@@ -97,7 +97,7 @@ DATABASES = {
         'USER': 'myuser',         # <-- your MySQL user (or 'root' if you prefer)
         'PASSWORD': 'mypassword',    # <-- your MySQL password
         'HOST': 'localhost',           # or '127.0.0.1'
-        'PORT': '3306',                # default MySQL port
+        'PORT': '5432',                # default MySQL port , pg port for prodction is 5432
         # 'OPTIONS': {
         #     'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
         # },
