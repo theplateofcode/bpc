@@ -1,0 +1,181 @@
+{% extends "base.html" %}
+{% load model_extras %}
+{% block content %}
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0">Accounts To-Do: Service Entries</h2>
+    <div class="d-flex align-items-center">
+      <a href="{% url 'processed_services' %}" class="btn btn-outline-primary me-3">View Processed Entries</a>
+      <form method="get" class="mb-0">
+        <label for="group_by" class="me-2 fw-bold">Group by:</label>
+        <select name="group_by" id="group_by" class="form-select d-inline-block" style="width:auto;" onchange="this.form.submit()">
+          <option value="">None</option>
+          <option value="booking" {% if group_by == 'booking' %}selected{% endif %}>Booking</option>
+          <option value="user" {% if group_by == 'user' %}selected{% endif %}>User</option>
+        </select>
+      </form>
+    </div>
+  </div>
+
+  <div class="card shadow-sm">
+    <div class="card-body p-0">
+      {% if group_by == "booking" %}
+  {% for booking, services in grouped_services.items %}
+    <div class="card mb-4">
+      <div class="card-header bg-light d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">
+          Booking: {{ booking.booking_id }} 
+          ({{ booking.client }}, {{ booking.booking_date|date:"d-m-y" }})
+        </h5>
+        <span class="badge bg-info">
+          Created by: {{ booking.created_by|default:"System" }}
+        </span>
+      </div>
+      
+      <div class="card-body">
+        <table class="table table-sm">
+          <thead>
+            <tr>
+              <th>Service Type</th>
+              <th>Created By</th>
+              <th>Description</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for service in services %}
+            <tr>
+              <td>{{ service|model_name|title }}</td>
+              <td>{{ service.created_by|default:"-" }}</td>
+              <td>
+                {% if service.notes %}
+                  {{ service.notes|truncatechars:30 }}
+                {% else %}
+                  {{ service }}
+                {% endif %}
+              </td>
+              <td>
+                {% if service.finished and not service.accounts_processed %}
+                  <span class="badge bg-warning">Ready for Processing</span>
+                {% elif service.accounts_processed %}
+                  <span class="badge bg-success">Processed</span>
+                {% else %}
+                  <span class="badge bg-secondary">Not Finished</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if service.finished and not service.accounts_processed %}
+                  <a href="{% url 'process_service' service_type=service|model_name pk=service.pk %}" 
+                     class="btn btn-sm btn-success">
+                    Mark Processed
+                  </a>
+                {% else %}
+                  <span class="text-muted">-</span>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  {% endfor %}
+      {% elif group_by == "user" %}
+        {% for user, services in grouped_services.items %}
+          <div class="px-3 pt-3 pb-1">
+            <h5 class="mb-2">User: {{ user }}</h5>
+          </div>
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>Booking Date</th>
+                <th>Booking</th>
+                <th>Service Type</th>
+                <th>Description</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for service in services %}
+              <tr>
+                <td>{{ service.booking.booking_date|date:"d-m-y" }}</td>
+                <td>{{ service.booking.booking_id }}</td>
+                <td>{{ service|model_name|title }}</td>
+                <td>
+                  {% if service.notes %}
+                    {{ service.notes }}
+                  {% else %}
+                    {{ service }}
+                  {% endif %}
+                </td>
+                <td>
+                  <a href="{% url 'process_service' service_type=service|model_name pk=service.pk %}" 
+                     class="btn btn-sm btn-success">
+                    Mark Processed
+                  </a>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        {% empty %}
+          <div class="text-center text-muted py-4">No completed service entries pending for accounts.</div>
+        {% endfor %}
+      {% else %}
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>Booking Date</th>
+              <th>Booking</th>
+              <th>Booking Created By</th>
+              <th>Service Created By</th>
+              <th>Client</th>
+              <th>Service Type</th>
+              <th>Description</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for service in services %}
+            <tr>
+              <td>{{ service.booking.booking_date|date:"d-m-y" }}</td>
+              <td>{{ service.booking.booking_id }}</td>
+              <td>{{ service.booking.created_by }}</td>
+              <td>
+                {% if service.created_by %}
+                  {{ service.created_by }}
+                {% else %}
+                  -
+                {% endif %}
+              </td>
+              <td>{{ service.booking.client }}</td>
+              <td>{{ service|model_name|title }}</td>
+              <td>
+                {% if service.notes %}
+                  {{ service.notes }}
+                {% else %}
+                  {{ service }}
+                {% endif %}
+              </td>
+              <td>
+                <a href="{% url 'process_service' service_type=service|model_name pk=service.pk %}" 
+                   class="btn btn-sm btn-success">
+                  Mark Processed
+                </a>
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="9" class="text-center text-muted py-4">
+                No completed service entries pending for accounts.
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

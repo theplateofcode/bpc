@@ -1,0 +1,151 @@
+{% load indian_number %}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Booking Report - {{ booking.booking_id }}</title>
+    <style>
+        @page { size: A4; margin: 1cm; }
+        body { font-family: Arial, sans-serif; font-size: 14px; margin: 0.5rem; }
+        h2 { color: #217BB2; margin: 0 0 8px 0; font-size: 1.2em; }
+        table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+        th, td {
+            border: 0.5px solid #bbb;
+            padding: 3px 2px;
+            text-align: left;
+            word-wrap: break-word; /* Ensures long words break */
+            white-space: normal;   /* Allows text to wrap naturally */
+            vertical-align: top;   /* Aligns content to the top of the cell */
+            width: auto; /* Allows columns to adjust based on content */
+        }
+        th { background: #f8f9fa; font-weight: bold; }
+        .header-table td { border: none; padding: 2px 2px; }
+        .totals-row { background: #f8f9fa; font-weight: bold; }
+        .service-table { margin-bottom: 12px; }
+        .service-break { page-break-after: never; }
+        /* Shorter columns for compactness - Adjusted for better fit */
+        .col-id { width: 4%; } /*Slightly smaller for ID */
+        .col-supplier { width: 16%; } /* Reduced slightly to give more space */
+        .col-travel { width: 13%; } /* Given a fixed width now */
+        .col-mode { width: 11%; } /* Added a width for Mode of Payment */
+        .col-amount { width: 10%; } /* Reduced for numerical columns */
+        .col-notes { width: 10%; } /* Increased for notes */
+        .col-attachment { width: 8%; } /* Increased for attachment */
+    </style>
+</head>
+<body>
+    <h2>Booking #{{ booking.booking_id }}</h2>
+    {% if show_pdf_controls %}
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-success mb-3" style="padding: 0.5rem 1rem; background-color: #217BB2; color: white; border-radius: 5px;">Mark as Processed</button><br><br>
+
+    </form>
+    {% endif %}
+
+    <table class="header-table">
+        <tr>
+            <td><strong>Client:</strong> {{ client }}</td>
+            <td><strong>Booking Date:</strong> {{ booking.booking_date|date:"d/m/y" }}</td>
+        </tr>
+        <tr>
+            <td>
+                <strong>Adults:</strong> {{ booking.number_of_adults }} &nbsp;
+                <strong>Children:</strong> {{ booking.number_of_children }}
+            </td>
+            <td>
+                <strong>Tour Dates:</strong>
+                {{ booking.tour_start_date|date:"d-M-Y" }} to {{ booking.tour_end_date|date:"d-M-Y" }}
+            </td>
+        </tr>
+    </table>
+
+    {% for service_type, services in services_data.items %}
+        {% if services %}
+        <h3 style="margin:8px 0 0 0;">{{ service_type }}</h3>
+        <table class="service-table">
+            <thead>
+                <tr>
+                    <th class="col-id">ID</th>
+                    <th class="col-supplier">Supplier</th>
+                    <th class="col-travel">Travel Type</th>
+                    <th class="col-mode">Mode</th>
+                    <th class="col-amount">Purchase</th>
+                    <th class="col-amount">Sales</th>
+                    <th class="col-amount">GST</th>
+                    <th class="col-amount">Profit</th>
+                    <th class="col-notes">Notes</th>
+                    <th class="col-attachment">Files</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for s in services %}
+                <tr>
+                    <td class="col-id">{{ s.id }}</td>
+                    <td class="col-supplier">
+                        <strong>{{ s.supplier.name }}</strong>
+                        {% if s.supplier.category %}
+                        <span style="font-size:10px;">({{ s.supplier.category.name }})</span>
+                        {% endif %}
+                        <br>
+                        {% if s.supplier.contact_person %}
+                        Contact: {{ s.supplier.contact_person }}<br>
+                        {% endif %}
+                        {% if s.supplier.phone %}
+                        Phone: {{ s.supplier.phone }}<br>
+                        {% endif %}
+                        {% if s.supplier.email %}
+                        Email: {{ s.supplier.email }}
+                        {% endif %}
+                    </td>
+                    <td class="col-travel">
+                        {{ s.travel_type|default:"-" }}
+                    </td>
+                    <td class="col-mode">{{ s.mode|default:"-" }}</td>
+                    <td class="col-amount">{{ s.purchase|indian_number }}</td>
+                    <td class="col-amount">{{ s.sales|indian_number }}</td>
+                    <td class="col-amount">{{ s.gst|indian_number }}</td>
+                    <td class="col-amount">{{ s.profit|indian_number }}</td>
+                    <td class="col-notes">{{ s.notes }}</td>
+                    <td class="col-attachment">
+                        {% if s.attachment %}
+                        <a href="http://127.0.0.1:8000/{{ s.attachment.url }}" target="_blank" rel="noopener noreferrer">View</a>
+                        {% else %}
+                        -
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <div class="service-break"></div>
+        {% endif %}
+    {% endfor %}
+
+    <h3 style="margin-top:10px;">Financial Summary</h3>
+    <table class="summary-table">
+        <tr>
+            <th>Total Purchase</th>
+            <td>Rs. {{ totals.total_purchase|indian_number }}</td>
+        </tr>
+        <tr>
+            <th>Total Sales</th>
+            <td>Rs. {{ totals.total_sales|indian_number }}</td>
+        </tr>
+        <tr>
+            <th>TCS Amount</th>
+            <td>Rs. {{ totals.total_tcs|indian_number }}</td>
+
+        </tr>
+        <tr>
+            <th>Total GST</th>
+            <td>Rs. {{ totals.total_gst|indian_number }}</td>
+        </tr>
+        <tr>
+            <th>Net Profit</th>
+            <td>Rs. {{ totals.net_profit|indian_number }}</td>
+        </tr>
+    </table>
+</body>
+</html>

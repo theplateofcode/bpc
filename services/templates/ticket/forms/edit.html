@@ -1,0 +1,345 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container my-5" style="max-width: 600px;">
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <h3 class="fw-bold mb-4">
+        Edit Ticket Entry for Booking: 
+        <span class="text-primary">{{ booking.booking_id }}</span>
+      </h3>
+      <form method="post" class="p-2" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.booking }} {# Hidden input for booking #}
+
+        <!-- Carrier Autocomplete -->
+        <div class="mb-3 position-relative">
+  <label class="form-label fw-bold">Carrier</label>
+  <input type="text" class="form-control" id="carrier-autocomplete" placeholder="Search carriers...">
+  <input type="hidden" name="carrier" id="carrier-id-hidden" value="{{ form.carrier.value|default_if_none:'' }}">
+  <div id="carrier-suggestions" class="list-group position-absolute w-100" style="z-index: 10; display: none;"></div>
+</div>
+
+
+        <!-- Supplier Autocomplete -->
+       <div class="mb-3 position-relative">
+  <label class="form-label fw-bold required">Supplier</label>
+  <input type="text" class="form-control" id="supplier-autocomplete" placeholder="Search suppliers...">
+  <input type="hidden" name="supplier" id="supplier-id-hidden" value="{{ form.supplier.value| default_if_none:'' }}">
+  <div id="supplier-suggestions" class="list-group position-absolute w-100" style="z-index: 10; display: none;"></div>
+</div>
+
+
+        <!-- Mode Autocomplete -->
+        <div class="mb-3 position-relative">
+  <label class="form-label fw-bold required">Mode</label>
+  <input type="text" class="form-control" id="mode-autocomplete" placeholder="Search modes...">
+  <input type="hidden" name="mode" id="mode-id-hidden" value="{{ form.mode.value|default_if_none:'' }}">
+  <div id="mode-suggestions" class="list-group position-absolute w-100" style="z-index: 10; display: none;"></div>
+</div>
+
+    <!-- Date Field -->
+        <div class="mb-3">
+          <label class="form-label fw-bold required">Date</label>
+          <input type="date" name="date" class="form-control" value="{{ ticket.date|date:'Y-m-d' }}" required>
+        </div>
+        {# Render the rest of the form fields except booking, carrier, supplier, mode #}
+        {% for field in form %}
+        {% if field.name not in "booking carrier supplier mode date notes attachment" %}
+  <div class="mb-3">
+    <label class="form-label fw-bold {{ field.field.required|yesno:'required,' }}">{{ field.label }}</label>
+    {{ field }}
+    {% if field.help_text %}
+      <div class="form-text">{{ field.help_text }}</div>
+    {% endif %}
+    {% for error in field.errors %}
+      <div class="text-danger small">{{ error }}</div>
+    {% endfor %}
+  </div>
+  {% endif %}
+{% endfor %}
+<div class="mb-3">
+    <label class="form-label fw-bold">Notes</label>
+    {{ form.notes }}
+  </div>
+  <div class="mb-3">
+    <label class="form-label fw-bold">Attachment</label>
+    {{ form.attachment }}
+    {% if form.instance.attachment %}
+      <div>
+        <a href="{{ form.instance.attachment.url }}" target="_blank">View current attachment</a>
+      </div>
+    {% endif %}
+  </div>
+
+
+        <div class="d-flex justify-content-end gap-2 mt-4">
+          <button type="submit" class="btn btn-danger px-4">Save</button>
+          <a href="{% url 'ticket_entries' booking.id %}" class="btn btn-secondary">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Carrier Modal -->
+<div class="modal fade" id="addCarrierModal" tabindex="-1" aria-labelledby="addCarrierModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <form id="add-carrier-form" class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Add New Carrier</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <input type="text" class="form-control" name="name" placeholder="Carrier Name" required>
+        <div id="add-carrier-error" class="text-danger small mt-2"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="submit" class="btn btn-danger">Save</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Supplier Modal -->
+<div class="modal fade" id="addSupplierModal" tabindex="-1" aria-labelledby="addSupplierModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <form id="add-supplier-form" class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="addSupplierModalLabel">Add New Supplier</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label class="form-label">Supplier Name</label>
+          <input type="text" class="form-control" name="name" required>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Service Category</label>
+          <select class="form-select" name="category" required>
+            <option value="" disabled selected>Select Category</option>
+            {% for cat in supplier_categories %}
+              <option value="{{ cat.id }}">{{ cat.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Contact Person</label>
+          <input type="text" class="form-control" name="contact_person">
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Phone</label>
+          <input type="text" class="form-control" name="phone">
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Email</label>
+          <input type="email" class="form-control" name="email">
+        </div>
+        <div id="add-supplier-error" class="text-danger small"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="submit" class="btn btn-danger">Save</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+
+<!-- Mode Modal -->
+<div class="modal fade" id="addModeModal" tabindex="-1" aria-labelledby="addModeModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <form id="add-mode-form" class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Add New Mode</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <input type="text" class="form-control" name="name" placeholder="Mode Name" required>
+        <div id="add-mode-error" class="text-danger small mt-2"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="submit" class="btn btn-danger">Save</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+function debounce(func, timeout = 300) {
+  let timer;
+  return (...args) => {
+    clearTimeout(timer);
+    timer = setTimeout(() => { func.apply(this, args); }, timeout);
+  };
+}
+function setupAutocomplete(inputId, suggestionsId, hiddenId, endpoint, addModalId) {
+  const input = document.getElementById(inputId);
+  const suggestions = document.getElementById(suggestionsId);
+  const hidden = document.getElementById(hiddenId);
+
+  // Fetch and display suggestions (with optional query)
+  function fetchAndShowSuggestions(query="") {
+    fetch(endpoint + "?q=" + encodeURIComponent(query))
+      .then(res => res.json())
+      .then(data => {
+        suggestions.innerHTML = "";
+        data.results.forEach(item => {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "list-group-item list-group-item-action";
+          btn.textContent = item.name;
+          btn.onclick = () => {
+            input.value = item.name;
+            hidden.value = item.id;
+            suggestions.style.display = "none";
+          };
+          suggestions.appendChild(btn);
+        });
+        // Add "Add New" at the end
+        const addBtn = document.createElement("button");
+        addBtn.type = "button";
+        addBtn.className = "list-group-item list-group-item-action text-center";
+        addBtn.innerHTML = `<i class="bi bi-plus-lg"></i> Add New`;
+        addBtn.onclick = () => {
+          suggestions.style.display = "none";
+          if (addModalId) new bootstrap.Modal(document.getElementById(addModalId)).show();
+        };
+        suggestions.appendChild(addBtn);
+        suggestions.style.display = "block";
+      });
+  }
+
+  // Show all options on focus if input is empty
+  input.addEventListener('focus', function() {
+    if (!input.value.trim()) {
+      fetchAndShowSuggestions("");
+    }
+  });
+
+  // Autocomplete on input
+  input.addEventListener('input', debounce(function () {
+    const query = input.value.trim();
+    if (!query) {
+      suggestions.style.display = "none";
+      return;
+    }
+    fetchAndShowSuggestions(query);
+  }, 300));
+
+  document.addEventListener("click", function (e) {
+    if (!suggestions.contains(e.target) && e.target !== input) {
+      suggestions.style.display = "none";
+    }
+  });
+}
+setupAutocomplete("supplier-autocomplete", "supplier-suggestions", "supplier-id-hidden", "/services/suppliers/autocomplete/", "addSupplierModal");
+setupAutocomplete("carrier-autocomplete", "carrier-suggestions", "carrier-id-hidden", "/services/carriers/autocomplete/", "addCarrierModal");
+setupAutocomplete("mode-autocomplete", "mode-suggestions", "mode-id-hidden", "/services/modes/autocomplete/", "addModeModal");
+
+// Modal submission handlers for carrier, supplier, and mode
+const carrierForm = document.getElementById("add-carrier-form");
+if (carrierForm) {
+  carrierForm.addEventListener("submit", function (e) {
+    e.preventDefault();
+    const formData = new FormData(this);
+    fetch("/services/carriers/create-ajax/", {
+      method: "POST",
+      headers: {
+        "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value,
+      },
+      body: formData,
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          document.getElementById("carrier-autocomplete").value = data.name;
+          document.getElementById("carrier-id-hidden").value = data.id;
+          bootstrap.Modal.getInstance(document.getElementById("addCarrierModal")).hide();
+          this.reset();
+          document.getElementById("add-carrier-error").textContent = "";
+          document.getElementById("carrier-autocomplete").dispatchEvent(new Event('input'));
+        } else {
+          document.getElementById("add-carrier-error").textContent = data.error || "Could not save carrier.";
+        }
+      });
+  });
+}
+const supplierForm = document.getElementById("add-supplier-form");
+if (supplierForm) {
+  supplierForm.addEventListener("submit", function (e) {
+    e.preventDefault();
+    const formData = new FormData(this);
+    fetch("/services/suppliers/create-ajax/", {
+      method: "POST",
+      headers: {
+        "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value,
+      },
+      body: formData,
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          document.getElementById("supplier-autocomplete").value = data.name;
+          document.getElementById("supplier-id-hidden").value = data.id;
+          bootstrap.Modal.getInstance(document.getElementById("addSupplierModal")).hide();
+          this.reset();
+          document.getElementById("add-supplier-error").textContent = "";
+          document.getElementById("supplier-autocomplete").dispatchEvent(new Event('input'));
+        } else {
+          document.getElementById("add-supplier-error").textContent = data.error || "Could not save supplier.";
+        }
+      });
+  });
+}
+const modeForm = document.getElementById("add-mode-form");
+if (modeForm) {
+  modeForm.addEventListener("submit", function (e) {
+    e.preventDefault();
+    const formData = new FormData(this);
+    fetch("/services/modes/create-ajax/", {
+      method: "POST",
+      headers: {
+        "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value,
+      },
+      body: formData,
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          document.getElementById("mode-autocomplete").value = data.name;
+          document.getElementById("mode-id-hidden").value = data.id;
+          bootstrap.Modal.getInstance(document.getElementById("addModeModal")).hide();
+          this.reset();
+          document.getElementById("add-mode-error").textContent = "";
+          document.getElementById("mode-autocomplete").dispatchEvent(new Event('input'));
+        } else {
+          document.getElementById("add-mode-error").textContent = data.error || "Could not save mode.";
+        }
+      });
+  });
+}
+document.addEventListener("DOMContentLoaded", function() {
+  // Prefill autocomplete fields if values exist
+  function initAutocomplete(field) {
+    const hiddenId = document.getElementById(`${field}-id-hidden`);
+    const input = document.getElementById(`${field}-autocomplete`);
+    if (hiddenId && input && hiddenId.value) {
+      fetch(`/services/${field}s/autocomplete/?id=${hiddenId.value}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.results.length > 0) {
+            input.value = data.results[0].name;
+          }
+        });
+    }
+  }
+  initAutocomplete('carrier');
+  initAutocomplete('supplier');
+  initAutocomplete('mode');
+});
+
+</script>
+{% endblock %}

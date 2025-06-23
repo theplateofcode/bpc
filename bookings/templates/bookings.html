@@ -1,0 +1,661 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+{% load indian_number %}
+
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0">Bookings</h2>
+  </div>
+  <a href="{% url 'create_booking' %}" class="btn btn-primary add-booking-btn">
+      <i class="bi bi-plus-lg"></i> Add New Booking
+    </a>
+  
+    
+    <div style="display: flex; align-items: center; gap: 1rem;">
+      <div id="filter-chips" class="mb-2"></div>
+      <div class="action-controls" style="display: flex; align-items: center; gap: 0.5rem;">
+        <div class="btn-group">
+          <button type="button" class="btn btn-outline-secondary dropdown-toggle"
+                  data-bs-toggle="dropdown" aria-expanded="false" id="actionDropdown">
+            Select Action
+          </button>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="#" data-action="edit">Edit</a></li>
+            <li><a class="dropdown-item" href="#" data-action="delete">Delete</a></li>
+            <li><a class="dropdown-item" href="#" data-action="view">View PDF</a></li>
+          </ul>
+        </div>
+          <!-- <label for="agg-selector" class="ms-5 me-2 fw-bold">Show aggregate:</label>
+          <select id="agg-selector" class="form-select d-inline-block" style="width:auto;">
+            <option value="sum">Sum</option>
+            <option value="avg">Average</option>
+            <option value="min">Minimum</option>
+            <option value="max">Maximum</option>
+          </select> -->
+      </div>
+    
+  </div>
+
+  <div class="table-responsive" style="overflow-x:auto;">
+    <table class="table align-middle" id="bookings-table" style="min-width: 100vw; table-layout: fixed;">
+      <thead class="table-light">
+  <tr>
+    <th style="width: 60px"></th>
+    <th data-col="booking_id" style="width:80px;">ID</th>
+    <th data-col="created_by"style="width:100px;">Created By</th>
+    <th data-col="booking_date"style="width:100px;">Booking Date</th>
+    <th data-col="client_name"style="width:220px;">Client Name</th>
+    <th data-col="services"style="width:250px;">Services</th>
+    <th data-col="total_p_cost" style="width:70px;">Total P. Cost</th>
+    <th data-col="total_s_cost" style="width:70px;">Total S.Cost</th>
+    <th data-col="total_gst" style="width:70px;">Total GST</th>
+    <th data-col="net_profit" style="width:70px;">Net Profit</th>
+    <th data-col="status">Status</th>
+  </tr>
+</thead>
+
+      <tbody id="bookings-tbody">
+        {% for booking in bookings %}
+        <tr data-booking-id="{{ booking.id }}">
+          <td>
+            <input type="radio" name="booking_selector"
+                   class="form-check-input row-selector"
+                   value="{{ booking.id }}">
+          </td>
+          <td>{{ booking.booking_id }}</td>
+          <td>{{ booking.created_by }}</td>
+          <td>{{ booking.booking_date|date:"d/m/y" }}</td>
+          <td>{{ booking.client }}</td>
+          <td>
+  {% for service_name, finished in booking.get_service_statuses %}
+    {% if finished %}
+      <span class="text-success">{{ service_name }}</span>
+    {% else %}
+      <span class="text-danger">{{ service_name }}</span>
+    {% endif %}
+    {% if not forloop.last %}, {% endif %}
+  {% endfor %}
+</td>
+
+
+          <td>{{ booking.purchase_total|indian_number }}</td>
+          <td>{{ booking.sales_total|indian_number }}</td>
+          <td>{{ booking.sales_gst|indian_number }}</td>
+          <td>{{ booking.net_profit|indian_number }}</td>
+          <td>
+            {% if booking.status.name|lower == "closed" %}
+              <span class="badge bg-success">closed</span>
+            {% elif booking.status.name|lower == "in process" %}
+              <span class="badge bg-warning text-dark">in process</span>
+            {% elif booking.status.name|lower == "open" %}
+              <span class="badge bg-info">open</span>
+            {% else %}
+              <span class="badge bg-secondary">Unknown</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="11" class="text-center">No bookings found.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+     
+    </table>
+  </div>
+  <nav>
+    <ul class="pagination justify-content-end" id="table-pagination"></ul>
+  </nav>
+</div>
+
+<style>
+  .table-header-menu {
+    position: absolute;
+    background: #fff;
+    border: 1px solid #ddd;
+    z-index: 9999;
+    min-width: auto;
+    max-width: auto;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+    border-radius: 10px;
+    display: none;
+    padding: 0.5rem 0;
+  }
+  .table-header-menu.active {
+    display: block;
+  }
+  .table-header-menu .dropdown-item {
+    padding-top: 0.55rem;
+    padding-bottom: 0.55rem;
+    font-size: 1em;
+  }
+  .table-header-menu .input-group {
+    margin-top: 0.25rem;
+  }
+  .filter-chip {
+    display: inline-flex;
+    align-items: center;
+    background: #e7f1fa;
+    color: #217bb2;
+    border-radius: 16px;
+    padding: 2px 10px 2px 8px;
+    margin-right: 8px;
+    margin-bottom: 5px;
+    font-size: 0.97em;
+    border: 1px solid #b6d6f5;
+  }
+  .filter-chip .close {
+    font-size: 1.1em;
+    margin-left: 6px;
+    cursor: pointer;
+    color: #888;
+  }
+  .table-responsive {
+    overflow-x: auto;
+  }
+  .row-selector {
+    margin: 0;
+    cursor: pointer;
+  }
+  .action-controls {
+    background: #f8f9fa;
+    padding: 0.5rem;
+    border-radius: 0px;
+    border: 1px solid #dee2e6;
+    margin-left: -1rem;
+  }
+  tr.selected-row {
+    background-color: #e9f7fe !important;
+  }
+  th {
+    position: relative;
+    cursor: pointer;
+    user-select: none;
+    background-clip: padding-box;
+    vertical-align: middle !important;
+    text-align: center;
+  
+  }
+  .resizer {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 6px;
+    height: 100%;
+    cursor: col-resize;
+    user-select: none;
+    z-index: 2;
+  }
+  .resizer:hover,
+  .resizing {
+    border-right: 2px solid #217bb2;
+  }
+  .pagination {
+    margin-top: 1rem;
+  }
+  .table-header-menu .filter-val {
+    border: 1.5px solid #b6d6f5;
+    border-radius: 6px;
+    box-shadow: 0 2px 8px rgba(33, 123, 178, 0.04);
+    transition: border-color 0.2s, box-shadow 0.2s;
+    background: #f7fbff;
+  }
+  .table-header-menu .filter-val:focus {
+    border-color: #217bb2;
+    box-shadow: 0 0 0 2px #b6d6f5;
+    background: #fff;
+  }
+  .table-header-menu .filter-apply {
+    border-radius: 6px;
+    background: #217bb2;
+    color: #fff;
+    border: none;
+    transition: background 0.2s;
+  }
+  .table-header-menu .filter-apply:hover {
+    background: #185a85;
+    color: #fff;
+  }
+  .add-booking-btn {
+    margin-bottom: 1rem;
+  }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  let selectedBookingId = null;
+
+  // Highlight selected row
+  document.querySelectorAll('.row-selector').forEach(rb => {
+    rb.addEventListener('change', function() {
+      document.querySelectorAll('tr.selected-row').forEach(tr => tr.classList.remove('selected-row'));
+      if (this.checked) {
+        selectedBookingId = this.value;
+        this.closest('tr').classList.add('selected-row');
+      }
+    });
+  });
+
+  // Action dropdown handler
+  document.querySelectorAll('[data-action]').forEach(item => {
+    item.addEventListener('click', function(e) {
+      e.preventDefault();
+      if (!selectedBookingId) {
+        alert('Please select a booking first');
+        return;
+      }
+      const action = this.dataset.action;
+      let url = "#";
+      if (action === "edit") {
+        url = "{% url 'edit_booking' 0 %}".replace("0", selectedBookingId);
+        window.location.href = url;
+      } else if (action === "delete") {
+        if (confirm("Are you sure you want to delete this booking?")) {
+          url = "{% url 'delete_booking' 0 %}".replace("0", selectedBookingId);
+          window.location.href = url;
+        }
+      } else if (action === "view") {
+        url = "{% url 'booking_pdf' 0 %}".replace("0", selectedBookingId);
+        window.open(url, "_blank");
+      }
+    });
+  });
+
+  // Aggregate selector logic
+  const aggSelector = document.getElementById('agg-selector');
+  aggSelector.addEventListener('change', function() {
+    document.querySelectorAll('.agg-row').forEach(row => {
+      row.style.display = (row.dataset.agg === aggSelector.value) ? '' : 'none';
+    });
+  });
+  aggSelector.dispatchEvent(new Event('change'));
+
+  // Column resizing and advanced filtering/sorting/pagination logic can be inserted here as needed
+});
+
+
+
+document.addEventListener('DOMContentLoaded', function () {
+  const table = document.getElementById('bookings-table');
+  if (!table) return;
+  const ths = table.querySelectorAll('th');
+  ths.forEach(function (th, idx) {
+    // if (idx === 0) return; // skip first column if you want
+    const resizer = document.createElement('div');
+    resizer.classList.add('resizer');
+    th.appendChild(resizer);
+    createResizableColumn(th, resizer);
+  });
+
+  function createResizableColumn(th, resizer) {
+    let x = 0;
+    let w = 0;
+
+    const mouseDownHandler = function (e) {
+      x = e.clientX;
+      w = th.offsetWidth;
+      document.addEventListener('mousemove', mouseMoveHandler);
+      document.addEventListener('mouseup', mouseUpHandler);
+      resizer.classList.add('resizing');
+    };
+
+    const mouseMoveHandler = function (e) {
+      const dx = e.clientX - x;
+      const newWidth = Math.max(60, w + dx); // minimum 60px
+      th.style.width = `${newWidth}px`;
+
+      // --- Adjust table width to fit all columns ---
+      const headerRow = table.querySelector('tr');
+      let totalWidth = 0;
+      headerRow.querySelectorAll('th').forEach(th => {
+        totalWidth += th.offsetWidth;
+      });
+      table.style.width = totalWidth + 'px';
+    };
+
+    const mouseUpHandler = function () {
+      resizer.classList.remove('resizing');
+      document.removeEventListener('mousemove', mouseMoveHandler);
+      document.removeEventListener('mouseup', mouseUpHandler);
+    };
+
+    resizer.addEventListener('mousedown', mouseDownHandler);
+  }
+});
+
+
+
+  // --- CONFIG ---
+  const columns = [
+    { key: "booking_id", label: "Booking ID", type: "text" },
+    { key: "created_by", label: "Created By", type: "text" },
+    { key: "booking_date", label: "Booking Date", type: "date" },
+    { key: "client_name", label: "Client Name", type: "text" },
+    { key: "services", label: "Services", type: "text" },
+    { key: "total_p_cost", label: "Total P. Cost", type: "number" },
+    { key: "total_s_cost", label: "Total S.Cost", type: "number" },
+    { key: "total_gst", label: "Total GST", type: "number" },
+    { key: "net_profit", label: "Net Profit", type: "number" },
+    { key: "status", label: "Status", type: "text" }
+];
+
+  const PAGE_SIZE = 10;
+  let filters = {};
+  let sort = { col: "booking_id", dir: "desc" };
+  let currentPage = 1;
+  const tbody = document.getElementById("bookings-tbody");
+  let allRows = Array.from(tbody.querySelectorAll("tr"));
+
+  // Debounce utility for filter input
+  function debounce(func, timeout = 300) {
+    let timer;
+    return (...args) => {
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        func.apply(this, args);
+      }, timeout);
+    };
+  }
+
+  function getCellValue(tr, colIdx) {
+    const cellIndex = colIdx + 1;
+    const td = tr.cells[cellIndex];
+    if (!td) return "";
+    return td.textContent.trim();
+  }
+  function parseValue(val, type) {
+    if (val === "" || val === null || val === undefined) return null;
+    if (type === "number") {
+      const num = parseFloat(val.replace(/[^\d.-]/g, ""));
+      return isNaN(num) ? null : num;
+    }
+    if (type === "date") {
+      let date = new Date(val);
+      if (!isNaN(date.getTime())) return date.getTime();
+      const parts = val.split("/");
+      if (parts.length === 3) {
+        date = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
+        if (!isNaN(date.getTime())) return date.getTime();
+      }
+      return null;
+    }
+    return val.toLowerCase();
+  }
+  function compare(a, b, type, dir) {
+    if (a === null && b === null) return 0;
+    if (a === null) return dir === "asc" ? 1 : -1;
+    if (b === null) return dir === "asc" ? -1 : 1;
+    if (type === "number" || type === "date") {
+      return dir === "asc" ? a - b : b - a;
+    }
+    return dir === "asc" ? a.localeCompare(b) : b.localeCompare(a);
+  }
+
+  function applyTable() {
+    const rows = allRows.slice();
+    let filtered = rows.filter((tr) => {
+      return Object.entries(filters).every(([col, { op, val }]) => {
+        const colIdx = columns.findIndex((c) => c.key === col);
+        const cellValue = getCellValue(tr, colIdx);
+        const type = columns[colIdx].type;
+        const parsedCell = parseValue(cellValue, type);
+        const parsedFilter = parseValue(val, type);
+        if (val === "" || val === null || val === undefined) return true;
+        if (parsedCell === null) return false;
+        if (type === "number") {
+          if (parsedFilter === null) return true;
+          switch (op) {
+            case "eq":
+              return parsedCell === parsedFilter;
+            case "gt":
+              return parsedCell > parsedFilter;
+            case "lt":
+              return parsedCell < parsedFilter;
+            case "gte":
+              return parsedCell >= parsedFilter;
+            case "lte":
+              return parsedCell <= parsedFilter;
+            default:
+              return true;
+          }
+        } else if (type === "date") {
+          if (parsedFilter === null) return true;
+          switch (op) {
+            case "eq":
+              return parsedCell === parsedFilter;
+            case "gt":
+              return parsedCell > parsedFilter;
+            case "lt":
+              return parsedCell < parsedFilter;
+            default:
+              return true;
+          }
+        } else {
+          const cellText = cellValue.toLowerCase();
+          const filterText = val.toLowerCase();
+          switch (op) {
+            case "contains":
+              return cellText.includes(filterText);
+            case "equals":
+              return cellText === filterText;
+            default:
+              return true;
+          }
+        }
+      });
+    });
+    if (sort.col) {
+      const colIdx = columns.findIndex((c) => c.key === sort.col);
+      const type = columns[colIdx].type;
+      filtered.sort((a, b) => {
+        const valA = parseValue(getCellValue(a, colIdx), type);
+        const valB = parseValue(getCellValue(b, colIdx), type);
+        return compare(valA, valB, type, sort.dir);
+      });
+    }
+    while (tbody.firstChild) tbody.removeChild(tbody.firstChild);
+    const total = filtered.length;
+    const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+    currentPage = Math.min(currentPage, totalPages);
+    const start = (currentPage - 1) * PAGE_SIZE;
+    const end = start + PAGE_SIZE;
+    filtered.slice(start, end).forEach((tr) => tbody.appendChild(tr));
+    renderPagination(totalPages);
+    renderFilterChips();
+  }
+
+  function renderPagination(totalPages) {
+    const pag = document.getElementById("table-pagination");
+    pag.innerHTML = "";
+    if (totalPages <= 1) return;
+    const addBtn = (label, page, disabled = false, active = false) => {
+      const li = document.createElement("li");
+      li.className =
+        "page-item" + (disabled ? " disabled" : "") + (active ? " active" : "");
+      const a = document.createElement("a");
+      a.className = "page-link";
+      a.href = "#";
+      a.textContent = label;
+      a.onclick = (e) => {
+        e.preventDefault();
+        if (!disabled && !active) {
+          currentPage = page;
+          applyTable();
+        }
+      };
+      li.appendChild(a);
+      pag.appendChild(li);
+    };
+    addBtn("«", 1, currentPage === 1);
+    for (let i = 1; i <= totalPages; i++)
+      addBtn(i, i, false, currentPage === i);
+    addBtn("»", totalPages, currentPage === totalPages);
+  }
+
+  function renderFilterChips() {
+    const chips = document.getElementById("filter-chips");
+    chips.innerHTML = "";
+    Object.entries(filters).forEach(([col, { op, val }]) => {
+      if (!val) return;
+      const c = columns.find((c) => c.key === col);
+      const opLabel =
+        {
+          eq: "=",
+          gt: ">",
+          lt: "<",
+          gte: "≥",
+          lte: "≤",
+          contains: "contains",
+          equals: "equals",
+        }[op] || op;
+      const chip = document.createElement("span");
+      chip.className = "filter-chip";
+      chip.innerHTML = `<b>${c.label}</b> &nbsp; ${opLabel} <span style="color:#185a85;"> &nbsp; ${val}</span>
+      <span class="close" title="Remove filter">&times;</span>`;
+      chip.querySelector(".close").onclick = () => {
+        delete filters[col];
+        if (Object.keys(filters).length === 0) {
+          sort = { col: "booking_date", dir: "desc" };
+          currentPage = 1;
+        }
+        applyTable();
+      };
+      chips.appendChild(chip);
+    });
+  }
+
+  function closeMenus() {
+    document.querySelectorAll(".table-header-menu").forEach((m) => m.remove());
+  }
+  document.addEventListener("click", closeMenus);
+
+  document
+    .querySelectorAll("#bookings-table thead th[data-col]")
+    .forEach((th, idx) => {
+      th.addEventListener("click", function (e) {
+        e.stopPropagation();
+        closeMenus();
+        const colKey = th.getAttribute("data-col");
+        const col = columns.find((c) => c.key === colKey);
+        const menu = document.createElement("div");
+        menu.className = "table-header-menu active";
+        menu.style.minWidth = "240px";
+        menu.style.maxWidth = "320px";
+        menu.style.padding = "0.5rem 0.5rem";
+        menu.innerHTML = `
+      <div class="px-3 py-2 border-bottom fw-bold" style="font-size:1.08em;">${
+        col.label
+      }</div>
+      <div class="px-3 pt-2 pb-1 text-muted" style="font-size:0.97em; letter-spacing:0.03em;">Sorting</div>
+      <button class="dropdown-item sort-asc"><i class="bi bi-sort-up"></i> Sort ${
+        col.type === "date"
+          ? "Oldest-Newest"
+          : col.type === "number"
+          ? "Smallest-Largest"
+          : "A-Z"
+      }</button>
+      <button class="dropdown-item sort-desc"><i class="bi bi-sort-down"></i> Sort ${
+        col.type === "date"
+          ? "Newest-Oldest"
+          : col.type === "number"
+          ? "Largest-Smallest"
+          : "Z-A"
+      }</button>
+      <div class="dropdown-divider my-2"></div>
+      <div class="px-3 pb-2">
+        <div class="mb-1 text-muted" style="font-size:0.97em; letter-spacing:0.03em;">Filter</div>
+        <div class="input-group input-group-sm">
+          <select class="form-select filter-op" style="max-width:90px;">
+            ${
+              col.type === "number"
+                ? `
+                <option value="eq">=</option>
+                <option value="gt">&gt;</option>
+                <option value="lt">&lt;</option>
+                <option value="gte">&ge;</option>
+                <option value="lte">&le;</option>
+              `
+                : col.type === "date"
+                ? `
+                <option value="eq">=</option>
+                <option value="gt">After</option>
+                <option value="lt">Before</option>
+              `
+                : `
+                <option value="contains">Contains</option>
+                <option value="equals">Equals</option>
+              `
+            }
+          </select>
+          <input class="form-control filter-val" type="${
+            col.type === "number"
+              ? "number"
+              : col.type === "date"
+              ? "date"
+              : "text"
+          }" placeholder="Value">
+          <button class="btn btn-outline-primary btn-sm filter-apply" type="button"><i class="bi bi-funnel"></i></button>
+        </div>
+      </div>
+    `;
+        document.body.appendChild(menu);
+        const rect = th.getBoundingClientRect();
+        const menuWidth = menu.offsetWidth || 260;
+        let left = rect.left + window.scrollX;
+        if (left + menuWidth > window.innerWidth - 8) {
+          left = Math.max(8, window.innerWidth - menuWidth - 8);
+        }
+        menu.style.position = "absolute";
+        menu.style.left = left + "px";
+        menu.style.top = rect.bottom + window.scrollY + "px";
+        menu.style.zIndex = 9999;
+        menu.style.display = "block";
+
+        menu.querySelector(".sort-asc").onclick = function (e) {
+          e.stopPropagation();
+          sort = { col: colKey, dir: "asc" };
+          currentPage = 1;
+          applyTable();
+          closeMenus();
+        };
+        menu.querySelector(".sort-desc").onclick = function (e) {
+          e.stopPropagation();
+          sort = { col: colKey, dir: "desc" };
+          currentPage = 1;
+          applyTable();
+          closeMenus();
+        };
+
+        // Debounced filter apply on input
+        const filterInput = menu.querySelector(".filter-val");
+        const filterOp = menu.querySelector(".filter-op");
+        const debouncedApply = debounce(function () {
+          const op = filterOp.value;
+          const val = filterInput.value;
+          if (val) filters[colKey] = { op, val };
+          else delete filters[colKey];
+          currentPage = 1;
+          applyTable();
+        }, 300);
+        filterInput.addEventListener("input", debouncedApply);
+
+        // Manual apply button (for users who click the funnel)
+        menu.querySelector(".filter-apply").onclick = function (e) {
+          e.stopPropagation();
+          const op = filterOp.value;
+          const val = filterInput.value;
+          if (val) filters[colKey] = { op, val };
+          else delete filters[colKey];
+          currentPage = 1;
+          applyTable();
+          closeMenus();
+        };
+
+        menu.onclick = (e) => e.stopPropagation();
+      });
+    });
+
+  applyTable();
+</script>
+{% endblock %} //correct this indent

@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container my-5" style="max-width: 600px;">
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <h3 class="fw-bold mb-4">Add New Client</h3>
+      <form method="post">
+        {% csrf_token %}
+        <div class="mb-3">
+          <label for="{{ form.first_name.id_for_label }}" class="form-label fw-bold">First Name</label>
+          {{ form.first_name }}
+        </div>
+        <div class="mb-3">
+          <label for="{{ form.middle_name.id_for_label }}" class="form-label fw-bold">Middle Name</label>
+          {{ form.middle_name }}
+        </div>
+        <div class="mb-3">
+          <label for="{{ form.last_name.id_for_label }}" class="form-label fw-bold">Last Name</label>
+          {{ form.last_name }}
+        </div>
+        <div class="mb-3">
+          <label for="{{ form.contact_number.id_for_label }}" class="form-label fw-bold">Contact Number</label>
+          {{ form.contact_number }}
+        </div>
+        <div class="d-flex justify-content-end gap-2">
+          <button type="submit" class="btn btn-danger" style="min-width:90px;">Save</button>
+          <a href="{% url 'clients' %}" class="btn btn-secondary" style="min-width:90px;">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

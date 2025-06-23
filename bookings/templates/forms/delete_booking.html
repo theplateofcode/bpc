@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container my-5" style="max-width: 600px;">
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <h3 class="fw-bold mb-4">Delete Booking</h3>
+      <p>Are you sure you want to delete booking <strong>{{ booking }}</strong>?</p>
+      <form method="post">{% csrf_token %}
+        <div class="d-flex justify-content-end gap-2">
+          <button type="submit" class="btn btn-danger" style="min-width:90px;">Delete</button>
+          <a href="{% url 'bookings' %}" class="btn btn-secondary" style="min-width:90px;">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

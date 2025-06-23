@@ -1,0 +1,350 @@
+{% extends "base.html" %} {% block content %}
+<div class="container my-5" style="max-width: 600px">
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <h3 class="fw-bold mb-4">Edit Visa</h3>
+      <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="hidden" name="booking" value="{{ visa.booking.id }}" />
+
+        <!-- Supplier Autocomplete -->
+        <div class="mb-3 position-relative">
+          <label class="form-label fw-bold required">Supplier</label>
+          <input
+            type="text"
+            class="form-control"
+            id="supplier-autocomplete"
+            placeholder="Search suppliers..."
+            autocomplete="off"
+            value="{{ visa.supplier.name }}"
+            required
+          />
+          <input
+            type="hidden"
+            name="supplier"
+            id="supplier-id-hidden"
+            value="{{ visa.supplier.id }}"
+          />
+          <div
+            id="supplier-suggestions"
+            class="list-group position-absolute w-100"
+            style="z-index: 10; display: none"
+          ></div>
+        </div>
+
+        <!-- Mode Autocomplete -->
+        <div class="mb-3 position-relative">
+          <label class="form-label fw-bold required">Mode</label>
+          <input
+            type="text"
+            class="form-control"
+            id="mode-autocomplete"
+            placeholder="Search modes..."
+            autocomplete="off"
+            value="{{ visa.mode.name }}"
+            required
+          />
+          <input
+            type="hidden"
+            name="mode"
+            id="mode-id-hidden"
+            value="{{ visa.mode.id }}"
+          />
+          <div
+            id="mode-suggestions"
+            class="list-group position-absolute w-100"
+            style="z-index: 10; display: none"
+          ></div>
+        </div>
+
+        <!-- Date Field -->
+        <div class="mb-3">
+          <label class="form-label fw-bold required">Date</label>
+          <input
+            type="date"
+            name="date"
+            class="form-control"
+            value="{{ visa.date|date:'Y-m-d' }}"
+            required
+          />
+        </div>
+
+        <!-- Purchase Amount -->
+        <div class="mb-3">
+          <label class="form-label fw-bold required">Purchase Amount (₹)</label>
+          <input
+            type="number"
+            name="purchase_amount"
+            class="form-control"
+            step="0.01"
+            value="{{ visa.purchase_amount }}"
+            required
+          />
+        </div>
+
+        <!-- Sales Amount -->
+        <div class="mb-3">
+          <label class="form-label fw-bold required">Sales Amount (₹)</label>
+          <input
+            type="number"
+            name="sales_amount"
+            class="form-control"
+            step="0.01"
+            value="{{ visa.sales_amount }}"
+            required
+          />
+        </div>
+        <div class="mb-3">
+          <label class="form-label fw-bold">Notes</label>
+          {{ form.notes }}
+        </div>
+        <div class="mb-3">
+          <label class="form-label fw-bold">Attachment</label>
+          {{ form.attachment }} {% if form.instance.attachment %}
+          <div>
+            <a href="{{ form.instance.attachment.url }}" target="_blank"
+              >View current attachment</a
+            >
+          </div>
+          {% endif %}
+        </div>
+
+        <div class="d-flex justify-content-end gap-2">
+          <button type="submit" class="btn btn-danger">Save</button>
+          <a href="{% url 'visas' %}" class="btn btn-secondary">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Supplier Modal (structure only, no script) -->
+<div class="modal fade" id="addSupplierModal" tabindex="-1" aria-labelledby="addSupplierModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <form id="add-supplier-form" class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="addSupplierModalLabel">Add New Supplier</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label class="form-label">Supplier Name</label>
+          <input type="text" class="form-control" name="name" required>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Service Category</label>
+          <select class="form-select" name="category" required>
+            <option value="" disabled selected>Select Category</option>
+            {% for cat in supplier_categories %}
+              <option value="{{ cat.id }}">{{ cat.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Contact Person</label>
+          <input type="text" class="form-control" name="contact_person">
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Phone</label>
+          <input type="text" class="form-control" name="phone">
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Email</label>
+          <input type="email" class="form-control" name="email">
+        </div>
+        <div id="add-supplier-error" class="text-danger small"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="submit" class="btn btn-danger">Save</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Mode Modal (structure only, no script) -->
+<!-- Mode Modal -->
+<div class="modal fade" id="addModeModal" tabindex="-1" aria-labelledby="addModeModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <form id="add-mode-form" class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Add New Mode</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <input type="text" class="form-control" name="name" placeholder="Mode Name" required>
+        <div id="add-mode-error" class="text-danger small mt-2"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="submit" class="btn btn-danger">Save</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+<script>
+  function debounce(func, timeout = 300) {
+    let timer;
+    return (...args) => {
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        func.apply(this, args);
+      }, timeout);
+    };
+  }
+  function setupAutocomplete(
+    inputId,
+    suggestionsId,
+    hiddenId,
+    endpoint,
+    addModalId
+  ) {
+    const input = document.getElementById(inputId);
+    const suggestions = document.getElementById(suggestionsId);
+    const hidden = document.getElementById(hiddenId);
+
+    function fetchAndShowSuggestions(query = "") {
+      fetch(endpoint + "?q=" + encodeURIComponent(query))
+        .then((res) => res.json())
+        .then((data) => {
+          suggestions.innerHTML = "";
+          data.results.forEach((item) => {
+            const btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "list-group-item list-group-item-action";
+            btn.textContent = item.name;
+            btn.onclick = () => {
+              input.value = item.name;
+              hidden.value = item.id;
+              suggestions.style.display = "none";
+            };
+            suggestions.appendChild(btn);
+          });
+          // Add "Add New" at the end
+          const addBtn = document.createElement("button");
+          addBtn.type = "button";
+          addBtn.className =
+            "list-group-item list-group-item-action text-center";
+          addBtn.innerHTML = `<i class="bi bi-plus-lg"></i> Add New`;
+          addBtn.onclick = () => {
+            suggestions.style.display = "none";
+            if (addModalId)
+              new bootstrap.Modal(document.getElementById(addModalId)).show();
+          };
+          suggestions.appendChild(addBtn);
+          suggestions.style.display = "block";
+        });
+    }
+
+    // Show all options on focus if input is empty
+    input.addEventListener("focus", function () {
+      if (!input.value.trim()) {
+        fetchAndShowSuggestions("");
+      }
+    });
+
+    // Autocomplete on input
+    input.addEventListener(
+      "input",
+      debounce(function () {
+        const query = input.value.trim();
+        if (!query) {
+          suggestions.style.display = "none";
+          return;
+        }
+        fetchAndShowSuggestions(query);
+      }, 300)
+    );
+
+    document.addEventListener("click", function (e) {
+      if (!suggestions.contains(e.target) && e.target !== input) {
+        suggestions.style.display = "none";
+      }
+    });
+  }
+
+  // Usage:
+  setupAutocomplete(
+    "supplier-autocomplete",
+    "supplier-suggestions",
+    "supplier-id-hidden",
+    "/services/suppliers/autocomplete/",
+    "addSupplierModal"
+  );
+  setupAutocomplete(
+    "mode-autocomplete",
+    "mode-suggestions",
+    "mode-id-hidden",
+    "/services/modes/autocomplete/",
+    "addModeModal"
+  );
+
+  // Modal submission for Supplier
+  document
+    .getElementById("add-supplier-form")
+    .addEventListener("submit", function (e) {
+      e.preventDefault();
+      const formData = new FormData(this);
+      fetch("/services/suppliers/create-ajax/", {
+        method: "POST",
+        headers: {
+          "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]")
+            .value,
+        },
+        body: formData,
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.success) {
+            document.getElementById("supplier-autocomplete").value = data.name;
+            document.getElementById("supplier-id-hidden").value = data.id;
+            bootstrap.Modal.getInstance(
+              document.getElementById("addSupplierModal")
+            ).hide();
+            this.reset();
+            document.getElementById("add-supplier-error").textContent = "";
+            document
+              .getElementById("supplier-autocomplete")
+              .dispatchEvent(new Event("input"));
+          } else {
+            document.getElementById("add-supplier-error").textContent =
+              data.error || "Could not save supplier.";
+          }
+        });
+    });
+
+  // Modal submission for Mode
+  document
+    .getElementById("add-mode-form")
+    .addEventListener("submit", function (e) {
+      e.preventDefault();
+      const formData = new FormData(this);
+      fetch("/services/modes/create-ajax/", {
+        method: "POST",
+        headers: {
+          "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]")
+            .value,
+        },
+        body: formData,
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.success) {
+            document.getElementById("mode-autocomplete").value = data.name;
+            document.getElementById("mode-id-hidden").value = data.id;
+            bootstrap.Modal.getInstance(
+              document.getElementById("addModeModal")
+            ).hide();
+            this.reset();
+            document.getElementById("add-mode-error").textContent = "";
+            document
+              .getElementById("mode-autocomplete")
+              .dispatchEvent(new Event("input"));
+          } else {
+            document.getElementById("add-mode-error").textContent =
+              data.error || "Could not save mode.";
+          }
+        });
+    });
+</script>
+{% endblock %}

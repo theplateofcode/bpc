@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">Modes of Payment</h2>
+    {% if request.user.is_owner or request.user.is_admin %}
+      <a href="{% url 'create_mode' %}" class="btn btn-primary">
+        <i class="bi bi-plus-lg"></i> Add New
+      </a>
+    {% endif %}
+  </div>
+  
+  <div class="card shadow-sm">
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>Name</th>
+              <th style="width: 150px">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for mode in modes %}
+            <tr>
+              <td>{{ mode.name }}</td>
+              <td>
+                {% if request.user.is_owner or request.user.is_admin %}
+                  <a href="{% url 'update_mode' mode.pk %}" class="btn btn-sm btn-outline-primary me-1">
+                    <i class="bi bi-pencil"></i>
+                  </a>
+                  <a href="{% url 'delete_mode' mode.pk %}" class="btn btn-sm btn-outline-danger">
+                    <i class="bi bi-trash"></i>
+                  </a>
+                {% endif %}
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="2" class="text-center text-muted">No modes of payment found.</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>
+      Insurance Entries for {{ booking.booking_id }} ({{ booking.client }})
+    </h2>
+    <a href="{% url 'create_insurance' booking.id %}" class="btn btn-success">
+      + New Insurance Entry
+    </a>
+    {% if not booking.insurances_finished %}
+      {% if all_finished %}
+        <form
+          method="post"
+          action="{% url 'mark_service_finished' service_type='insurance' pk=booking.id %}">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-primary">
+            <i class="bi bi-check-circle"></i> Mark Insurances Finished
+          </button>
+        </form>
+      {% else %}
+        <span class="badge bg-warning text-dark">
+          All insurances must be marked as finished to complete
+        </span>
+      {% endif %}
+    {% else %}
+      <span class="badge bg-primary fs-5">Insurances Finished</span>
+    {% endif %}
+  </div>
+
+  <div class="table-responsive">
+    <table class="table align-middle">
+      <thead class="table-light">
+        <tr>
+          <th>Actions</th>
+          <th>Insurance ID</th>
+          <th>Date</th>
+          <th>Supplier</th>
+          <th>Mode</th>
+          <th>Purchase Amount</th>
+          <th>Sales Amount</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for insurance in insurances %}
+        <tr>
+          <td>
+            <a
+              href="{% url 'edit_insurance' insurance.id %}"
+              class="btn btn-outline-secondary btn-sm"
+            >
+              <i class="bi bi-pencil"></i>
+            </a>
+            <a
+              href="{% url 'delete_insurance' insurance.id %}"
+              class="btn btn-outline-danger btn-sm"
+            >
+              <i class="bi bi-trash"></i>
+            </a>
+            {% if not insurance.finished %}
+              <form
+                method="post"
+                action="{% url 'mark_service_finished' service_type='insurance' pk=insurance.id %}"
+                style="display: inline"
+              >
+                {% csrf_token %}
+                <button
+                  type="submit"
+                  class="btn btn-outline-success btn-sm"
+                  title="Mark Finished"
+                >
+                  <i class="bi bi-check2-circle"></i>
+                </button>
+              </form>
+            {% else %}
+              <span class="badge bg-success">Finished</span>
+            {% endif %}
+          </td>
+          <td>{{ insurance.insurance_booking_id }}</td>
+          <td>{{ insurance.date|date:"d/m/y" }}</td>
+          <td>{{ insurance.supplier }}</td>
+          <td>{{ insurance.mode }}</td>
+          <td>{{ insurance.purchase_amount }}</td>
+          <td>{{ insurance.sales_amount }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="8" class="text-center">
+            No insurance entries for this booking.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

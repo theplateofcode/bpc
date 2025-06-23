@@ -1,0 +1,235 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+
+<div class="container my-5">
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <h3 class="fw-bold mb-4">Create New Booking</h3>
+      <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {% if form.non_field_errors %}
+          <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+        {% endif %}
+
+        <div class="row">
+          <!-- Left: General Booking Fields -->
+          <div class="col-md-6 border-end">
+            {# --- Client Autocomplete Field --- #}
+            <div class="mb-3 position-relative">
+              <label for="client-autocomplete" class="form-label fw-bold required">Client</label>
+              <input type="text" class="form-control" id="client-autocomplete" autocomplete="off" placeholder="Type to search clients..." required>
+              <input type="hidden" name="client" id="client-id-hidden">
+              <div id="client-suggestions" class="list-group position-absolute w-100" style="z-index: 10; display: none;"></div>
+            </div>
+            {% for field in form %}
+              {% if field.name != "client" %}
+                <div class="mb-3 row align-items-center">
+                  <label
+                    {% if field.id_for_label %}for="{{ field.id_for_label }}"{% endif %}
+                    class="col-sm-5 col-form-label{% if field.field.required %} required{% endif %}"
+                  >
+                    {{ field.label }}
+                  </label>
+                  <div class="col-sm-7">
+                    {{ field }}
+                    {% if field.help_text %}
+                      <small class="form-text text-muted">{{ field.help_text }}</small>
+                    {% endif %}
+                    {% for error in field.errors %}
+                      <div class="text-danger">{{ error }}</div>
+                    {% endfor %}
+                  </div>
+                </div>
+              {% endif %}
+            {% endfor %}
+          </div>
+          <!-- Right: Service Grid with Assignments -->
+          <div class="col-md-6">
+            <label class="form-label fw-bold mb-3">Services & Assignments</label>
+            <div class="row row-cols-1 row-cols-md-1 g-3">
+              {% for service in service_list %}
+              <div class="col">
+                <div class="card h-100">
+                  <div class="card-body">
+                    <div class="form-check">
+                      <input class="form-check-input service-checkbox"
+                             type="checkbox"
+                             name="services"
+                             value="{{ service.id }}"
+                             id="service-{{ service.id }}">
+                      <label class="form-check-label fw-bold" for="service-{{ service.id }}">
+                        {{ service.name }}
+                      </label>
+                    </div>
+                    <div class="mt-2">
+                      <select class="form-select assignee-select"
+                              name="assigned_to_{{ service.id }}"
+                              disabled>
+                        <option value="">Assign to...</option>
+                        {% for user in assignable_users %}
+                        <option value="{{ user.id }}">
+                          {{ user.get_full_name|default:user.username }}
+                        </option>
+                        {% endfor %}
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+        <div class="d-flex justify-content-end gap-2 mt-4">
+          <button type="submit" class="btn" style="background:#d9534f; color:#fff; min-width:90px;">Save</button>
+          <a href="{% url 'bookings' %}" class="btn btn-secondary" style="min-width:90px;">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Add New Client Modal (unchanged) -->
+<div class="modal fade" id="addClientModal" tabindex="-1" aria-labelledby="addClientModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <form id="add-client-form" class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="addClientModalLabel">Add New Client</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label class="form-label required">First Name</label>
+          <input type="text" class="form-control" name="first_name" required>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Middle Name</label>
+          <input type="text" class="form-control" name="middle_name">
+        </div>
+        <div class="mb-3">
+          <label class="form-label required">Last Name</label>
+          <input type="text" class="form-control" name="last_name" required>
+        </div>
+        <div class="mb-3">
+          <label class="form-label required">Contact Number</label>
+          <input type="text" class="form-control" name="contact_number" required pattern="[0-9]{10,15}">
+        </div>
+        <div id="add-client-error" class="text-danger small"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="submit" class="btn btn-danger">Save</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  // Client autocomplete logic (unchanged)
+  const input = document.getElementById("client-autocomplete");
+  const suggestions = document.getElementById("client-suggestions");
+  const clientIdHidden = document.getElementById("client-id-hidden");
+
+  input.addEventListener("input", function () {
+    const query = input.value.trim();
+    if (query.length < 1) {
+      suggestions.style.display = "none";
+      return;
+    }
+    fetch(`/clients/autocomplete/?q=${encodeURIComponent(query)}`)
+      .then(res => res.json())
+      .then(data => {
+        suggestions.innerHTML = "";
+        if (data.results.length === 0) {
+          suggestions.innerHTML = `<button type="button" class="list-group-item list-group-item-action text-center" id="add-client-btn"><i class="bi bi-plus-lg"></i> Add New Client</button>`;
+        } else {
+          data.results.forEach((client, idx) => {
+            const item = document.createElement("button");
+            item.type = "button";
+            item.className = "list-group-item list-group-item-action";
+            item.textContent = `${client.first_name} ${client.middle_name || ""} ${client.last_name} (${client.contact_number})`;
+            item.onclick = function () {
+              input.value = `${client.first_name} ${client.middle_name || ""} ${client.last_name}`.replace(/\s+/g, " ").trim();
+              clientIdHidden.value = client.id;
+              suggestions.style.display = "none";
+            };
+            suggestions.appendChild(item);
+          });
+          // Add "Add new client" button at the end
+          const addBtn = document.createElement("button");
+          addBtn.type = "button";
+          addBtn.className = "list-group-item list-group-item-action text-center";
+          addBtn.id = "add-client-btn";
+          addBtn.innerHTML = `<i class="bi bi-plus-lg"></i> Add New Client`;
+          suggestions.appendChild(addBtn);
+        }
+        suggestions.style.display = "block";
+      });
+  });
+
+  // Hide suggestions if click outside
+  document.addEventListener("click", function (e) {
+    if (!suggestions.contains(e.target) && e.target !== input) {
+      suggestions.style.display = "none";
+    }
+  });
+
+  // Show modal on "Add New Client"
+  suggestions.addEventListener("click", function (e) {
+    if (e.target.closest("#add-client-btn")) {
+      suggestions.style.display = "none";
+      new bootstrap.Modal(document.getElementById("addClientModal")).show();
+    }
+  });
+
+  // Handle Add Client form submission
+  document.getElementById("add-client-form").addEventListener("submit", function (e) {
+    e.preventDefault();
+    const form = e.target;
+    const data = {
+      first_name: form.first_name.value,
+      middle_name: form.middle_name.value,
+      last_name: form.last_name.value,
+      contact_number: form.contact_number.value
+    };
+    fetch("/clients/create-ajax/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value
+      },
+      body: JSON.stringify(data)
+    })
+    .then(res => res.json())
+    .then(result => {
+      if (result.success) {
+        input.value = `${result.client.first_name} ${result.client.middle_name || ""} ${result.client.last_name}`.replace(/\s+/g, " ").trim();
+        clientIdHidden.value = result.client.id;
+        bootstrap.Modal.getInstance(document.getElementById("addClientModal")).hide();
+        form.reset();
+        document.getElementById("add-client-error").textContent = "";
+      } else {
+        document.getElementById("add-client-error").textContent = result.error || "Could not add client.";
+      }
+    })
+    .catch(() => {
+      document.getElementById("add-client-error").textContent = "Could not add client.";
+    });
+  });
+
+  // Service grid: enable/disable assignee dropdowns
+  document.querySelectorAll('.service-checkbox').forEach(checkbox => {
+    const select = checkbox.closest('.card-body').querySelector('.assignee-select');
+    checkbox.addEventListener('change', () => {
+      select.disabled = !checkbox.checked;
+      if (!checkbox.checked) select.value = '';
+    });
+    // Initial state
+    select.disabled = !checkbox.checked;
+  });
+});
+</script>
+
+{% endblock %}

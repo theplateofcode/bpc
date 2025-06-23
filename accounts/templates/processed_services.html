@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% load service_tags %}  {# Add this line #}
+
+{% load dict_extras %}
+
+{% block content %}
+<div class="container py-4">
+  <h2 class="mb-4">Processed Service Entries</h2>
+  <div class="card shadow-sm">
+    <div class="card-body p-0">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>Booking Date</th>
+            <th>Booking</th>
+            <th>Client</th>
+            <th>Service Type</th>
+            <th>Description</th>
+            <th>Amount</th>
+            <th>Processed By</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for service in services %}
+          <tr>
+            <td>{{ service.booking.booking_date|date:"d-m-y" }}</td>
+            <td>{{ service.booking.booking_id }}</td>
+            <td>{{ service.booking.client }}</td>
+            <td>{{ service|service_type }}</td>  {# Updated line #}
+            <td>
+              {% if service.get_service_description %}
+                {{ service.get_service_description }}
+              {% else %}
+                {{ service }}
+              {% endif %}
+            </td>
+            <td>₹{{ service.sales_amount|floatformat:0 }}</td>
+            <td>
+              {% if service.created_by %}
+                {{ service.created_by }}
+              {% else %}
+                -
+              {% endif %}
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="7" class="text-center text-muted py-4">
+              No processed service entries found.
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}
