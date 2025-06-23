@@ -38,7 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'bootstrap5',
+    'django-bootstrap5',
     'bootstrap_datepicker_plus',
     'core',
     'bookings',
