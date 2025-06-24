@@ -53,10 +53,13 @@ INSTALLED_APPS = [
     'accounts',
     'widget_tweaks',
     'xhtml2pdf',
+    'corsheaders'
 
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',  # must be first
+    'django.middleware.common.CommonMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -106,7 +109,10 @@ DATABASES = {
         },
     }
 }
-
+CORS_ALLOWED_ORIGINS = [
+    "http://192.168.35.129:8000",
+    "http://localhost:8000",
+]
 
 
 # Password validation
