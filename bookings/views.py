@@ -169,15 +169,8 @@ def create_booking(request):
 @login_required(login_url='/users/login/')
 def edit_booking(request, pk):
     booking = get_object_or_404(Booking, pk=pk)
-    if request.method == 'POST':
-        form = BookingForm(request.POST, instance=booking)
-        if form.is_valid():
-            form.save()
-            return redirect('bookings')
-    else:
-        form = BookingForm(instance=booking)
-
-    # These are required for the service assignment grid:
+    
+    # Prepare context data (needed for both GET and POST)
     service_list = ServiceList.objects.all()
     assignable_users = User.objects.filter(is_active=True)
     selected_services = list(booking.services.values_list('id', flat=True))
@@ -186,6 +179,42 @@ def edit_booking(request, pk):
         for bs in BookingService.objects.filter(booking=booking)
     }
 
+    if request.method == 'POST':
+        form = BookingForm(request.POST, instance=booking)
+        if form.is_valid():
+            # Save form data first
+            booking = form.save(commit=False)
+            
+            # Handle client update
+            client_id = request.POST.get('client')
+            if client_id:
+                try:
+                    booking.client_id = int(client_id)
+                except (ValueError, TypeError):
+                    # Handle invalid client ID
+                    pass
+            booking.save()
+            
+            # Handle services and assignments
+            service_ids = request.POST.getlist('services')
+            booking.services.set(service_ids)
+            
+            for service_id in service_ids:
+                assignee_id = request.POST.get(f'assigned_to_{service_id}')
+                booking_service, _ = BookingService.objects.get_or_create(
+                    booking=booking,
+                    service_id=service_id
+                )
+                booking_service.assigned_to_id = assignee_id or None
+                booking_service.save()
+            
+            return redirect('bookings')
+    else:
+        form = BookingForm(instance=booking)
+    
+    # Return response for both cases:
+    # 1. GET requests
+    # 2. POST requests with invalid form
     return render(request, 'forms/edit_booking.html', {
         'form': form,
         'booking': booking,
