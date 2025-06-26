@@ -99,10 +99,10 @@ WSGI_APPLICATION = 'main.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'bpc',         # <-- your database name
-        'USER': 'root',         # <-- your MySQL user (or 'root' if you prefer)
-        'PASSWORD': 'Gaynegus@420',    # <-- your MySQL password
-        'HOST': '127.0.0.1',           # or '127.0.0.1'
+        'NAME': 'booking_db',         # <-- your database name
+        'USER': 'hetpatel',         # <-- your MySQL user (or 'root' if you prefer)
+        'PASSWORD': 'Modi2024@pm',    # <-- your MySQL password
+        'HOST': 'localhost',           # or '127.0.0.1'
         'PORT': '3306',                              # default MySQL port , pg port for prodction is 5432
         'OPTIONS': {
             'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
