@@ -246,3 +246,37 @@ class BookingService(models.Model):
 
     def __str__(self):
         return f"{self.booking.booking_id} - {self.service.name}"
+
+# bookings/models.py
+import os
+from django.db import models
+from services.models import ServiceList  # Your existing service model
+from clients.models import Client  # Your existing client model
+from suppliers.models import Supplier  # Your existing supplier model
+from bookings.models import Booking  # Your existing booking model
+
+def booking_document_path(instance, filename):
+    """Generate hierarchical path for booking documents"""
+    booking = instance.booking
+    service = instance.service
+    
+    return os.path.join(
+        str(booking.date.year),  # Year from booking date
+        booking.date.strftime("%B"),  # Month name
+        service.service_name,  # Service type name
+        f"{booking.booking_id}_{booking.client.first_name , booking.client.last_name}",  # Booking ID + Client name
+        instance.supplier.name,  # Supplier name
+        filename
+    )
+
+class BookingDocument(models.Model):
+    booking = models.ForeignKey(Booking, on_delete=models.CASCADE, related_name='documents')
+    service = models.ForeignKey(ServiceList, on_delete=models.PROTECT)
+    supplier = models.ForeignKey(Supplier, on_delete=models.PROTECT)
+    document = models.FileField(upload_to=booking_document_path)
+    
+    # Optional: Add timestamp
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return f"Document for {self.booking.booking_id}"

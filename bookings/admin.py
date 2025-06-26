@@ -37,3 +37,11 @@ class StatusAdmin(admin.ModelAdmin):
 @admin.register(Mode)
 class ModeAdmin(admin.ModelAdmin):
     list_display = ['name']
+
+
+from .models import BookingDocument
+
+@admin.register(BookingDocument)
+class BookingDocumentAdmin(admin.ModelAdmin):
+    list_display = ('booking', 'service', 'supplier', 'uploaded_at')
+    autocomplete_fields = ('booking', 'service', 'supplier')
