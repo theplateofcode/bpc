@@ -44,4 +44,4 @@ from .models import BookingDocument
 @admin.register(BookingDocument)
 class BookingDocumentAdmin(admin.ModelAdmin):
     list_display = ('booking', 'service', 'supplier', 'uploaded_at')
-    autocomplete_fields = ('booking', 'service', 'supplier')
+    # autocomplete_fields = ('booking', 'service', 'supplier')
