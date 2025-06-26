@@ -216,7 +216,6 @@ def delete_booking(request, pk):
 # PDF Generation Views and Helpers
 
 
-@login_required(login_url='/users/login/')
 def service_summary(qs, service_type=None):
     summary = []
     gst_rate = Decimal('0.18')
@@ -256,7 +255,6 @@ def service_summary(qs, service_type=None):
         })
     return summary
 
-@login_required(login_url='/users/login/')
 def booking_pdf(request, booking_id):
     booking = get_object_or_404(Booking.objects.prefetch_related(
         'tickets__supplier',
