@@ -27,9 +27,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-t^8)i6mbc!hb_6%^(^bkaw^9cw186#7)6pmh_gy@8^cj#y_2!p'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
-ALLOWED_HOSTS = ['31.97.60.40','45.36.65.117','192.168.35.129', 'localhost', ]
+ALLOWED_HOSTS = ['online-discoverytours.co.in', 'www.online-discoverytours.co.in','31.97.60.40','45.36.65.117','192.168.35.129', 'localhost', ]
 
 DATE_INPUT_FORMATS = ['%d/%m/%y']  # Add as needed
 # Application definition
