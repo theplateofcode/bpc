@@ -14,20 +14,24 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required, user_passes_test
 from .models import Status
 from .forms import StatusForm
+from django.contrib.auth.decorators import login_required
+
 
 
 def is_owner_or_admin(user):
     return user.is_authenticated and (getattr(user, 'role', '') == 'OWNER' or getattr(user, 'role', '') == 'ADMIN')
 
 
-@login_required
+
+@login_required(login_url='/users/login/')
 @user_passes_test(is_owner_or_admin)
 def status_list(request):
     statuses = Status.objects.all()
     return render(request, 'status_list.html', {'statuses': statuses})
 
 
-@login_required
+
+@login_required(login_url='/users/login/')
 @user_passes_test(is_owner_or_admin)
 def status_create(request):
     if request.method == 'POST':
@@ -40,7 +44,8 @@ def status_create(request):
     return render(request, 'forms/status_form.html', {'form': form})
 
 
-@login_required
+
+@login_required(login_url='/users/login/')
 @user_passes_test(is_owner_or_admin)
 def status_update(request, pk):
     status = get_object_or_404(Status, pk=pk)
@@ -54,7 +59,8 @@ def status_update(request, pk):
     return render(request, 'forms/status_form.html', {'form': form})
 
 
-@login_required
+
+@login_required(login_url='/users/login/')
 @user_passes_test(is_owner_or_admin)
 def status_delete(request, pk):
     status = get_object_or_404(Status, pk=pk)
@@ -76,7 +82,8 @@ from django.db.models import (
 )
 from django.db.models.functions import Coalesce, Least
 
-@login_required
+
+@login_required(login_url='/users/login/')
 def bookings(request):
     # Role-based filtering
     if request.user.role in ['OWNER', 'ADMIN']:
@@ -111,6 +118,7 @@ def bookings(request):
 User = get_user_model()
 
 
+@login_required(login_url='/users/login/')
 def create_booking(request):
     service_list = ServiceList.objects.all()
     assignable_users = User.objects.filter(is_active=True)
@@ -158,6 +166,7 @@ def create_booking(request):
 
 
 
+@login_required(login_url='/users/login/')
 def edit_booking(request, pk):
     booking = get_object_or_404(Booking, pk=pk)
     if request.method == 'POST':
@@ -188,6 +197,7 @@ def edit_booking(request, pk):
 
 from django.db import transaction
 
+@login_required(login_url='/users/login/')
 def delete_booking(request, pk):
     booking = get_object_or_404(Booking, pk=pk)
     if request.method == 'POST':
@@ -206,6 +216,7 @@ def delete_booking(request, pk):
 # PDF Generation Views and Helpers
 
 
+@login_required(login_url='/users/login/')
 def service_summary(qs, service_type=None):
     summary = []
     gst_rate = Decimal('0.18')
@@ -245,6 +256,7 @@ def service_summary(qs, service_type=None):
         })
     return summary
 
+@login_required(login_url='/users/login/')
 def booking_pdf(request, booking_id):
     booking = get_object_or_404(Booking.objects.prefetch_related(
         'tickets__supplier',

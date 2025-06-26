@@ -6,13 +6,15 @@ from .forms import ModeOfPaymentForm
 def is_owner_or_admin(user):
     return user.is_authenticated and (user.role == 'OWNER' or user.role == 'ADMIN')
 
-@login_required
+
+@login_required(login_url='/users/login/')
 @user_passes_test(is_owner_or_admin)
 def modes_of_payment(request):
     modes = Mode.objects.all().order_by('name')
     return render(request, 'modes_of_payment.html', {'modes': modes})
 
-@login_required
+
+@login_required(login_url='/users/login/')
 @user_passes_test(is_owner_or_admin)
 def create_mode(request):
     if request.method == 'POST':
@@ -24,7 +26,8 @@ def create_mode(request):
         form = ModeOfPaymentForm()
     return render(request, 'forms/mode_form.html', {'form': form})
 
-@login_required
+
+@login_required(login_url='/users/login/')
 @user_passes_test(is_owner_or_admin)
 def update_mode(request, pk):
     mode = get_object_or_404(Mode, pk=pk)
@@ -37,7 +40,8 @@ def update_mode(request, pk):
         form = ModeOfPaymentForm(instance=mode)
     return render(request, 'forms/mode_form.html', {'form': form})
 
-@login_required
+
+@login_required(login_url='/users/login/')
 @user_passes_test(is_owner_or_admin)
 def delete_mode(request, pk):
     mode = get_object_or_404(Mode, pk=pk)

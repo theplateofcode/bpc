@@ -67,15 +67,15 @@ def forgot_password_view(request):
         email = request.POST.get('email')
         form = PasswordResetForm({'email': email})
         if form.is_valid():
-            form.save(
-                request=request,
-                use_https=request.is_secure(),
-                email_template_name='users/password_reset_email.html',
-                subject_template_name='users/password_reset_subject.txt',
-                from_email=None,
-                html_email_template_name=None,
-                extra_email_context=None,
-            )
+            # form.save(
+            #     request=request,
+            #     use_https=request.is_secure(),
+            #     email_template_name='users/password_reset_email.html',
+            #     subject_template_name='users/password_reset_subject.txt',
+            #     from_email=None,
+            #     html_email_template_name=None,
+            #     extra_email_context=None,
+            # )
             messages.success(request, "A password reset link has been sent to your email.")
             return redirect('login')
         else:
@@ -93,6 +93,9 @@ from bookings.models import Booking
 
 User = get_user_model()
 
+from django.contrib.auth.decorators import login_required
+
+@login_required(login_url='/users/login/')
 def users_list(request):
     users = User.objects.all().prefetch_related('groups')
     user_data = []
@@ -120,6 +123,8 @@ User = get_user_model()
 def is_owner_or_superuser(user):
     return user.is_superuser or getattr(user, 'role', '') == 'Owner'
 
+
+@login_required(login_url='/users/login/')
 @user_passes_test(is_owner_or_superuser)
 def edit_user(request, user_id):
     user = get_object_or_404(User, id=user_id)
@@ -147,6 +152,8 @@ from django.contrib import messages
 from django.db.models import ProtectedError
 from django.core.exceptions import PermissionDenied
 
+
+@login_required(login_url='/users/login/')
 @user_passes_test(is_owner_or_superuser)
 @require_POST  # Ensure only POST requests are accepted
 def delete_user(request, user_id):

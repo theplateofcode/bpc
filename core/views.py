@@ -9,19 +9,26 @@ from django.contrib.auth.models import Group
 from django.shortcuts import render, redirect, get_object_or_404
 # from django.contrib.auth.views import PasswordResetView
 # from django.urls import reverse_lazy
+from django.contrib.auth.decorators import login_required
+
 
 
 # Create your views here.
+
+@login_required(login_url='/users/login/')
 def home(request):
     return render(request, 'home.html')
 
+
+@login_required(login_url='/users/login/')
 def clients(request):
     return render(request, 'clients.html')
 
 
 User = get_user_model()  # Add this line
 
-@login_required
+
+@login_required(login_url='/users/login/')
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 def manage_groups(request):
     groups = Group.objects.all().order_by('name')

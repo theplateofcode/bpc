@@ -8,10 +8,13 @@ from bookings.models import Booking
 from bookings.views import service_summary
 from services.utils.decorators import get_service_model
 from collections import defaultdict
+from django.contrib.auth.decorators import login_required
 
 
 def is_accountant(user):
     return user.is_authenticated and getattr(user, 'role', '').upper() == 'ACCOUNTANT'
+
+
 
 @method_decorator(user_passes_test(is_accountant), name='dispatch')
 class AccountTodoView(ListView):
@@ -52,6 +55,8 @@ class AccountTodoView(ListView):
         context['grouped_services'] = grouped_services
         return context
 
+
+@login_required(login_url='/users/login/')
 @user_passes_test(is_accountant)
 def process_service(request, service_type, pk):
     model = get_service_model(service_type)

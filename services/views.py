@@ -38,13 +38,15 @@ def all_services_finished(booking):
         ])
 
 
-@login_required
+
+@login_required(login_url='/users/login/')
 @user_passes_test(is_owner_or_admin)
 def carrier_list(request):
     carriers = Carrier.objects.all()
     return render(request, 'carriers/carriers_list.html', {'carriers': carriers})
 
-@login_required
+
+@login_required(login_url='/users/login/')
 @user_passes_test(is_owner_or_admin)
 def carrier_create(request):
     if request.method == 'POST':
@@ -56,7 +58,8 @@ def carrier_create(request):
         form = CarrierForm()
     return render(request, 'carriers/carrier_form.html', {'form': form})
 
-@login_required
+
+@login_required(login_url='/users/login/')
 @user_passes_test(is_owner_or_admin)
 def carrier_update(request, pk):
     carrier = get_object_or_404(Carrier, pk=pk)
@@ -69,7 +72,8 @@ def carrier_update(request, pk):
         form = CarrierForm(instance=carrier)
     return render(request, 'carriers/carrier_form.html', {'form': form})
 
-@login_required
+
+@login_required(login_url='/users/login/')
 @user_passes_test(is_owner_or_admin)
 def carrier_delete(request, pk):
     carrier = get_object_or_404(Carrier, pk=pk)
@@ -162,6 +166,7 @@ def mark_service_finished(request, service_type, pk):
     return redirect('home')
 
 
+@login_required(login_url='/users/login/')
 @group_required('Ticket_Dept')
 def tickets(request):
     statuses = Status.objects.all().order_by('name')
@@ -193,6 +198,8 @@ def tickets(request):
 
 
 # --- Create Ticket Entry ---
+
+@login_required(login_url='/users/login/')
 @group_required('Ticket_Dept')
 def create_ticket(request, booking_id):
     booking = get_object_or_404(Booking, pk=booking_id)
@@ -210,6 +217,8 @@ def create_ticket(request, booking_id):
         form = TicketForm(initial={'booking': booking})
     return render(request, 'ticket/forms/create.html', {'form': form, 'booking': booking, "supplier_categories": supplier_categories,})
 
+
+@login_required(login_url='/users/login/')
 @group_required('Ticket_Dept')# --- Edit Ticket Entry ---
 def edit_ticket(request, ticket_id):
     ticket = get_object_or_404(Ticket, pk=ticket_id)
@@ -223,6 +232,8 @@ def edit_ticket(request, ticket_id):
         form = TicketForm(instance=ticket)
     return render(request, 'ticket/forms/edit.html', {'form': form, 'booking': booking, 'ticket': ticket})
 
+
+@login_required(login_url='/users/login/')
 @group_required('Ticket_Dept')# --- Delete Ticket Entry ---
 def delete_ticket(request, ticket_id):
     ticket = get_object_or_404(Ticket, pk=ticket_id)
@@ -232,6 +243,8 @@ def delete_ticket(request, ticket_id):
         return redirect('ticket_entries', booking_id=booking_id)
     return render(request, 'ticket/forms/delete.html', {'ticket': ticket})
 
+
+@login_required(login_url='/users/login/')
 @group_required('Passport_Dept')
 def passports(request):
     statuses = Status.objects.all().order_by('name')
@@ -257,7 +270,9 @@ def passports(request):
 
 
 
-# --- Create Ticket Entry ---
+# --- Create Passport Entry ---
+
+@login_required(login_url='/users/login/')
 @group_required('Passport_Dept')
 def create_passport(request, booking_id):
     booking = get_object_or_404(Booking, pk=booking_id)
@@ -276,7 +291,9 @@ def create_passport(request, booking_id):
         form = PassportForm(initial={'booking': booking})
     return render(request, 'passport/forms/create.html', {'form': form, 'booking': booking, "supplier_categories": supplier_categories,})
 
-# --- Edit Ticket Entry ---
+# --- Edit passport Entry ---
+
+@login_required(login_url='/users/login/')
 @group_required('Passport_Dept')
 def edit_passport(request, passport_id):
     passport = get_object_or_404(Passport, pk=passport_id)
@@ -290,7 +307,9 @@ def edit_passport(request, passport_id):
         form = PassportForm(instance=passport)
     return render(request, 'passport/forms/edit.html', {'form': form, 'booking': booking, 'passport': passport})
 
-# --- Delete Ticket Entry ---
+# --- Delete passport Entry ---
+
+@login_required(login_url='/users/login/')
 @group_required('Passport_Dept')
 def delete_passport(request, ticket_id):
     passport = get_object_or_404(Passport, pk=ticket_id)
@@ -305,6 +324,7 @@ def delete_passport(request, ticket_id):
 # ======================
 # ==== Visa Views ======
 # ======================
+@login_required(login_url='/users/login/')
 @group_required('Visa_Dept')
 def visas(request):
     statuses = Status.objects.all().order_by('name')
@@ -328,7 +348,7 @@ def visas(request):
     })
 
 
-
+@login_required(login_url='/users/login/')
 @group_required('Visa_Dept')
 def create_visa(request, booking_id):
     booking = get_object_or_404(Booking, pk=booking_id)
@@ -352,6 +372,7 @@ def create_visa(request, booking_id):
         "supplier_categories": supplier_categories,
     })
 
+@login_required(login_url='/users/login/')
 @group_required('Visa_Dept')
 def edit_visa(request, visa_id):
     visa = get_object_or_404(Visa, pk=visa_id)
@@ -371,6 +392,7 @@ def edit_visa(request, visa_id):
         'visa': visa,
     })
 
+@login_required(login_url='/users/login/')
 @group_required('Visa_Dept')
 def delete_visa(request, visa_id):
     visa = get_object_or_404(Visa, pk=visa_id)
@@ -385,6 +407,7 @@ def delete_visa(request, visa_id):
 # ======================
 # === Insurance Views ==
 # ======================
+@login_required(login_url='/users/login/')
 @group_required('Insurance_Dept')
 def insurances(request):
     statuses = Status.objects.all().order_by('name')
@@ -409,6 +432,7 @@ def insurances(request):
 
 
 
+@login_required(login_url='/users/login/')
 @group_required('Insurance_Dept')
 def create_insurance(request, booking_id):
     booking = get_object_or_404(Booking, pk=booking_id)
@@ -432,6 +456,7 @@ def create_insurance(request, booking_id):
         "supplier_categories": supplier_categories,
     })
 
+@login_required(login_url='/users/login/')
 @group_required('Insurance_Dept')
 def edit_insurance(request, insurance_id):
     insurance = get_object_or_404(Insurance, pk=insurance_id)
@@ -451,6 +476,7 @@ def edit_insurance(request, insurance_id):
         'insurance': insurance,
     })
 
+@login_required(login_url='/users/login/')
 @group_required('Insurance_Dept')
 def delete_insurance(request, insurance_id):
     insurance = get_object_or_404(Insurance, pk=insurance_id)
@@ -475,6 +501,7 @@ def mark_insurance_ready(request, pk):
 # ======================
 # ==== Hotel Views =====
 # ======================
+@login_required(login_url='/users/login/')
 @group_required('Hotel_Dept')
 def hotels(request):
     statuses = Status.objects.all().order_by('name')
@@ -499,6 +526,7 @@ def hotels(request):
 
 
 
+@login_required(login_url='/users/login/')
 @group_required('Hotel_Dept')
 def create_hotel(request, booking_id):
     booking = get_object_or_404(Booking, pk=booking_id)
@@ -520,6 +548,7 @@ def create_hotel(request, booking_id):
         "supplier_categories": supplier_categories,
     })
 
+@login_required(login_url='/users/login/')
 @group_required('Hotel_Dept')
 def edit_hotel(request, hotel_id):
     hotel = get_object_or_404(Hotel, pk=hotel_id)
@@ -537,6 +566,7 @@ def edit_hotel(request, hotel_id):
         'hotel': hotel,
     })
 
+@login_required(login_url='/users/login/')
 @group_required('Hotel_Dept')
 def delete_hotel(request, hotel_id):
     hotel = get_object_or_404(Hotel, pk=hotel_id)
@@ -550,6 +580,7 @@ def delete_hotel(request, hotel_id):
 # ======================
 # == Sightseeing Views =
 # ======================
+@login_required(login_url='/users/login/')
 @group_required('Sightseeing_Dept')
 def sightseeings(request):
     statuses = Status.objects.all().order_by('name')
@@ -575,6 +606,7 @@ def sightseeings(request):
 
 
 
+@login_required(login_url='/users/login/')
 @group_required('Sightseeing_Dept')
 def create_sightseeing(request, booking_id):
     booking = get_object_or_404(Booking, pk=booking_id)
@@ -596,6 +628,7 @@ def create_sightseeing(request, booking_id):
         "supplier_categories": supplier_categories,
     })
 
+@login_required(login_url='/users/login/')
 @group_required('Sightseeing_Dept')
 def edit_sightseeing(request, sightseeing_id):
     sightseeing = get_object_or_404(SightSeeing, pk=sightseeing_id)
@@ -613,6 +646,7 @@ def edit_sightseeing(request, sightseeing_id):
         'sightseeing': sightseeing,
     })
 
+@login_required(login_url='/users/login/')
 @group_required('Sightseeing_Dept')
 def delete_sightseeing(request, sightseeing_id):
     sightseeing = get_object_or_404(SightSeeing, pk=sightseeing_id)
@@ -626,6 +660,7 @@ def delete_sightseeing(request, sightseeing_id):
 # ======================
 # === Transfer Views ===
 # ======================
+@login_required(login_url='/users/login/')
 @group_required('Transfer_Dept')
 def transfers(request):
     statuses = Status.objects.all().order_by('name')
@@ -651,6 +686,7 @@ def transfers(request):
 
 
 
+@login_required(login_url='/users/login/')
 @group_required('Transfer_Dept')
 def create_transfer(request, booking_id):
     booking = get_object_or_404(Booking, pk=booking_id)
@@ -672,6 +708,7 @@ def create_transfer(request, booking_id):
         "supplier_categories": supplier_categories,
     })
 
+@login_required(login_url='/users/login/')
 @group_required('Transfer_Dept')
 def edit_transfer(request, transfer_id):
     transfer = get_object_or_404(Transfer, pk=transfer_id)
@@ -689,6 +726,7 @@ def edit_transfer(request, transfer_id):
         'transfer': transfer,
     })
 
+@login_required(login_url='/users/login/')
 @group_required('Transfer_Dept')
 def delete_transfer(request, transfer_id):
     transfer = get_object_or_404(Transfer, pk=transfer_id)
@@ -704,6 +742,7 @@ from django.contrib import messages
 from bookings.models import Booking, Status
 from services.models import Ticket, Visa, Hotel, Transfer, Passport, Insurance, SightSeeing
 
+@login_required(login_url='/users/login/')
 def ticket_entries(request, booking_id):
     booking = get_object_or_404(Booking, pk=booking_id)
     tickets = booking.tickets.all()
@@ -729,6 +768,7 @@ def ticket_entries(request, booking_id):
         'all_finished': all_finished,
     })
 
+@login_required(login_url='/users/login/')
 def visa_entries(request, booking_id):
     booking = get_object_or_404(Booking, pk=booking_id)
     visas = booking.visas.all()
@@ -751,6 +791,7 @@ def visa_entries(request, booking_id):
         'all_finished': all_finished,
     })
 
+@login_required(login_url='/users/login/')
 def hotel_entries(request, booking_id):
     booking = get_object_or_404(Booking, pk=booking_id)
     hotels = booking.hotels.all()
@@ -773,6 +814,7 @@ def hotel_entries(request, booking_id):
         'all_finished': all_finished,
     })
 
+@login_required(login_url='/users/login/')
 def insurance_entries(request, booking_id):
     booking = get_object_or_404(Booking, pk=booking_id)
     insurances = booking.insurances.all()
@@ -795,6 +837,7 @@ def insurance_entries(request, booking_id):
         'all_finished': all_finished,
     })
 
+@login_required(login_url='/users/login/')
 def transfer_entries(request, booking_id):
     booking = get_object_or_404(Booking, pk=booking_id)
     transfers = booking.transfers.all()
@@ -817,6 +860,7 @@ def transfer_entries(request, booking_id):
         'all_finished': all_finished,
     })
 
+@login_required(login_url='/users/login/')
 def sightseeing_entries(request, booking_id):
     booking = get_object_or_404(Booking, pk=booking_id)
     sightseeings = booking.sightseeings.all()
@@ -839,6 +883,7 @@ def sightseeing_entries(request, booking_id):
         'all_finished': all_finished,
     })
 
+@login_required(login_url='/users/login/')
 def passport_entries(request, booking_id):
     booking = get_object_or_404(Booking, pk=booking_id)
     passports = booking.passports.all()
