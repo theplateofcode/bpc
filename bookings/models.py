@@ -255,27 +255,44 @@ from clients.models import Client  # Your existing client model
 from suppliers.models import Supplier  # Your existing supplier model
 from bookings.models import Booking  # Your existing booking model
 
+from django.utils import timezone
+from django.utils.text import slugify
+
 def booking_document_path(instance, filename):
-    """Generate hierarchical path for booking documents"""
-    booking = instance.booking
-    service = instance.service
+    # Get booking date or current date as fallback
+    booking_date = instance.booking.booking_date if instance.booking.booking_date else timezone.now()
     
-    return os.path.join(
-        str(booking.date.year),  # Year from booking date
-        booking.date.strftime("%B"),  # Month name
-        service.service_name,  # Service type name
-        f"{booking.booking_id}_{booking.client.first_name , booking.client.last_name}",  # Booking ID + Client name
-        instance.supplier.name,  # Supplier name
-        filename
+    # Extract year and month
+    year = booking_date.year
+    month = booking_date.month
+    
+    # Get service name (slugified)
+    service_name = slugify(instance.service.name) if instance.service else 'unknown_service'
+    
+    # Get booking ID
+    booking_id = instance.booking.booking_id if instance.booking else 'no_booking'
+    
+    # Get supplier name (slugified)
+    supplier_name = slugify(instance.supplier.name) if instance.supplier else 'no_supplier'
+    
+    # Construct the path
+    path = os.path.join(
+        "booking_documents",  # Base folder
+        f"{year}",            # Year folder
+        f"{month:02d}",       # Month folder (zero-padded)
+        service_name,         # Service type folder
+        booking_id,           # Booking ID folder
+        supplier_name,        # Supplier name folder
+        filename              # Original filename
     )
+    
+    return path
 
 class BookingDocument(models.Model):
     booking = models.ForeignKey(Booking, on_delete=models.CASCADE, related_name='documents')
     service = models.ForeignKey(ServiceList, on_delete=models.PROTECT)
     supplier = models.ForeignKey(Supplier, on_delete=models.PROTECT)
     document = models.FileField(upload_to=booking_document_path)
-    
-    # Optional: Add timestamp
     uploaded_at = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):
