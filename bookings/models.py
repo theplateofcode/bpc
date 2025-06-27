@@ -259,42 +259,12 @@ from django.utils import timezone
 from django.utils.text import slugify
 
 def booking_document_path(instance, filename):
-    # Save all attachments under booking ID folder only
     booking_id = instance.booking.booking_id if instance.booking else 'no_booking'
-    path = os.path.join(
-        "booking_documents",  # base folder
-        booking_id,           # booking ID subfolder
-        filename              # original filename
-    )
-    return path
+    return os.path.join("booking_documents", booking_id, filename)
 
 import os
 from django.utils import timezone
 from django.utils.text import slugify
-
-def structured_attachment_path(instance, filename):
-    # Use booking date or current date as fallback
-    date = instance.booking.booking_date if instance.booking.booking_date else timezone.now()
-    
-    # Extract year and month
-    year = date.year
-    month = date.month
-    
-    # Get service name (slugified for safe path)
-    service_name = slugify(instance.service.name)
-    
-    # Get supplier name (slugified)
-    supplier_name = slugify(instance.supplier.name)
-    
-    # Construct the path
-    return os.path.join(
-        "service_attachments",  # Base folder
-        f"{year}",              # Year folder
-        f"{month:02d}",         # Month folder (zero-padded)
-        service_name,           # Service type folder
-        supplier_name,          # Supplier name folder
-        filename                # Original filename
-    )
 
 
 
