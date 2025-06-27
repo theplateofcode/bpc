@@ -110,7 +110,7 @@
                     <td class="col-notes">{{ s.notes }}</td>
                     <td class="col-attachment">
                         {% if s.attachment %}
-                        <a href="http://127.0.0.1:8000/{{ s.attachment.url }}" target="_blank" rel="noopener noreferrer">View</a>
+                        <a href="{{ s.attachment.url }}" target="_blank" rel="noopener noreferrer">View</a>
                         {% else %}
                         -
                         {% endif %}
