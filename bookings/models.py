@@ -69,7 +69,7 @@ class Booking(models.Model):
     status = models.ForeignKey(
         Status,
         on_delete=models.PROTECT,
-        default=3
+        default=2
     )
     accounts_done = models.BooleanField(
         default=False, verbose_name="Accounts Processed")
