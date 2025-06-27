@@ -288,12 +288,44 @@ def booking_document_path(instance, filename):
     
     return path
 
+
+import os
+from django.utils import timezone
+from django.utils.text import slugify
+
+def structured_attachment_path(instance, filename):
+    # Use booking date or current date as fallback
+    date = instance.booking.booking_date if instance.booking.booking_date else timezone.now()
+    
+    # Extract year and month
+    year = date.year
+    month = date.month
+    
+    # Get service name (slugified for safe path)
+    service_name = slugify(instance.service.name)
+    
+    # Get supplier name (slugified)
+    supplier_name = slugify(instance.supplier.name)
+    
+    # Construct the path
+    return os.path.join(
+        "service_attachments",  # Base folder
+        f"{year}",              # Year folder
+        f"{month:02d}",         # Month folder (zero-padded)
+        service_name,           # Service type folder
+        supplier_name,          # Supplier name folder
+        filename                # Original filename
+    )
+
+
+
 class BookingDocument(models.Model):
     booking = models.ForeignKey(Booking, on_delete=models.CASCADE, related_name='documents')
     service = models.ForeignKey(ServiceList, on_delete=models.PROTECT)
     supplier = models.ForeignKey(Supplier, on_delete=models.PROTECT)
-    document = models.FileField(upload_to=booking_document_path)
+    document = models.FileField(upload_to=structured_attachment_path)  # Updated here
     uploaded_at = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):
         return f"Document for {self.booking.booking_id}"
+
