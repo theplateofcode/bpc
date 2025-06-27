@@ -153,7 +153,7 @@ MEDIA_ROOT = '/opt/booking_documents'
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / "static"]
-STATIC_ROOT = '/home/hetpatel/webapps/booking_project/staticfiles/'
+STATIC_ROOT = '/home/hetpatel/webapps/bpc/staticfiles/'
 
 
 # Default primary key field type
