@@ -278,7 +278,7 @@ def service_summary(qs, service_type=None):
             'tcs_amount': tcs,
             'supplier': obj.supplier if hasattr(obj, 'supplier') else None,
             'type': obj._meta.verbose_name.title(),
-            'attachment': obj.attachment if hasattr(obj, 'attachment') else None,
+            'attachment': getattr(obj, 'attachment', None),
             'travel_type': travel_type,
             'mode': mode_name,  # <-- Add this line
         })
