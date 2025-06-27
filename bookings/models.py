@@ -259,35 +259,14 @@ from django.utils import timezone
 from django.utils.text import slugify
 
 def booking_document_path(instance, filename):
-    # Get booking date or current date as fallback
-    booking_date = instance.booking.booking_date if instance.booking.booking_date else timezone.now()
-    
-    # Extract year and month
-    year = booking_date.year
-    month = booking_date.month
-    
-    # Get service name (slugified)
-    service_name = slugify(instance.service.name) if instance.service else 'unknown_service'
-    
-    # Get booking ID
+    # Save all attachments under booking ID folder only
     booking_id = instance.booking.booking_id if instance.booking else 'no_booking'
-    
-    # Get supplier name (slugified)
-    supplier_name = slugify(instance.supplier.name) if instance.supplier else 'no_supplier'
-    
-    # Construct the path
     path = os.path.join(
-        "booking_documents",  # Base folder
-        f"{year}",            # Year folder
-        f"{month:02d}",       # Month folder (zero-padded)
-        service_name,         # Service type folder
-        booking_id,           # Booking ID folder
-        supplier_name,        # Supplier name folder
-        filename              # Original filename
+        "booking_documents",  # base folder
+        booking_id,           # booking ID subfolder
+        filename              # original filename
     )
-    
     return path
-
 
 import os
 from django.utils import timezone
@@ -323,9 +302,8 @@ class BookingDocument(models.Model):
     booking = models.ForeignKey(Booking, on_delete=models.CASCADE, related_name='documents')
     service = models.ForeignKey(ServiceList, on_delete=models.PROTECT)
     supplier = models.ForeignKey(Supplier, on_delete=models.PROTECT)
-    document = models.FileField(upload_to=structured_attachment_path)  # Updated here
+    document = models.FileField(upload_to=booking_document_path)  # Use the simplified function
     uploaded_at = models.DateTimeField(auto_now_add=True)
-    
+
     def __str__(self):
         return f"Document for {self.booking.booking_id}"
-
