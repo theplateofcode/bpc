@@ -151,7 +151,7 @@ USE_TZ = True
 MEDIA_URL = '/media/'
 MEDIA_ROOT = '/opt/booking_documents'
 
-STATIC_URL = '/static/'
+STATIC_URL = '/staticfiles/'
 STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = '/home/hetpatel/webapps/bpc/staticfiles/'
 
