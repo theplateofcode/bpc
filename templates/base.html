@@ -155,6 +155,16 @@
           </a>
         </div>
       {% endif %}
+      <!-- REPORT MODULE URL -->
+      {% if user.is_authenticated %}
+        <div class="nav-item mb-1">
+          <a href="{% url 'owner_reports' %}"
+             class="nav-link d-flex align-items-center gap-2 rounded px-3 py-2{% if '/owner-reports' in request.path %} active{% endif %}">
+            <i class="bi bi-chart-fill"></i>
+            <span>Reports</span>
+          </a>
+        </div>
+      {% endif %}
 
             <!-- Settings Heading -->
       <div class="sidebar-heading text-uppercase text-muted small px-3 mt-3 mb-2" style="letter-spacing: 1px;">
