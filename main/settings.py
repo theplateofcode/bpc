@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'suppliers',
     'payments',
     'accounts',
+    'reports',
     'widget_tweaks',
     'xhtml2pdf',
     'corsheaders'
