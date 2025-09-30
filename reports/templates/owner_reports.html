@@ -1,325 +1,155 @@
-{% extends "base.html" %} {% block content %}
+{% extends "base.html" %}
+{% block content %}
 
-<!-- Company chart -->
-
-
-
-
-<!-- Staff chart -->
-<!-- <div class="chart-container" style="max-width: 1000px;">
-    <canvas id="staffChart" style="max-height: 500px;"></canvas>
-  </div> -->
-
-<!-- Staff summary table -->
-<!-- <h3 class="mt-4">Staff Profit Summary</h3> -->
-
-
-<!-- <br /><br /> -->
-<!-- DROPDOWN FILTERS -->
-<h3 style="margin-top: 2rem;" class="mt-7">Report Filters</h3>
+<!-- Report Filters -->
+<h3 class="mt-4">Report Filters</h3>
 <form id="reportFilters" class="row g-3 align-items-end">
   <div class="col-md-2">
     <label for="service" class="form-label">Service</label>
-    <select id="service" name="service" class="form-select">
-      <option value="">All</option>
-    </select>
+    <select id="service" name="service" class="form-select"><option value="">All</option></select>
   </div>
   <div class="col-md-2">
     <label for="employee" class="form-label">Employee</label>
-    <select id="employee" name="employee" class="form-select">
-      <option value="">All</option>
-    </select>
+    <select id="employee" name="employee" class="form-select"><option value="">All</option></select>
   </div>
   <div class="col-md-2">
     <label for="year" class="form-label">Year</label>
-    <select id="year" name="year" class="form-select">
-      <option value="">All</option>
-    </select>
+    <select id="year" name="year" class="form-select"><option value="">All</option></select>
   </div>
   <div class="col-md-2">
     <label for="month" class="form-label">Month</label>
-    <select id="month" name="month" class="form-select">
-      <option value="">All</option>
-    </select>
+    <select id="month" name="month" class="form-select"><option value="">All</option></select>
   </div>
   <div class="col-md-2">
     <label for="client" class="form-label">Client</label>
-    <select id="client" name="client" class="form-select">
-      <option value="">All</option>
-    </select>
+    <select id="client" name="client" class="form-select"><option value="">All</option></select>
   </div>
   <div class="col-md-2">
     <label for="supplier" class="form-label">Supplier</label>
-    <select id="supplier" name="supplier" class="form-select">
-      <option value="">All</option>
-    </select>
+    <select id="supplier" name="supplier" class="form-select"><option value="">All</option></select>
   </div>
-
-  <!-- Buttons column -->
   <div class="col-md-2 d-flex flex-column">
-    <button type="button" id="applyFilters" class="btn btn-primary w-100 mb-2">
-      Apply
-    </button>
-    <button type="reset" id="resetFilters" class="btn btn-secondary w-100">
-      Reset All
-    </button>
+    <button type="button" id="applyFilters" class="btn btn-primary w-100 mb-2">Apply</button>
+    <button type="reset" id="resetFilters" class="btn btn-secondary w-100">Reset All</button>
   </div>
 </form>
 
-<!-- POST DROPDOWN FILTERED RESULTS -->
-
-
+<!-- Cards -->
 <div id="reportResults" class="row g-3 mt-3">
-  <!-- Sales Card -->
   <div class="col-md-3">
     <div class="card text-white bg-primary h-100">
       <div class="card-body">
         <h5 class="card-title">Total Sales</h5>
-        <p class="card-text mb-1">
-          <span id="salesTotal"></span>
-        </p>
-        <small>(<span id="salesCash"></span> cash /
-        <span id="salesNonCash"></span> non-cash)</small>
+        <p class="card-text mb-1"><span id="salesTotal"></span></p>
+        <small>(<span id="salesCash"></span> C / <span id="salesNonCash"></span> Q)</small>
       </div>
     </div>
   </div>
-
-  <!-- Purchase Card -->
   <div class="col-md-3">
     <div class="card text-white bg-danger h-100">
       <div class="card-body">
         <h5 class="card-title">Total Purchase</h5>
-        <p class="card-text mb-1">
-          <span id="purchaseTotal"></span>
-        </p>
-        <small>(<span id="purchaseCash"></span> cash /
-        <span id="purchaseNonCash"></span> non-cash)</small>
+        <p class="card-text mb-1"><span id="purchaseTotal"></span></p>
+        <small>(<span id="purchaseCash"></span> C / <span id="purchaseNonCash"></span> Q)</small>
       </div>
     </div>
   </div>
-
-  <!-- Profit Card -->
   <div class="col-md-3">
     <div class="card text-white bg-success h-100">
       <div class="card-body">
         <h5 class="card-title">Profit</h5>
-        <p class="card-text mb-1">
-          <span id="profitTotal"></span>
-        </p>
-        <small>(<span id="profitCash"></span> cash /
-        <span id="profitNonCash"></span> non-cash)</small>
+        <p class="card-text mb-1"><span id="profitTotal"></span></p>
+        <small>(<span id="profitCash"></span> C / <span id="profitNonCash"></span> Q)</small>
       </div>
     </div>
   </div>
-
-  <!-- Bookings Card -->
   <div class="col-md-3">
     <div class="card text-dark bg-warning h-100">
       <div class="card-body">
         <h5 class="card-title">Total Bookings</h5>
-        <p class="card-text mb-1">
-          <span id="bookingTotal"></span>
-        </p>
+        <p class="card-text mb-1"><span id="bookingTotal"></span></p>
       </div>
     </div>
   </div>
 </div>
 
-  <br />
-  <h4>Service Summary</h4>
-  <table class="table table-bordered" id="serviceSummary">
-    <thead>
-      <tr>
-        <th>Service</th>
-        <th>Sales (Cash)</th>
-        <th>Sales (Non-Cash)</th>
-        <th>Purchase (Cash)</th>
-        <th>Purchase (Non-Cash)</th>
-        <th>Profit (Cash)</th>
-        <th>Profit (Non-Cash)</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
-
-  <br />
-  <h4>Employee Summary</h4>
-  <table class="table table-bordered" id="employeeSummary">
-    <thead>
-      <tr>
-        <th>Employee</th>
-        <th>Sales (Cash)</th>
-        <th>Sales (Non-Cash)</th>
-        <th>Purchase (Cash)</th>
-        <th>Purchase (Non-Cash)</th>
-        <th>Profit (Cash)</th>
-        <th>Profit (Non-Cash)</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
-  <br />
-  <br />
-  <h4>Client Bookings Summary</h4>
-  <table class="table table-bordered" id="clientSummary">
-    <thead>
-      <tr>
-        <th>Booking ID</th>
-        <th>Booking Date</th>
-        <th>Created By</th>
-        <th>Service Details</th>
-        <th>Sales (Cash)</th>
-        <th>Sales (Non-Cash)</th>
-        <th>Purchase (Cash)</th>
-        <th>Purchase (Non-Cash)</th>
-        <th>Profit (Cash)</th>
-        <th>Profit (Non-Cash)</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
-</div>
-
-
-<!-- BIG SUMMARY TABLES CLIENT AND SERVICE -->
-
-<!-- <table
-  id="staffTable"
-  class="table table-striped table-bordered"
-  style="width: 100%"
->
-  <thead>
+<!-- Service Summary -->
+<h4 class="mt-4">Service Summary</h4>
+<table class="table table-bordered" id="serviceSummary">
+  <thead class="table-light">
     <tr>
-      <th>Staff</th>
-      <th>Cash Profit</th>
-      <th>Non-Cash Profit</th>
-      <th>Total Profit</th>
-      <th>Contribution %</th>
+      <th rowspan="2">Service</th>
+      <th colspan="2">Sales</th>
+      <th colspan="2">Purchase</th>
+      <th colspan="2">Profit</th>
+    </tr>
+    <tr>
+      <th>C</th><th>Q</th>
+      <th>C</th><th>Q</th>
+      <th>C</th><th>Q</th>
     </tr>
   </thead>
   <tbody></tbody>
 </table>
-<br /><br />
-<h3 class="mt-4">Service-wise Summary</h3>
-<table id="serviceTable" class="table table-bordered table-striped">
-  <thead>
+
+<!-- Employee Summary -->
+<h4 class="mt-4">Employee Summary</h4>
+<table class="table table-bordered" id="employeeSummary">
+  <thead class="table-light">
     <tr>
-      <th>Service</th>
-      <th>Purchase (Cash)</th>
-      <th>Purchase (Non-Cash)</th>
-      <th>Purchase (Total)</th>
-      <th>Sales (Cash)</th>
-      <th>Sales (Non-Cash)</th>
-      <th>Sales (Total)</th>
-      <th>Profit (Cash)</th>
-      <th>Profit (Non-Cash)</th>
-      <th>Profit (Total)</th>
+      <th rowspan="2">Employee</th>
+      <th colspan="2">Sales</th>
+      <th colspan="2">Purchase</th>
+      <th colspan="2">Profit</th>
+    </tr>
+    <tr>
+      <th>C</th><th>Q</th>
+      <th>C</th><th>Q</th>
+      <th>C</th><th>Q</th>
     </tr>
   </thead>
   <tbody></tbody>
-</table> -->
+</table>
 
+<!-- Client Summary -->
+<h4 class="mt-4">Client Bookings Summary</h4>
+<table class="table table-bordered" id="clientSummary">
+  <thead class="table-light">
+    <tr>
+      <th>Booking ID</th>
+      <th>Booking Date</th>
+      <th>Created By</th>
+      <th>Service Details</th>
+      <th>C Sales</th>
+      <th>Q Sales</th>
+      <th>C Purchase</th>
+      <th>Q Purchase</th>
+      <th>C Profit</th>
+      <th>Q Profit</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-  // --- Company chart ---
-  fetch("{% url 'monthly_profit_data' %}")
-    .then(r => r.json())
-    .then(data => {
-      new Chart(document.getElementById("companyChart"), {
-        type: "bar",
-        data: { labels: data.labels, datasets: data.datasets },
-        options: {
-          responsive: true,
-          plugins: {
-            legend: { position: "top" },
-            title: { display: true, text: "Company: Cash vs Non-Cash Profit (Monthly)" }
-          }
-        }
-      });
-    });
-
-  // --- Staff profit summary (table only) ---
-  fetch("{% url 'staff_profit_data' %}")
-    .then(r => r.json())
-    .then(data => {
-      const tbody = document.querySelector("#staffTable tbody");
-      tbody.innerHTML = "";
-      data.table.forEach(row => {
-        tbody.innerHTML += `
-          <tr>
-            <td>${row.staff}</td>
-            <td>${row.cash.toLocaleString("en-IN")}</td>
-            <td>${row.non_cash.toLocaleString("en-IN")}</td>
-            <td>${row.total.toLocaleString("en-IN")}</td>
-            <td>${row.contribution}%</td>
-          </tr>
-        `;
-      });
-    });
-
-  // --- Service-wise summary table ---
-  fetch("{% url 'service_wise_table' %}")
-    .then(r => r.json())
-    .then(resp => {
-      const tbody = document.querySelector("#serviceTable tbody");
-      tbody.innerHTML = "";
-      resp.data.forEach(row => {
-        tbody.innerHTML += `
-          <tr>
-            <td>${row.service}</td>
-            <td>${row.purchase_cash}</td>
-            <td>${row.purchase_non_cash || row.purchase_cheque}</td>
-            <td>${row.purchase_total}</td>
-            <td>${row.sales_cash}</td>
-            <td>${row.sales_non_cash || row.sales_cheque}</td>
-            <td>${row.sales_total}</td>
-            <td>${row.profit_cash}</td>
-            <td>${row.profit_non_cash || row.profit_cheque}</td>
-            <td>${row.profit_total}</td>
-          </tr>
-        `;
-      });
-    });
-
   // --- Populate filter dropdowns ---
   fetch("{% url 'report_filters_data' %}")
     .then(r => r.json())
     .then(data => {
-      const serviceSel = document.getElementById("service");
-      data.services.forEach(s => {
-        serviceSel.innerHTML += `<option value="${s}">${s}</option>`;
-      });
-
-      const empSel = document.getElementById("employee");
-      data.employees.forEach(e => {
-        empSel.innerHTML += `<option value="${e.id}">${e.name}</option>`;
-      });
-
-      const yearSel = document.getElementById("year");
-      data.years.forEach(y => {
-        yearSel.innerHTML += `<option value="${y}">${y}</option>`;
-      });
-
-      const monthSel = document.getElementById("month");
-      data.months.forEach(m => {
-        monthSel.innerHTML += `<option value="${m}">${m}</option>`;
-      });
-
-      const clientSel = document.getElementById("client");
-      data.clients.forEach(c => {
-        clientSel.innerHTML += `<option value="${c.id}">${c.name}</option>`;
-      });
-
-      const supplierSel = document.getElementById("supplier");
-      data.suppliers.forEach(s => {
-        supplierSel.innerHTML += `<option value="${s.id}">${s.name}</option>`;
-      });
+      const addOptions = (id, items, textFn) => {
+        const sel = document.getElementById(id);
+        items.forEach(i => sel.innerHTML += `<option value="${i.id || i}">${textFn(i)}</option>`);
+      };
+      addOptions("service", data.services, s => s);
+      addOptions("employee", data.employees, e => e.name);
+      addOptions("year", data.years, y => y);
+      addOptions("month", data.months, m => m);
+      addOptions("client", data.clients, c => c.name);
+      addOptions("supplier", data.suppliers, s => s.name);
     });
 
-  // --- Shared function to load report ---
   function loadReportData(params = "") {
-    // Main filtered report
+    // --- Main filtered report ---
     fetch("{% url 'filtered_report' %}" + (params ? "?" + params : ""))
       .then(r => r.json())
       .then(data => {
@@ -327,23 +157,20 @@
         document.getElementById("salesTotal").innerText = (data.totals.sales_cash + data.totals.sales_non_cash).toLocaleString("en-IN");
         document.getElementById("salesCash").innerText = data.totals.sales_cash.toLocaleString("en-IN");
         document.getElementById("salesNonCash").innerText = data.totals.sales_non_cash.toLocaleString("en-IN");
-
         document.getElementById("purchaseTotal").innerText = (data.totals.purchase_cash + data.totals.purchase_non_cash).toLocaleString("en-IN");
         document.getElementById("purchaseCash").innerText = data.totals.purchase_cash.toLocaleString("en-IN");
         document.getElementById("purchaseNonCash").innerText = data.totals.purchase_non_cash.toLocaleString("en-IN");
-
         document.getElementById("profitTotal").innerText = (data.totals.profit_cash + data.totals.profit_non_cash).toLocaleString("en-IN");
         document.getElementById("profitCash").innerText = data.totals.profit_cash.toLocaleString("en-IN");
         document.getElementById("profitNonCash").innerText = data.totals.profit_non_cash.toLocaleString("en-IN");
-
         document.getElementById("bookingTotal").innerText = data.totals.bookings;
 
         // Service Summary
-        const serviceTbody = document.querySelector("#serviceSummary tbody");
-        serviceTbody.innerHTML = "";
+        const sbody = document.querySelector("#serviceSummary tbody");
+        sbody.innerHTML = "";
         Object.entries(data.service_summary).forEach(([service, vals]) => {
-          serviceTbody.innerHTML += `
-            <tr>
+          const isTotal = service === "TOTAL";
+          sbody.innerHTML += `<tr${isTotal ? ' style="font-weight:bold;background:#f8f9fa;"' : ""}>
               <td>${service}</td>
               <td>${vals.sales_cash.toLocaleString("en-IN")}</td>
               <td>${vals.sales_non_cash.toLocaleString("en-IN")}</td>
@@ -351,16 +178,15 @@
               <td>${vals.purchase_non_cash.toLocaleString("en-IN")}</td>
               <td>${vals.profit_cash.toLocaleString("en-IN")}</td>
               <td>${vals.profit_non_cash.toLocaleString("en-IN")}</td>
-            </tr>
-          `;
+            </tr>`;
         });
 
         // Employee Summary
-        const empTbody = document.querySelector("#employeeSummary tbody");
-        empTbody.innerHTML = "";
+        const ebody = document.querySelector("#employeeSummary tbody");
+        ebody.innerHTML = "";
         Object.entries(data.employee_summary).forEach(([emp, vals]) => {
-          empTbody.innerHTML += `
-            <tr>
+          const isTotal = emp === "TOTAL";
+          ebody.innerHTML += `<tr${isTotal ? ' style="font-weight:bold;background:#f8f9fa;"' : ""}>
               <td>${emp}</td>
               <td>${vals.sales_cash.toLocaleString("en-IN")}</td>
               <td>${vals.sales_non_cash.toLocaleString("en-IN")}</td>
@@ -368,64 +194,51 @@
               <td>${vals.purchase_non_cash.toLocaleString("en-IN")}</td>
               <td>${vals.profit_cash.toLocaleString("en-IN")}</td>
               <td>${vals.profit_non_cash.toLocaleString("en-IN")}</td>
-            </tr>
-          `;
+            </tr>`;
         });
 
-        // Reset client summary unless explicitly refetched
+        // Clear bookings table before reload
         document.querySelector("#clientSummary tbody").innerHTML = "";
       });
 
-    // Client report (only if client is selected)
-    const clientId = document.getElementById("client").value;
-    if (clientId) {
-      fetch("{% url 'client_bookings_report' %}?" + params)
-        .then(r => r.json())
-        .then(resp => {
-          const tbody = document.querySelector("#clientSummary tbody");
-          tbody.innerHTML = "";
-
-          resp.data.forEach(b => {
-            const serviceDetails = b.services.map(s =>
-              `<strong>${s.service}</strong> (${s.mode}): 
-               Sales ${s.sales}, Purchase ${s.purchase}, Profit ${s.profit}, Entered by ${s.entered_by}`
-            ).join("<br>");
-
-            tbody.innerHTML += `
-              <tr>
-                <td>${b.booking_id}</td>
-                <td>${b.booking_date}</td>
-                <td>${b.created_by}</td>
-                <td>${serviceDetails}</td>
-                <td>${b.totals.sales_cash.toLocaleString("en-IN")}</td>
-                <td>${b.totals.sales_non_cash.toLocaleString("en-IN")}</td>
-                <td>${b.totals.purchase_cash.toLocaleString("en-IN")}</td>
-                <td>${b.totals.purchase_non_cash.toLocaleString("en-IN")}</td>
-                <td>${b.totals.profit_cash.toLocaleString("en-IN")}</td>
-                <td>${b.totals.profit_non_cash.toLocaleString("en-IN")}</td>
-              </tr>
-            `;
-          });
+    // --- Bookings report ---
+    fetch("{% url 'bookings_report' %}" + (params ? "?" + params : ""))
+      .then(r => r.json())
+      .then(resp => {
+        const tbody = document.querySelector("#clientSummary tbody");
+        tbody.innerHTML = "";
+        resp.data.forEach(b => {
+          const serviceDetails = b.services.map(s =>
+            `<strong>${s.service}</strong> (${s.mode}): Sales ${s.sales}, Purchase ${s.purchase}, Profit ${s.profit}, Entered by ${s.entered_by}`
+          ).join("<br>");
+          tbody.innerHTML += `<tr>
+              <td>${b.booking_id}</td>
+              <td>${b.booking_date}</td>
+              <td>${b.created_by}</td>
+              <td>${serviceDetails}</td>
+              <td>${b.totals.sales_cash.toLocaleString("en-IN")}</td>
+              <td>${b.totals.sales_non_cash.toLocaleString("en-IN")}</td>
+              <td>${b.totals.purchase_cash.toLocaleString("en-IN")}</td>
+              <td>${b.totals.purchase_non_cash.toLocaleString("en-IN")}</td>
+              <td>${b.totals.profit_cash.toLocaleString("en-IN")}</td>
+              <td>${b.totals.profit_non_cash.toLocaleString("en-IN")}</td>
+            </tr>`;
         });
-    }
+      });
   }
 
-  // --- Apply Filters ---
+  // --- Apply & Reset ---
   document.getElementById("applyFilters").addEventListener("click", () => {
     const params = new URLSearchParams(new FormData(document.getElementById("reportFilters"))).toString();
     loadReportData(params);
   });
-
-  // --- Reset Filters ---
   document.getElementById("resetFilters").addEventListener("click", () => {
     document.querySelectorAll("#reportFilters select").forEach(sel => sel.value = "");
-    loadReportData(); // reload with ALL data
-  });
-
-  // --- Auto load on page ready ---
-  document.addEventListener("DOMContentLoaded", () => {
     loadReportData();
   });
+
+  // --- Auto load ---
+  document.addEventListener("DOMContentLoaded", () => loadReportData());
 </script>
 
 {% endblock %}

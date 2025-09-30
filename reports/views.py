@@ -1,10 +1,11 @@
 from django.http import JsonResponse
 from django.contrib.auth.decorators import user_passes_test
-from itertools import chain
-from collections import defaultdict
 from django.shortcuts import render
 from django.db.models import Sum, Value, CharField
 from django.utils.formats import number_format
+from itertools import chain
+from collections import defaultdict
+from datetime import datetime
 
 from services.models import Hotel, Insurance, Passport, SightSeeing, Ticket, Transfer, Visa
 from bookings.models import Booking
@@ -13,11 +14,13 @@ from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
+
 # ---------------------------
 # Helpers
 # ---------------------------
 def superuser_only(user):
     return user.is_superuser
+
 
 def add_totals_row(summary_dict, include_bookings=False):
     """Append a TOTAL row at the end of summaries."""
@@ -37,7 +40,7 @@ def add_totals_row(summary_dict, include_bookings=False):
 
 
 # ---------------------------
-# Page view
+# Main Report Page
 # ---------------------------
 @user_passes_test(superuser_only)
 def owner_reports(request):
@@ -87,7 +90,7 @@ def monthly_profit_data(request):
 
 
 # ---------------------------
-# Staff-wise profit summary
+# Staff-wise profit summary (dynamic)
 # ---------------------------
 @user_passes_test(superuser_only)
 def staff_profit_data(request):
@@ -145,43 +148,6 @@ def staff_profit_data(request):
 
 
 # ---------------------------
-# Service-wise totals (for the static service table)
-# ---------------------------
-@user_passes_test(superuser_only)
-def service_wise_table(request):
-    services = {
-        "Hotel": Hotel.objects.all(),
-        "Insurance": Insurance.objects.all(),
-        "Passport": Passport.objects.all(),
-        "Sightseeing": SightSeeing.objects.all(),
-        "Ticket": Ticket.objects.all(),
-        "Transfer": Transfer.objects.all(),
-        "Visa": Visa.objects.all(),
-    }
-
-    data = []
-    for name, qs in services.items():
-        purchase_cash = qs.filter(mode__name="Cash").aggregate(total=Sum("purchase_amount"))["total"] or 0
-        purchase_non = qs.exclude(mode__name="Cash").aggregate(total=Sum("purchase_amount"))["total"] or 0
-        sales_cash = qs.filter(mode__name="Cash").aggregate(total=Sum("sales_amount"))["total"] or 0
-        sales_non = qs.exclude(mode__name="Cash").aggregate(total=Sum("sales_amount"))["total"] or 0
-        profit_cash, profit_non = sales_cash - purchase_cash, sales_non - purchase_non
-        data.append({
-            "service": name,
-            "purchase_cash": number_format(purchase_cash, use_l10n=True),
-            "purchase_non_cash": number_format(purchase_non, use_l10n=True),
-            "sales_cash": number_format(sales_cash, use_l10n=True),
-            "sales_non_cash": number_format(sales_non, use_l10n=True),
-            "profit_cash": number_format(profit_cash, use_l10n=True),
-            "profit_non_cash": number_format(profit_non, use_l10n=True),
-            "purchase_total": number_format(purchase_cash + purchase_non, use_l10n=True),
-            "sales_total": number_format(sales_cash + sales_non, use_l10n=True),
-            "profit_total": number_format(profit_cash + profit_non, use_l10n=True),
-        })
-    return JsonResponse({"data": data})
-
-
-# ---------------------------
 # Filters (dropdown sources)
 # ---------------------------
 @user_passes_test(superuser_only)
@@ -208,17 +174,22 @@ def report_filters_data(request):
         "services": services,
         "employees": [{"id": e["id"], "name": f"{e['first_name']} {e['last_name']}"} for e in employees],
         "years": sorted(years),
-        "months": sorted(months, key=lambda m: ["January","February","March","April","May","June","July","August","September","October","November","December"].index(m)),
+        "months": sorted(months, key=lambda m: [
+            "January","February","March","April","May","June",
+            "July","August","September","October","November","December"
+        ].index(m)),
         "clients": [{"id": c["client_id"], "name": f"{c['client__first_name']} {c['client__last_name']}"} for c in clients if c["client_id"]],
         "suppliers": list(suppliers),
     })
 
 
 # ---------------------------
-# Filtered Report (applies all filters + adds TOTAL rows)
+# Filtered Report (cards + service summary + employee summary)
 # ---------------------------
 @user_passes_test(superuser_only)
 def filtered_report(request):
+    from datetime import datetime
+
     service_filter = request.GET.get("service")
     employee = request.GET.get("employee")
     year = request.GET.get("year")
@@ -226,14 +197,12 @@ def filtered_report(request):
     client = request.GET.get("client")
     supplier = request.GET.get("supplier")
 
-    # Build a quick set of booking IDs for client filter (if any)
     client_booking_ids = None
     if client:
         client_booking_ids = set(
             Booking.objects.filter(client_id=client).values_list("id", flat=True)
         )
 
-    # Map service name -> model
     services_map = {
         "Hotel": Hotel,
         "Insurance": Insurance,
@@ -244,32 +213,23 @@ def filtered_report(request):
         "Visa": Visa,
     }
 
-    # Collect rows from the chosen service(s) and annotate service_name
     all_services = []
     for name, model in services_map.items():
         if service_filter and service_filter != name:
             continue
         qs = model.objects.all()
         rows = qs.values(
-            "date",
-            "sales_amount",
-            "purchase_amount",
-            "mode__name",
-            "created_by_id",
-            "booking_id",
-            "supplier_id",
+            "date", "sales_amount", "purchase_amount", "mode__name",
+            "created_by_id", "booking_id", "supplier_id"
         ).annotate(service_name=Value(name, output_field=CharField()))
         all_services.extend(list(rows))
 
     results = {
         "totals": {
-            "sales_cash": 0.0,
-            "sales_non_cash": 0.0,
-            "purchase_cash": 0.0,
-            "purchase_non_cash": 0.0,
-            "profit_cash": 0.0,
-            "profit_non_cash": 0.0,
-            "bookings": set(),
+            "sales_cash": 0.0, "sales_non_cash": 0.0,
+            "purchase_cash": 0.0, "purchase_non_cash": 0.0,
+            "profit_cash": 0.0, "profit_non_cash": 0.0,
+            "bookings": 0,   # now a count, not a set
         },
         "service_summary": {},
         "employee_summary": {},
@@ -279,7 +239,7 @@ def filtered_report(request):
         if not s["date"]:
             continue
 
-        # Apply filters
+        # Filters
         if year and str(s["date"].year) != year:
             continue
         if month and s["date"].strftime("%B") != month:
@@ -297,65 +257,65 @@ def filtered_report(request):
         results["totals"][f"sales_{mode}"] += float(s["sales_amount"] or 0)
         results["totals"][f"purchase_{mode}"] += float(s["purchase_amount"] or 0)
         results["totals"][f"profit_{mode}"] += profit
-        results["totals"]["bookings"].add(s["booking_id"])
 
         # Service summary
         service_name = s["service_name"]
         if service_name not in results["service_summary"]:
             results["service_summary"][service_name] = {
                 "bookings": set(),
-                "sales_cash": 0.0,
-                "sales_non_cash": 0.0,
-                "purchase_cash": 0.0,
-                "purchase_non_cash": 0.0,
-                "profit_cash": 0.0,
-                "profit_non_cash": 0.0,
+                "sales_cash": 0.0, "sales_non_cash": 0.0,
+                "purchase_cash": 0.0, "purchase_non_cash": 0.0,
+                "profit_cash": 0.0, "profit_non_cash": 0.0,
             }
         results["service_summary"][service_name]["bookings"].add(s["booking_id"])
-        results["service_summary"][service_name][f"sales_{mode}"] += float(
-            s["sales_amount"] or 0
-        )
-        results["service_summary"][service_name][f"purchase_{mode}"] += float(
-            s["purchase_amount"] or 0
-        )
+        results["service_summary"][service_name][f"sales_{mode}"] += float(s["sales_amount"] or 0)
+        results["service_summary"][service_name][f"purchase_{mode}"] += float(s["purchase_amount"] or 0)
         results["service_summary"][service_name][f"profit_{mode}"] += profit
 
         # Employee summary
         emp_id = s["created_by_id"]
         if emp_id not in results["employee_summary"]:
             results["employee_summary"][emp_id] = {
-                "sales_cash": 0.0,
-                "sales_non_cash": 0.0,
-                "purchase_cash": 0.0,
-                "purchase_non_cash": 0.0,
-                "profit_cash": 0.0,
-                "profit_non_cash": 0.0,
+                "sales_cash": 0.0, "sales_non_cash": 0.0,
+                "purchase_cash": 0.0, "purchase_non_cash": 0.0,
+                "profit_cash": 0.0, "profit_non_cash": 0.0,
             }
-        results["employee_summary"][emp_id][f"sales_{mode}"] += float(
-            s["sales_amount"] or 0
-        )
-        results["employee_summary"][emp_id][f"purchase_{mode}"] += float(
-            s["purchase_amount"] or 0
-        )
+        results["employee_summary"][emp_id][f"sales_{mode}"] += float(s["sales_amount"] or 0)
+        results["employee_summary"][emp_id][f"purchase_{mode}"] += float(s["purchase_amount"] or 0)
         results["employee_summary"][emp_id][f"profit_{mode}"] += profit
 
-    # finalize distinct bookings count
-    results["totals"]["bookings"] = len(results["totals"]["bookings"])
+    # 🔹 Correct bookings count using Booking model directly
+    bookings_qs = Booking.objects.all()
+    if client:
+        bookings_qs = bookings_qs.filter(client_id=client)
+    if employee:
+        bookings_qs = bookings_qs.filter(created_by_id=employee)
+    if year:
+        bookings_qs = bookings_qs.filter(booking_date__year=year)
+    if month:
+        try:
+            month_num = datetime.strptime(month, "%B").month
+            bookings_qs = bookings_qs.filter(booking_date__month=month_num)
+        except ValueError:
+            pass
+    if supplier:
+        service_booking_ids = set(
+            s["booking_id"] for s in all_services if str(s["supplier_id"]) == supplier
+        )
+        bookings_qs = bookings_qs.filter(id__in=service_booking_ids)
 
-    # convert service booking sets to counts
+    results["totals"]["bookings"] = bookings_qs.distinct().count()
+
+    # Finalize service summaries
     for k, v in results["service_summary"].items():
         v["bookings"] = len(v["bookings"])
-
-    # append TOTAL rows
-    results["service_summary"] = add_totals_row(
-        results["service_summary"], include_bookings=True
-    )
+    results["service_summary"] = add_totals_row(results["service_summary"], include_bookings=True)
     results["employee_summary"] = add_totals_row(results["employee_summary"])
 
-    # 🔹 Replace employee IDs with full names
+    # Replace employee IDs with names
     emp_summary_named = {}
     for emp_id, vals in results["employee_summary"].items():
-        if emp_id == "TOTAL":  # keep total row as is
+        if emp_id == "TOTAL":
             emp_summary_named["TOTAL"] = vals
             continue
         try:
@@ -367,17 +327,43 @@ def filtered_report(request):
     results["employee_summary"] = emp_summary_named
 
     return JsonResponse(results)
-
-# ---------------------------
-# Client Bookings Report (per selected client)
+#-------------------------
+# Bookings Report (filters: employee, client, year, month, supplier, service)
 # ---------------------------
 @user_passes_test(superuser_only)
-def client_bookings_report(request):
+def bookings_report(request):
+    employee = request.GET.get("employee")
     client_id = request.GET.get("client")
-    if not client_id:
-        return JsonResponse({"data": []})
+    year = request.GET.get("year")
+    month = request.GET.get("month")
+    supplier = request.GET.get("supplier")
+    service_filter = request.GET.get("service")
 
-    bookings = Booking.objects.filter(client_id=client_id).select_related("client", "created_by", "status")
+    bookings = Booking.objects.all().select_related("client", "created_by", "status")
+
+    # --- Apply filters ---
+    if client_id:
+        bookings = bookings.filter(client_id=client_id)
+    if employee:
+        bookings = bookings.filter(created_by_id=employee)
+    if year:
+        bookings = bookings.filter(booking_date__year=year)
+    if month:
+        try:
+            from datetime import datetime
+            month_num = datetime.strptime(month, "%B").month
+            bookings = bookings.filter(booking_date__month=month_num)
+        except ValueError:
+            pass
+    if supplier:
+        bookings = bookings.filter(
+            id__in=[
+                b.id for b in Booking.objects.filter(
+                    id__in=bookings.values_list("id", flat=True),
+                    services__supplier_id=supplier
+                )
+            ]
+        )
 
     data = []
     for booking in bookings:
@@ -401,6 +387,10 @@ def client_bookings_report(request):
         sales_cash = sales_non = purchase_cash = purchase_non = 0.0
 
         for s in all_services:
+            # Service filter applied here
+            if service_filter and service_filter != s["service_name"]:
+                continue
+
             profit = float((s["sales_amount"] or 0) - (s["purchase_amount"] or 0))
             first_last = User.objects.filter(id=s["created_by_id"]).values_list("first_name", "last_name").first()
             staff_name = " ".join(first_last) if first_last else "Unknown"
