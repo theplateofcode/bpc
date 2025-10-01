@@ -119,6 +119,7 @@
       <th>Booking ID</th>
       <th>Booking Date</th>
       <th>Created By</th>
+      <th>Client Name</th>
       <th>Service Details</th>
       <th>C Sales</th>
       <th>Q Sales</th>
@@ -215,6 +216,7 @@
               <td>${b.booking_id}</td>
               <td>${b.booking_date}</td>
               <td>${b.created_by}</td>
+              <td>${b.client_name}</td>
               <td>${serviceDetails}</td>
               <td>${b.totals.sales_cash.toLocaleString("en-IN")}</td>
               <td>${b.totals.sales_non_cash.toLocaleString("en-IN")}</td>

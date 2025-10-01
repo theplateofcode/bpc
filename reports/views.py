@@ -371,8 +371,10 @@ def bookings_report(request):
             "booking_id": booking.booking_id,
             "booking_date": booking.booking_date.strftime("%d-%b-%Y") if booking.booking_date else "",
             "created_by": booking.created_by.get_full_name() if getattr(booking, "created_by", None) else "Unknown",
+            "client_name": f"{booking.client.first_name} {booking.client.last_name}" if booking.client else "Unknown",
             "services": [],
         }
+
 
         all_services = chain(
             Hotel.objects.filter(booking=booking).values("sales_amount", "purchase_amount", "mode__name", "created_by_id").annotate(service_name=Value("Hotel", output_field=CharField())),
