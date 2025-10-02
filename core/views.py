@@ -88,9 +88,6 @@ def employee_report_filters_data(request):
         "suppliers": list(suppliers),
     })
 
-# ---------------------------
-# Filtered report (cards + service summary)
-# ---------------------------
 @login_required
 def employee_filtered_report(request):
     user = request.user
@@ -100,84 +97,94 @@ def employee_filtered_report(request):
     client = request.GET.get("client")
     supplier = request.GET.get("supplier")
 
-    client_booking_ids = None
+    # Base queryset of bookings for this employee
+    bookings = Booking.objects.filter(created_by=user)
+
     if client:
-        client_booking_ids = set(
-            Booking.objects.filter(client_id=client).values_list("id", flat=True)
-        )
-
-    services_map = {
-        "Hotel": Hotel, "Insurance": Insurance, "Passport": Passport,
-        "Sightseeing": SightSeeing, "Ticket": Ticket,
-        "Transfer": Transfer, "Visa": Visa,
-    }
-
-    all_services = []
-    for name, model in services_map.items():
-        if service_filter and service_filter != name:
-            continue
-        qs = model.objects.filter(created_by=user)
-        rows = qs.values(
-            "date", "sales_amount", "purchase_amount", "mode__name",
-            "booking_id", "supplier_id"
-        ).annotate(service_name=Value(name, output_field=CharField()))
-        all_services.extend(list(rows))
+        bookings = bookings.filter(client_id=client)
+    if year:
+        bookings = bookings.filter(booking_date__year=year)
+    if month:
+        try:
+            month_num = datetime.strptime(month, "%B").month
+            bookings = bookings.filter(booking_date__month=month_num)
+        except ValueError:
+            pass
 
     results = {
         "totals": {
             "sales_cash": 0.0, "sales_non_cash": 0.0,
             "purchase_cash": 0.0, "purchase_non_cash": 0.0,
             "profit_cash": 0.0, "profit_non_cash": 0.0,
-            "bookings": set(),
+            "bookings": 0,
         },
         "service_summary": {},
     }
 
-    for s in all_services:
-        if not s["date"]:
-            continue
-        if year and str(s["date"].year) != year:
-            continue
-        if month and s["date"].strftime("%B") != month:
-            continue
-        if supplier and str(s["supplier_id"]) != supplier:
-            continue
-        if client_booking_ids and s["booking_id"] not in client_booking_ids:
-            continue
+    # --- Loop over bookings (holy grail) ---
+    for booking in bookings:
+        all_services = chain(
+            Hotel.objects.filter(booking=booking, created_by=user).values("sales_amount", "purchase_amount", "mode__name").annotate(service_name=Value("Hotel", output_field=CharField())),
+            Insurance.objects.filter(booking=booking, created_by=user).values("sales_amount", "purchase_amount", "mode__name").annotate(service_name=Value("Insurance", output_field=CharField())),
+            Passport.objects.filter(booking=booking, created_by=user).values("sales_amount", "purchase_amount", "mode__name").annotate(service_name=Value("Passport", output_field=CharField())),
+            SightSeeing.objects.filter(booking=booking, created_by=user).values("sales_amount", "purchase_amount", "mode__name").annotate(service_name=Value("Sightseeing", output_field=CharField())),
+            Ticket.objects.filter(booking=booking, created_by=user).values("sales_amount", "purchase_amount", "mode__name").annotate(service_name=Value("Ticket", output_field=CharField())),
+            Transfer.objects.filter(booking=booking, created_by=user).values("sales_amount", "purchase_amount", "mode__name").annotate(service_name=Value("Transfer", output_field=CharField())),
+            Visa.objects.filter(booking=booking, created_by=user).values("sales_amount", "purchase_amount", "mode__name").annotate(service_name=Value("Visa", output_field=CharField())),
+        )
 
-        sales = float(s["sales_amount"] or 0)
-        purchase = float(s["purchase_amount"] or 0)
-        profit = sales - purchase
-        mode = "cash" if s["mode__name"] == "Cash" else "non_cash"
+        b_sales_c = b_sales_q = b_pur_c = b_pur_q = 0.0
+        b_profit_c = b_profit_q = 0.0
 
-        results["totals"][f"sales_{mode}"] += sales
-        results["totals"][f"purchase_{mode}"] += purchase
-        results["totals"][f"profit_{mode}"] += profit
-        results["totals"]["bookings"].add(s["booking_id"])
+        for s in all_services:
+            if service_filter and service_filter != s["service_name"]:
+                continue
+            if supplier and str(s.get("supplier_id")) != supplier:
+                continue
 
-        service_name = s["service_name"]
-        if service_name not in results["service_summary"]:
-            results["service_summary"][service_name] = {
-                "sales_cash": 0.0, "sales_non_cash": 0.0,
-                "purchase_cash": 0.0, "purchase_non_cash": 0.0,
-                "profit_cash": 0.0, "profit_non_cash": 0.0,
-                "bookings": set(),
-            }
-        results["service_summary"][service_name][f"sales_{mode}"] += sales
-        results["service_summary"][service_name][f"purchase_{mode}"] += purchase
-        results["service_summary"][service_name][f"profit_{mode}"] += profit
-        results["service_summary"][service_name]["bookings"].add(s["booking_id"])
+            sales = float(s["sales_amount"] or 0)
+            purchase = float(s["purchase_amount"] or 0)
+            profit = sales - purchase
+            mode = "cash" if s["mode__name"] == "Cash" else "non_cash"
 
-    results["totals"]["bookings"] = len(results["totals"]["bookings"])
+            if mode == "cash":
+                b_sales_c += sales
+                b_pur_c += purchase
+                b_profit_c += profit
+            else:
+                b_sales_q += sales
+                b_pur_q += purchase
+                b_profit_q += profit
+
+            # --- Service summary accumulation ---
+            svc = s["service_name"]
+            if svc not in results["service_summary"]:
+                results["service_summary"][svc] = {
+                    "sales_cash": 0.0, "sales_non_cash": 0.0,
+                    "purchase_cash": 0.0, "purchase_non_cash": 0.0,
+                    "profit_cash": 0.0, "profit_non_cash": 0.0,
+                    "bookings": set(),
+                }
+            results["service_summary"][svc][f"sales_{mode}"] += sales
+            results["service_summary"][svc][f"purchase_{mode}"] += purchase
+            results["service_summary"][svc][f"profit_{mode}"] += profit
+            results["service_summary"][svc]["bookings"].add(booking.id)
+
+        # --- Add booking-level totals into grand totals ---
+        results["totals"]["sales_cash"] += b_sales_c
+        results["totals"]["sales_non_cash"] += b_sales_q
+        results["totals"]["purchase_cash"] += b_pur_c
+        results["totals"]["purchase_non_cash"] += b_pur_q
+        results["totals"]["profit_cash"] += b_profit_c
+        results["totals"]["profit_non_cash"] += b_profit_q
+        results["totals"]["bookings"] += 1
+
+    # Finalize bookings count in service_summary
     for k, v in results["service_summary"].items():
         v["bookings"] = len(v["bookings"])
 
     return JsonResponse(results)
 
-
-# ---------------------------
-# Bookings report (table)
-# ---------------------------
 @login_required
 def employee_bookings_report(request):
     user = request.user
@@ -221,35 +228,41 @@ def employee_bookings_report(request):
         )
 
         sales_cash = sales_non = purchase_cash = purchase_non = 0.0
+        profit_cash = profit_non = 0.0
+
         for s in all_services:
             if service_filter and service_filter != s["service_name"]:
+                continue
+            if supplier and str(s.get("supplier_id")) != supplier:
                 continue
 
             sales = float(s["sales_amount"] or 0)
             purchase = float(s["purchase_amount"] or 0)
-            profit = sales - purchase
+            row_profit = sales - purchase
             mode = "cash" if s["mode__name"] == "Cash" else "non_cash"
 
             if mode == "cash":
                 sales_cash += sales
                 purchase_cash += purchase
+                profit_cash += row_profit
             else:
                 sales_non += sales
                 purchase_non += purchase
+                profit_non += row_profit
 
             booking_info["services"].append({
                 "service": s["service_name"],
                 "mode": s["mode__name"],
                 "sales": sales,
                 "purchase": purchase,
-                "profit": profit,
+                "profit": row_profit,
             })
 
         booking_info["totals"] = {
             "sales_cash": sales_cash, "sales_non_cash": sales_non,
             "purchase_cash": purchase_cash, "purchase_non_cash": purchase_non,
-            "profit_cash": sales_cash - purchase_cash,
-            "profit_non_cash": sales_non - purchase_non,
+            "profit_cash": profit_cash,
+            "profit_non_cash": profit_non,
         }
 
         data.append(booking_info)

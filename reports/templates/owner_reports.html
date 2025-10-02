@@ -164,7 +164,8 @@
         document.getElementById("profitTotal").innerText = (data.totals.profit_cash + data.totals.profit_non_cash).toLocaleString("en-IN");
         document.getElementById("profitCash").innerText = data.totals.profit_cash.toLocaleString("en-IN");
         document.getElementById("profitNonCash").innerText = data.totals.profit_non_cash.toLocaleString("en-IN");
-        document.getElementById("bookingTotal").innerText = data.totals.bookings;
+        document.getElementById("bookingTotal").innerText =  data.totals.bookings;
+        console.log("Backend totals:", data.totals);
 
         // Service Summary
         const sbody = document.querySelector("#serviceSummary tbody");
