@@ -1,9 +1,10 @@
 {% extends "base.html" %}
 {% block content %}
 
-<!-- Employee Dashboard -->
 <h3 class="mt-4">My Dashboard</h3>
-<form id="reportFilters" class="row g-3 align-items-end">
+
+<!-- Filters (Inline Buttons) -->
+<form id="reportFilters" class="row g-2 align-items-end">
   <div class="col-md-2">
     <label for="service" class="form-label">Service</label>
     <select id="service" name="service" class="form-select"><option value="">All</option></select>
@@ -24,46 +25,46 @@
     <label for="supplier" class="form-label">Supplier</label>
     <select id="supplier" name="supplier" class="form-select"><option value="">All</option></select>
   </div>
-  <div class="col-md-2 d-flex flex-column">
-    <button type="button" id="applyFilters" class="btn btn-primary w-100 mb-2">Apply</button>
-    <button type="reset" id="resetFilters" class="btn btn-secondary w-100">Reset All</button>
+  <div class="col-md-auto d-flex align-items-end">
+    <button type="button" id="applyFilters" class="btn btn-primary me-2">Apply</button>
+    <button type="reset" id="resetFilters" class="btn btn-outline-secondary">Reset</button>
   </div>
 </form>
 
-<!-- Cards -->
+<!-- Summary Cards -->
 <div id="reportResults" class="row g-3 mt-3">
   <div class="col-md-3">
-    <div class="card text-white bg-primary h-100">
-      <div class="card-body">
+    <div class="card text-dark bg-primary bg-opacity-50 h-100">
+      <div class="card-body text-center">
         <h5 class="card-title">Total Sales</h5>
-        <p class="card-text mb-1"><span id="salesTotal"></span></p>
-        <small>(<span id="salesCash"></span> cash / <span id="salesNonCash"></span> non-cash)</small>
+        <h3 id="salesTotal"></h3>
+        <small>(<span id="salesC"></span> C / <span id="salesQ"></span> Q)</small>
       </div>
     </div>
   </div>
   <div class="col-md-3">
-    <div class="card text-white bg-danger h-100">
-      <div class="card-body">
+    <div class="card text-dark bg-danger bg-opacity-50 h-100">
+      <div class="card-body text-center">
         <h5 class="card-title">Total Purchase</h5>
-        <p class="card-text mb-1"><span id="purchaseTotal"></span></p>
-        <small>(<span id="purchaseCash"></span> cash / <span id="purchaseNonCash"></span> non-cash)</small>
+        <h3 id="purchaseTotal"></h3>
+        <small>(<span id="purchaseC"></span> C / <span id="purchaseQ"></span> Q)</small>
       </div>
     </div>
   </div>
   <div class="col-md-3">
-    <div class="card text-white bg-success h-100">
-      <div class="card-body">
+    <div class="card text-dark bg-success bg-opacity-50 h-100">
+      <div class="card-body text-center">
         <h5 class="card-title">Profit</h5>
-        <p class="card-text mb-1"><span id="profitTotal"></span></p>
-        <small>(<span id="profitCash"></span> cash / <span id="profitNonCash"></span> non-cash)</small>
+        <h3 id="profitTotal"></h3>
+        <small>(<span id="profitC"></span> C / <span id="profitQ"></span> Q)</small>
       </div>
     </div>
   </div>
   <div class="col-md-3">
-    <div class="card text-dark bg-warning h-100">
-      <div class="card-body">
+    <div class="card text-dark bg-warning bg-opacity-50 h-100">
+      <div class="card-body text-center">
         <h5 class="card-title">Total Bookings</h5>
-        <p class="card-text mb-1"><span id="bookingTotal"></span></p>
+        <h3 id="bookingTotal"></h3>
       </div>
     </div>
   </div>
@@ -71,50 +72,65 @@
 
 <!-- Service Summary -->
 <h4 class="mt-4">Service Summary</h4>
-<table class="table table-bordered" id="serviceSummary">
+<table class="table table-bordered text-center" id="serviceSummary">
   <thead>
     <tr>
       <th>Service</th>
-      <th>Sales (Cash)</th>
-      <th>Sales (Non-Cash)</th>
-      <th>Purchase (Cash)</th>
-      <th>Purchase (Non-Cash)</th>
-      <th>Profit (Cash)</th>
-      <th>Profit (Non-Cash)</th>
+      <th class="bg-primary bg-opacity-25">Sales (C)</th>
+      <th class="bg-primary bg-opacity-25">Sales (Q)</th>
+      <th class="bg-danger bg-opacity-25">Purchase (C)</th>
+      <th class="bg-danger bg-opacity-25">Purchase (Q)</th>
+      <th class="bg-success bg-opacity-25">Profit (C)</th>
+      <th class="bg-success bg-opacity-25">Profit (Q)</th>
     </tr>
   </thead>
   <tbody></tbody>
 </table>
 
-<!-- Client Summary -->
+<!-- My Bookings -->
 <h4 class="mt-4">My Bookings</h4>
-<table class="table table-bordered" id="clientSummary">
+<table class="table table-bordered text-center" id="clientSummary">
   <thead>
     <tr>
       <th>Booking ID</th>
-      <th>Booking Date</th>
-      <th>Created by</th>
+      <th>Date</th>
+      <th>Created By</th>
       <th>Client</th>
       <th>Service Details</th>
-      <th>Sales (Cash)</th>
-      <th>Sales (Non-Cash)</th>
-      <th>Purchase (Cash)</th>
-      <th>Purchase (Non-Cash)</th>
-      <th>Profit (Cash)</th>
-      <th>Profit (Non-Cash)</th>
+      <th class="bg-primary bg-opacity-25">Sales (C)</th>
+      <th class="bg-primary bg-opacity-25">Sales (Q)</th>
+      <th class="bg-danger bg-opacity-25">Purchase (C)</th>
+      <th class="bg-danger bg-opacity-25">Purchase (Q)</th>
+      <th class="bg-success bg-opacity-25">Profit (C)</th>
+      <th class="bg-success bg-opacity-25">Profit (Q)</th>
     </tr>
   </thead>
   <tbody></tbody>
 </table>
 
+<!-- Modal Popup -->
+<div class="modal fade" id="detailsModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title">Service Details</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div id="modalDetails" class="row"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
-  // --- Populate filter dropdowns ---
+  // --- Populate filters ---
   fetch("{% url 'employee_report_filters_data' %}")
     .then(r => r.json())
     .then(data => {
       const addOptions = (id, items, textFn) => {
-        const sel = document.getElementById(id);
-        items.forEach(i => sel.innerHTML += `<option value="${i.id || i}">${textFn(i)}</option>`);
+        const el = document.getElementById(id);
+        items.forEach(i => el.innerHTML += `<option value="${i.id || i}">${textFn(i)}</option>`);
       };
       addOptions("service", data.services, s => s);
       addOptions("year", data.years, y => y);
@@ -123,67 +139,78 @@
       addOptions("supplier", data.suppliers, s => s.name);
     });
 
+  // --- Load Data ---
   function loadReportData(params = "") {
-    // --- Main filtered report ---
     fetch("{% url 'employee_filtered_report' %}" + (params ? "?" + params : ""))
       .then(r => r.json())
       .then(data => {
-        // Totals
-        document.getElementById("salesTotal").innerText = (data.totals.sales_cash + data.totals.sales_non_cash).toLocaleString("en-IN");
-        document.getElementById("salesCash").innerText = data.totals.sales_cash.toLocaleString("en-IN");
-        document.getElementById("salesNonCash").innerText = data.totals.sales_non_cash.toLocaleString("en-IN");
-        document.getElementById("purchaseTotal").innerText = (data.totals.purchase_cash + data.totals.purchase_non_cash).toLocaleString("en-IN");
-        document.getElementById("purchaseCash").innerText = data.totals.purchase_cash.toLocaleString("en-IN");
-        document.getElementById("purchaseNonCash").innerText = data.totals.purchase_non_cash.toLocaleString("en-IN");
-        document.getElementById("profitTotal").innerText = (data.totals.profit_cash + data.totals.profit_non_cash).toLocaleString("en-IN");
-        document.getElementById("profitCash").innerText = data.totals.profit_cash.toLocaleString("en-IN");
-        document.getElementById("profitNonCash").innerText = data.totals.profit_non_cash.toLocaleString("en-IN");
-        document.getElementById("bookingTotal").innerText = data.totals.bookings;
+        const t = data.totals;
+        const round = x => Math.round(x).toLocaleString("en-IN");
 
-        // Service Summary
+        document.getElementById("salesTotal").innerText = round(t.sales_cash + t.sales_non_cash);
+        document.getElementById("salesC").innerText = round(t.sales_cash);
+        document.getElementById("salesQ").innerText = round(t.sales_non_cash);
+        document.getElementById("purchaseTotal").innerText = round(t.purchase_cash + t.purchase_non_cash);
+        document.getElementById("purchaseC").innerText = round(t.purchase_cash);
+        document.getElementById("purchaseQ").innerText = round(t.purchase_non_cash);
+        document.getElementById("profitTotal").innerText = round(t.profit_cash + t.profit_non_cash);
+        document.getElementById("profitC").innerText = round(t.profit_cash);
+        document.getElementById("profitQ").innerText = round(t.profit_non_cash);
+        document.getElementById("bookingTotal").innerText = t.bookings;
+
         const sbody = document.querySelector("#serviceSummary tbody");
         sbody.innerHTML = "";
-        Object.entries(data.service_summary).forEach(([service, vals]) => {
+        Object.entries(data.service_summary).forEach(([srv, v]) => {
           sbody.innerHTML += `<tr>
-              <td>${service}</td>
-              <td>${vals.sales_cash.toLocaleString("en-IN")}</td>
-              <td>${vals.sales_non_cash.toLocaleString("en-IN")}</td>
-              <td>${vals.purchase_cash.toLocaleString("en-IN")}</td>
-              <td>${vals.purchase_non_cash.toLocaleString("en-IN")}</td>
-              <td>${vals.profit_cash.toLocaleString("en-IN")}</td>
-              <td>${vals.profit_non_cash.toLocaleString("en-IN")}</td>
-            </tr>`;
+            <td>${srv}</td>
+            <td>${round(v.sales_cash)}</td><td>${round(v.sales_non_cash)}</td>
+            <td>${round(v.purchase_cash)}</td><td>${round(v.purchase_non_cash)}</td>
+            <td>${round(v.profit_cash)}</td><td>${round(v.profit_non_cash)}</td>
+          </tr>`;
         });
-
-        // Clear bookings table before reload
-        document.querySelector("#clientSummary tbody").innerHTML = "";
       });
 
-    // --- Bookings report ---
     fetch("{% url 'employee_bookings_report' %}" + (params ? "?" + params : ""))
       .then(r => r.json())
       .then(resp => {
         const tbody = document.querySelector("#clientSummary tbody");
         tbody.innerHTML = "";
+        const round = x => Math.round(x).toLocaleString("en-IN");
+
         resp.data.forEach(b => {
-          const serviceDetails = b.services.map(s =>
-            `<strong>${s.service}</strong> (${s.mode}): Sales ${s.sales}, Purchase ${s.purchase}, Profit ${s.profit}`
-          ).join("<br>");
-          tbody.innerHTML += `<tr>
+          const simpleList = b.services.map(s => `<span class='badge bg-primary-subtle text-primary me-1'>${s.service}</span>`).join("");
+          const details = b.services.map(s => `
+            <div class='col-md-6 mb-3'>
+              <div class='border p-2 rounded bg-light'>
+                <strong>${s.service}</strong> (${s.mode})<br>
+                <small>Sales: ${round(s.sales)} | Purchase: ${round(s.purchase)} | Profit: ${round(s.profit)}</small>
+              </div>
+            </div>`).join("");
+
+          tbody.innerHTML += `
+            <tr>
               <td>${b.booking_id}</td>
               <td>${b.booking_date}</td>
               <td>${b.created_by}</td>
               <td>${b.client_name}</td>
-              <td>${serviceDetails}</td>
-              <td>${b.totals.sales_cash.toLocaleString("en-IN")}</td>
-              <td>${b.totals.sales_non_cash.toLocaleString("en-IN")}</td>
-              <td>${b.totals.purchase_cash.toLocaleString("en-IN")}</td>
-              <td>${b.totals.purchase_non_cash.toLocaleString("en-IN")}</td>
-              <td>${b.totals.profit_cash.toLocaleString("en-IN")}</td>
-              <td>${b.totals.profit_non_cash.toLocaleString("en-IN")}</td>
+              <td>${simpleList}&nbsp;&nbsp;
+                <button class="btn btn-sm btn-primary p-1" onclick="showDetails(\`${details}\`)">Show details</button>
+              </td>
+              <td>${round(b.totals.sales_cash)}</td>
+              <td>${round(b.totals.sales_non_cash)}</td>
+              <td>${round(b.totals.purchase_cash)}</td>
+              <td>${round(b.totals.purchase_non_cash)}</td>
+              <td>${round(b.totals.profit_cash)}</td>
+              <td>${round(b.totals.profit_non_cash)}</td>
             </tr>`;
         });
       });
+  }
+
+  function showDetails(html) {
+    document.getElementById("modalDetails").innerHTML = html;
+    const modal = new bootstrap.Modal(document.getElementById("detailsModal"));
+    modal.show();
   }
 
   // --- Apply & Reset ---
@@ -196,7 +223,6 @@
     loadReportData();
   });
 
-  // --- Auto load ---
   document.addEventListener("DOMContentLoaded", () => loadReportData());
 </script>
 

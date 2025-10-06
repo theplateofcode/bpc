@@ -1,9 +1,8 @@
 {% extends "base.html" %}
 {% block content %}
 
-<!-- Report Filters -->
 <h3 class="mt-4">Report Filters</h3>
-<form id="reportFilters" class="row g-3 align-items-end">
+<form id="reportFilters" class="row g-2 align-items-end">
   <div class="col-md-2">
     <label for="service" class="form-label">Service</label>
     <select id="service" name="service" class="form-select"><option value="">All</option></select>
@@ -28,16 +27,19 @@
     <label for="supplier" class="form-label">Supplier</label>
     <select id="supplier" name="supplier" class="form-select"><option value="">All</option></select>
   </div>
-  <div class="col-md-2 d-flex flex-column">
-    <button type="button" id="applyFilters" class="btn btn-primary w-100 mb-2">Apply</button>
-    <button type="reset" id="resetFilters" class="btn btn-secondary w-100">Reset All</button>
+
+  <!-- Buttons INLINE with filters -->
+  <div class="col-md-auto d-flex align-items-end">
+    <button type="button" id="applyFilters" class="btn btn-primary me-2">Apply</button>
+    <button type="reset" id="resetFilters" class="btn btn-outline-secondary">Reset</button>
   </div>
 </form>
+
 
 <!-- Cards -->
 <div id="reportResults" class="row g-3 mt-3">
   <div class="col-md-3">
-    <div class="card text-white bg-primary h-100">
+    <div class="card text-white" style="background-color:#6ea8fe;">
       <div class="card-body">
         <h5 class="card-title">Total Sales</h5>
         <p class="card-text mb-1"><span id="salesTotal"></span></p>
@@ -46,7 +48,7 @@
     </div>
   </div>
   <div class="col-md-3">
-    <div class="card text-white bg-danger h-100">
+    <div class="card text-white" style="background-color:#f57c7c;">
       <div class="card-body">
         <h5 class="card-title">Total Purchase</h5>
         <p class="card-text mb-1"><span id="purchaseTotal"></span></p>
@@ -55,7 +57,7 @@
     </div>
   </div>
   <div class="col-md-3">
-    <div class="card text-white bg-success h-100">
+    <div class="card text-white" style="background-color:#68d17f;">
       <div class="card-body">
         <h5 class="card-title">Profit</h5>
         <p class="card-text mb-1"><span id="profitTotal"></span></p>
@@ -64,7 +66,7 @@
     </div>
   </div>
   <div class="col-md-3">
-    <div class="card text-dark bg-warning h-100">
+    <div class="card text-dark bg-warning">
       <div class="card-body">
         <h5 class="card-title">Total Bookings</h5>
         <p class="card-text mb-1"><span id="bookingTotal"></span></p>
@@ -76,12 +78,12 @@
 <!-- Service Summary -->
 <h4 class="mt-4">Service Summary</h4>
 <table class="table table-bordered" id="serviceSummary">
-  <thead class="table-light">
+  <thead class="table-light text-center">
     <tr>
       <th rowspan="2">Service</th>
-      <th colspan="2">Sales</th>
-      <th colspan="2">Purchase</th>
-      <th colspan="2">Profit</th>
+      <th colspan="2" style="background-color:#6ea8fe;">Sales</th>
+      <th colspan="2" style="background-color:#f57c7c;">Purchase</th>
+      <th colspan="2" style="background-color:#68d17f;">Profit</th>
     </tr>
     <tr>
       <th>C</th><th>Q</th>
@@ -95,12 +97,12 @@
 <!-- Employee Summary -->
 <h4 class="mt-4">Employee Summary</h4>
 <table class="table table-bordered" id="employeeSummary">
-  <thead class="table-light">
+  <thead class="table-light text-center">
     <tr>
       <th rowspan="2">Employee</th>
-      <th colspan="2">Sales</th>
-      <th colspan="2">Purchase</th>
-      <th colspan="2">Profit</th>
+      <th colspan="2" style="background-color:#6ea8fe;">Sales</th>
+      <th colspan="2" style="background-color:#f57c7c;">Purchase</th>
+      <th colspan="2" style="background-color:#68d17f;">Profit</th>
     </tr>
     <tr>
       <th>C</th><th>Q</th>
@@ -114,26 +116,39 @@
 <!-- Client Summary -->
 <h4 class="mt-4">Client Bookings Summary</h4>
 <table class="table table-bordered" id="clientSummary">
-  <thead class="table-light">
+  <thead class="table-light text-center">
     <tr>
       <th>Booking ID</th>
       <th>Booking Date</th>
       <th>Created By</th>
       <th>Client Name</th>
       <th>Service Details</th>
-      <th>C Sales</th>
-      <th>Q Sales</th>
-      <th>C Purchase</th>
-      <th>Q Purchase</th>
-      <th>C Profit</th>
-      <th>Q Profit</th>
+      <th style="background-color:#6ea8fe;">C Sales</th>
+      <th style="background-color:#6ea8fe;">Q Sales</th>
+      <th style="background-color:#f57c7c;">C Purchase</th>
+      <th style="background-color:#f57c7c;">Q Purchase</th>
+      <th style="background-color:#68d17f;">C Profit</th>
+      <th style="background-color:#68d17f;">Q Profit</th>
     </tr>
   </thead>
   <tbody></tbody>
 </table>
 
+<!-- Modal Popup -->
+<div class="modal fade" id="serviceModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title">Service Details</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" id="serviceModalBody" style="background-color:#f8f9fa;"></div>
+    </div>
+  </div>
+</div>
+
 <script>
-  // --- Populate filter dropdowns ---
+  // Populate filters
   fetch("{% url 'report_filters_data' %}")
     .then(r => r.json())
     .then(data => {
@@ -150,22 +165,21 @@
     });
 
   function loadReportData(params = "") {
-    // --- Main filtered report ---
     fetch("{% url 'filtered_report' %}" + (params ? "?" + params : ""))
       .then(r => r.json())
       .then(data => {
-        // Totals
-        document.getElementById("salesTotal").innerText = (data.totals.sales_cash + data.totals.sales_non_cash).toLocaleString("en-IN");
-        document.getElementById("salesCash").innerText = data.totals.sales_cash.toLocaleString("en-IN");
-        document.getElementById("salesNonCash").innerText = data.totals.sales_non_cash.toLocaleString("en-IN");
-        document.getElementById("purchaseTotal").innerText = (data.totals.purchase_cash + data.totals.purchase_non_cash).toLocaleString("en-IN");
-        document.getElementById("purchaseCash").innerText = data.totals.purchase_cash.toLocaleString("en-IN");
-        document.getElementById("purchaseNonCash").innerText = data.totals.purchase_non_cash.toLocaleString("en-IN");
-        document.getElementById("profitTotal").innerText = (data.totals.profit_cash + data.totals.profit_non_cash).toLocaleString("en-IN");
-        document.getElementById("profitCash").innerText = data.totals.profit_cash.toLocaleString("en-IN");
-        document.getElementById("profitNonCash").innerText = data.totals.profit_non_cash.toLocaleString("en-IN");
-        document.getElementById("bookingTotal").innerText =  data.totals.bookings;
-        console.log("Backend totals:", data.totals);
+        const clean = n => Math.round(n).toLocaleString("en-IN");
+
+        document.getElementById("salesTotal").innerText = clean(data.totals.sales_cash + data.totals.sales_non_cash);
+        document.getElementById("salesCash").innerText = clean(data.totals.sales_cash);
+        document.getElementById("salesNonCash").innerText = clean(data.totals.sales_non_cash);
+        document.getElementById("purchaseTotal").innerText = clean(data.totals.purchase_cash + data.totals.purchase_non_cash);
+        document.getElementById("purchaseCash").innerText = clean(data.totals.purchase_cash);
+        document.getElementById("purchaseNonCash").innerText = clean(data.totals.purchase_non_cash);
+        document.getElementById("profitTotal").innerText = clean(data.totals.profit_cash + data.totals.profit_non_cash);
+        document.getElementById("profitCash").innerText = clean(data.totals.profit_cash);
+        document.getElementById("profitNonCash").innerText = clean(data.totals.profit_non_cash);
+        document.getElementById("bookingTotal").innerText = data.totals.bookings;
 
         // Service Summary
         const sbody = document.querySelector("#serviceSummary tbody");
@@ -174,12 +188,12 @@
           const isTotal = service === "TOTAL";
           sbody.innerHTML += `<tr${isTotal ? ' style="font-weight:bold;background:#f8f9fa;"' : ""}>
               <td>${service}</td>
-              <td>${vals.sales_cash.toLocaleString("en-IN")}</td>
-              <td>${vals.sales_non_cash.toLocaleString("en-IN")}</td>
-              <td>${vals.purchase_cash.toLocaleString("en-IN")}</td>
-              <td>${vals.purchase_non_cash.toLocaleString("en-IN")}</td>
-              <td>${vals.profit_cash.toLocaleString("en-IN")}</td>
-              <td>${vals.profit_non_cash.toLocaleString("en-IN")}</td>
+              <td>${clean(vals.sales_cash)}</td>
+              <td>${clean(vals.sales_non_cash)}</td>
+              <td>${clean(vals.purchase_cash)}</td>
+              <td>${clean(vals.purchase_non_cash)}</td>
+              <td>${clean(vals.profit_cash)}</td>
+              <td>${clean(vals.profit_non_cash)}</td>
             </tr>`;
         });
 
@@ -190,47 +204,58 @@
           const isTotal = emp === "TOTAL";
           ebody.innerHTML += `<tr${isTotal ? ' style="font-weight:bold;background:#f8f9fa;"' : ""}>
               <td>${emp}</td>
-              <td>${vals.sales_cash.toLocaleString("en-IN")}</td>
-              <td>${vals.sales_non_cash.toLocaleString("en-IN")}</td>
-              <td>${vals.purchase_cash.toLocaleString("en-IN")}</td>
-              <td>${vals.purchase_non_cash.toLocaleString("en-IN")}</td>
-              <td>${vals.profit_cash.toLocaleString("en-IN")}</td>
-              <td>${vals.profit_non_cash.toLocaleString("en-IN")}</td>
+              <td>${clean(vals.sales_cash)}</td>
+              <td>${clean(vals.sales_non_cash)}</td>
+              <td>${clean(vals.purchase_cash)}</td>
+              <td>${clean(vals.purchase_non_cash)}</td>
+              <td>${clean(vals.profit_cash)}</td>
+              <td>${clean(vals.profit_non_cash)}</td>
             </tr>`;
         });
 
-        // Clear bookings table before reload
+        // Clear bookings
         document.querySelector("#clientSummary tbody").innerHTML = "";
       });
 
-    // --- Bookings report ---
     fetch("{% url 'bookings_report' %}" + (params ? "?" + params : ""))
       .then(r => r.json())
       .then(resp => {
         const tbody = document.querySelector("#clientSummary tbody");
         tbody.innerHTML = "";
         resp.data.forEach(b => {
-          const serviceDetails = b.services.map(s =>
-            `<strong>${s.service}</strong> (${s.mode}): Sales ${s.sales}, Purchase ${s.purchase}, Profit ${s.profit}, Entered by ${s.entered_by}`
-          ).join("<br>");
-          tbody.innerHTML += `<tr>
+          const serviceNames = b.services.map(s => s.service).join(", ");
+          const modalContent = b.services.map(s => `
+            <div class="p-3 mb-3 bg-white shadow-sm rounded border">
+              <h6 class="mb-1"><strong>${s.service}</strong> (${s.mode})</h6>
+              <p class="mb-0">Sales: ${s.sales}<br>Purchase: ${s.purchase}<br>Profit: ${s.profit}<br>Entered by: ${s.entered_by}</p>
+            </div>
+          `).join("");
+
+          tbody.innerHTML += `
+            <tr>
               <td>${b.booking_id}</td>
               <td>${b.booking_date}</td>
               <td>${b.created_by}</td>
               <td>${b.client_name}</td>
-              <td>${serviceDetails}</td>
-              <td>${b.totals.sales_cash.toLocaleString("en-IN")}</td>
-              <td>${b.totals.sales_non_cash.toLocaleString("en-IN")}</td>
-              <td>${b.totals.purchase_cash.toLocaleString("en-IN")}</td>
-              <td>${b.totals.purchase_non_cash.toLocaleString("en-IN")}</td>
-              <td>${b.totals.profit_cash.toLocaleString("en-IN")}</td>
-              <td>${b.totals.profit_non_cash.toLocaleString("en-IN")}</td>
+              <td>${serviceNames}&nbsp;&nbsp; <button class="btn btn-sm btn-outline-primary mt-1 text-end" data-bs-toggle="modal" data-bs-target="#serviceModal" data-services='${encodeURIComponent(modalContent)}'>Show Details</button></td>
+              <td>${Math.round(b.totals.sales_cash)}</td>
+              <td>${Math.round(b.totals.sales_non_cash)}</td>
+              <td>${Math.round(b.totals.purchase_cash)}</td>
+              <td>${Math.round(b.totals.purchase_non_cash)}</td>
+              <td>${Math.round(b.totals.profit_cash)}</td>
+              <td>${Math.round(b.totals.profit_non_cash)}</td>
             </tr>`;
+        });
+
+        const modal = document.getElementById("serviceModal");
+        modal.addEventListener("show.bs.modal", e => {
+          const button = e.relatedTarget;
+          const html = decodeURIComponent(button.getAttribute("data-services"));
+          document.getElementById("serviceModalBody").innerHTML = html;
         });
       });
   }
 
-  // --- Apply & Reset ---
   document.getElementById("applyFilters").addEventListener("click", () => {
     const params = new URLSearchParams(new FormData(document.getElementById("reportFilters"))).toString();
     loadReportData(params);
@@ -239,8 +264,6 @@
     document.querySelectorAll("#reportFilters select").forEach(sel => sel.value = "");
     loadReportData();
   });
-
-  // --- Auto load ---
   document.addEventListener("DOMContentLoaded", () => loadReportData());
 </script>
 
