@@ -273,22 +273,27 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
   let selectedBookingId = null;
+  const tableBody = document.getElementById('bookings-tbody');
 
-  // Highlight selected row
-  document.querySelectorAll('.row-selector').forEach(rb => {
-    rb.addEventListener('change', function() {
-      // Remove 'selected-row' from all rows
-      document.querySelectorAll('#bookings-tbody tr').forEach(tr => tr.classList.remove('selected-row'));
-      if (this.checked) {
-        selectedBookingId = this.value;
-        this.closest('tr').classList.add('selected-row');
+  // --- KEY CHANGE ---
+  // Use Event Delegation for row selection. This single listener on the table body
+  // will handle clicks for all radio buttons, even those added later by pagination.
+  tableBody.addEventListener('change', function(e) {
+    if (e.target.matches('.row-selector')) {
+      // First, remove 'selected-row' from any previously selected row
+      tableBody.querySelectorAll('tr').forEach(tr => tr.classList.remove('selected-row'));
+      
+      const selector = e.target;
+      if (selector.checked) {
+        selectedBookingId = selector.value;
+        selector.closest('tr').classList.add('selected-row');
       } else {
-        selectedBookingId = null; // Deselect if unchecked
+        selectedBookingId = null; // Should not happen with radio buttons, but good practice
       }
-    });
+    }
   });
 
-  // Action dropdown handler
+  // Action dropdown handler (this part remains the same)
   document.querySelectorAll('[data-action]').forEach(item => {
     item.addEventListener('click', function(e) {
       e.preventDefault();
