@@ -1,6 +1,9 @@
 {% load static %}
 {% load group_filters %}
 
+<!-- if user is authenticated, only then he seeing this -->
+ {% if user.is_authenticated %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -12,6 +15,20 @@
   <link rel="stylesheet" href="{% static 'styles.css' %}">
   <link rel="shortcut icon" href="{% static 'discovery_logo_main.png' %}" type="image/x-icon">
 </head>
+<script src="https://unpkg.com/htmx.org@1.9.12"></script>
+<style>
+  .flash-approved {
+  animation: flashFade 2s ease forwards;
+  background-color: #d4edda !important;
+}
+
+@keyframes flashFade {
+  0% { background-color: #d4edda; opacity: 1; }
+  80% { opacity: 1; }
+  100% { opacity: 0; height: 0; transform: scaleY(0); }
+}
+
+</style>
 <body>
   <!-- Navbar -->
   <header class="navbar-top">
@@ -43,27 +60,16 @@
           <i class="bi bi-list"></i>
         </button>
       </div>
+      {% if user.role == 'STAFF' %}
       <div class="nav-item mb-1">
         <a href="{% url 'home' %}"
            class="nav-link d-flex align-items-center gap-2 rounded px-3 py-2{% if request.path == '/' %} active{% endif %}">
           <i class="bi bi-book-fill"></i>
-          <span>Home</span>
+          <span>Pre Report</span>
         </a>
       </div>
-      <div class="nav-item mb-1">
-        <a href="{% url 'clients' %}"
-           class="nav-link d-flex align-items-center gap-2 rounded px-3 py-2{% if '/clients' in request.path %} active{% endif %}">
-          <i class="bi bi-people-fill"></i>
-          <span>Clients</span>
-        </a>
-      </div>
-      <div class="nav-item mb-1">
-        <a href="{% url 'suppliers' %}"
-           class="nav-link d-flex align-items-center gap-2 rounded px-3 py-2{% if '/suppliers' in request.path %} active{% endif %}">
-          <i class="bi bi-briefcase-fill"></i>
-          <span>Suppliers</span>
-        </a>
-      </div>
+      {% endif %}
+      
       <div class="nav-item mb-1">
         <a href="{% url 'bookings' %}"
            class="nav-link d-flex align-items-center gap-2 rounded px-3 py-2{% if '/bookings' in request.path %} active{% endif %}">
@@ -71,6 +77,23 @@
           <span>Bookings</span>
         </a>
       </div>
+      <div class="nav-item mb-1">
+        <a href="{% url 'payments_home' %}"
+           class="nav-link d-flex align-items-center gap-2 rounded px-3 py-2{% if '/payments/home' in request.path %} active{% endif %}">
+          <i class="bi bi-tags-fill"></i>
+          <span>Payments</span>
+        </a>
+      </div>
+      {% if user.role == 'STAFF' %}
+      <div class="nav-item mb-1">
+        <a href="{% url 'staff_actual_reports' %}"
+           class="nav-link d-flex align-items-center gap-2 rounded px-3 py-2{% if '/staff-reports-actual' in request.path %} active{% endif %}">
+          <i class="bi bi-bar-chart-steps"></i>
+          <span>Staff Actual Reports</span>
+        </a>
+      </div>
+      {% endif %}
+      
 
       <!-- Services Heading
       <div class="sidebar-heading text-uppercase text-muted small d-flex align-items-center gap-2 rounded px-3 py-2 mt-3 mb-2" style="letter-spacing: 1px;">
@@ -82,6 +105,13 @@
        class="nav-link d-flex align-items-center gap-2 rounded px-3 py-2{% if '/accounts/todo' in request.path %} active{% endif %}">
       <i class="bi bi-calculator"></i>
       <span>Accounts To-Do</span>
+    </a>
+  </div>
+  <div class="nav-item mb-1">
+    <a href="{% url 'accountant_dashboard' %}"
+       class="nav-link d-flex align-items-center gap-2 rounded px-3 py-2{% if '/payments/accountant-dashboard' in request.path %} active{% endif %}">
+      <i class="bi bi-cash"></i>
+      <span>Received Payments</span>
     </a>
   </div>
 {% endif %}
@@ -133,7 +163,7 @@
             <i class="bi bi-building"></i>
             <span>Hotel</span>
           </a>
-        </div>
+        </div>  
       {% endif %}
 
       {% if user.is_authenticated and user|has_group:'Transfer_Dept' %}
@@ -156,12 +186,21 @@
         </div>
       {% endif %}
       <!-- REPORT MODULE URL -->
-      {% if user.is_authenticated %}
+
+      {% if user.is_owner_or_admin or user.is_superuser%}
         <div class="nav-item mb-1">
-          <a href="{% url 'owner_reports' %}"
-             class="nav-link d-flex align-items-center gap-2 rounded px-3 py-2{% if '/owner-reports' in request.path %} active{% endif %}">
-            <i class="bi bi-chart-fill"></i>
-            <span>Reports</span>
+  <a href="{% url 'owner_reports' %}"
+     class="nav-link d-flex align-items-center gap-2 rounded px-3 py-2
+            {% if request.resolver_match.url_name == 'owner_reports' %} active{% endif %}">
+    <i class="bi bi-bar-chart"></i>
+    <span>Pre Reports</span>
+  </a>
+</div>
+        <div class="nav-item mb-1">
+          <a href="{% url 'owner_actual_reports' %}"
+             class="nav-link d-flex align-items-center gap-2 rounded px-3 py-2{% if '/owner-reports-actual' in request.path %} active{% endif %}">
+            <i class="bi bi-bar-chart-fill"></i>
+            <span>Post Reports</span>
           </a>
         </div>
       {% endif %}
@@ -188,12 +227,22 @@
   </a>
         <ul class="dropdown-menu shadow" aria-labelledby="settingsDropdown" style="min-width:180px;">
           <li>
+            <a href="{% url 'clients' %}" class="dropdown-item{% if '/clients' in request.path %} active{% endif %}">
+                        <i class="bi bi-people-fill"></i> Clients
+            </a>
+          </li>
+          <li>
+            <a href="{% url 'suppliers' %}" class="dropdown-item{% if '/suppliers' in request.path %} active{% endif %}">
+                        <i class="bi bi-briefcase-fill"></i> Suppliers
+            </a>
+</li>
+          <li>
             <a href="{% url 'carrier_list' %}" class="dropdown-item{% if '/carriers' in request.path %} active{% endif %}">
               <i class="bi bi-truck"></i> Carriers
             </a>
           </li>
           <li>
-            <a href="{% url 'modes_of_payment' %}" class="dropdown-item{% if '/modes-of-payment' in request.path %} active{% endif %}">
+            <a href="{% url 'modes_of_payment' %}" class="dropdown-item{% if '/modes' in request.path %} active{% endif %}">
               <i class="bi bi-credit-card-2-front"></i> Mode of Payment
             </a>
           </li>
@@ -249,5 +298,17 @@
       document.getElementById('mainContent').classList.toggle('collapsed');
     });
   </script>
+  <script>
+  document.addEventListener("htmx:configRequest", (event) => {
+    const token = document.querySelector('input[name="csrfmiddlewaretoken"]')?.value
+      || (document.cookie.match(/csrftoken=([^;]+)/) || [])[1];
+    if (token) {
+      event.detail.headers['X-CSRFToken'] = token;
+    }
+  });
+</script>
+
 </body>
 </html>
+
+{% endif %}

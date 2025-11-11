@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+{% block content %}
+<h3 class="mt-4">Accountant Dashboard</h3>
+
+<!-- Filters -->
+<form method="get" class="row g-3 align-items-end mb-3">
+  <div class="col-md-3">
+    <label class="form-label">Client</label>
+    <input type="text" name="client" value="{{ client }}" class="form-control" placeholder="Search client...">
+  </div>
+
+  <div class="col-md-3">
+    <label class="form-label">Status</label>
+    <select name="status" class="form-select">
+      <option value="">All</option>
+      <option value="approved" {% if status == "approved" %}selected{% endif %}>Approved</option>
+      <option value="pending" {% if status == "pending" %}selected{% endif %}>Pending</option>
+    </select>
+  </div>
+
+  <div class="col-md-3">
+    <label class="form-label">Order</label>
+    <select name="order" class="form-select">
+      <option value="desc" {% if order == "desc" %}selected{% endif %}>Newest First</option>
+      <option value="asc" {% if order == "asc" %}selected{% endif %}>Oldest First</option>
+    </select>
+  </div>
+
+  <div class="col-md-3">
+    <button class="btn btn-primary w-100">Apply Filters</button>
+  </div>
+</form>
+
+<!-- Table -->
+<div class="table-responsive">
+  <table class="table table-bordered align-middle">
+    <thead class="table-light">
+      <tr>
+        <th>Booking ID</th>
+        <th>Client</th>
+        <th>Amount (₹)</th>
+        <th>Mode</th>
+        <th>Status</th>
+        <th>Discount</th>
+        <th>By</th>
+        <th>Created At</th>
+        <th>Document</th>
+      </tr>
+    </thead>
+    <tbody id="payments-table">
+      {% for p in payments %}
+      <tr id="payrow-{{ p.id }}">
+        <td>{{ p.booking.booking_id }}</td>
+        <td>{{ p.booking.client.first_name }} {{ p.booking.client.last_name }}</td>
+        <td class="text-end">{{ p.amount|floatformat:0 }}</td>
+        <td>{{ p.mode.name }}</td>
+
+        <!-- ✅ INTERACTIVE STATUS CELL -->
+        <td id="status-{{ p.id }}">
+          {% if p.approved %}
+            <span class="badge bg-success">Approved</span>
+          {% else %}
+            <div class="d-flex gap-1">
+              <button 
+                class="btn btn-success btn-sm"
+                hx-post="{% url 'approve' p.id %}"
+                hx-target="#payrow-{{ p.id }}"
+                hx-swap="outerHTML"
+                hx-confirm="Approve this payment?">
+                ✓ Approve
+              </button>
+              <button 
+                class="btn btn-danger btn-sm"
+                hx-post="{% url 'reject' p.id %}"
+                hx-target="#payrow-{{ p.id }}"
+                hx-swap="outerHTML"
+                hx-confirm="Reject and delete this payment?">
+                ✗ Reject
+              </button>
+            </div>
+          {% endif %}
+        </td>
+
+        <td class="text-end">{{ p.discount|floatformat:0 }}</td>
+        <td>{{ p.received_by.username }}</td>
+        <td>{{ p.created_at|date:"d-M-Y H:i" }}</td>
+        <td>
+          {% if p.document %}
+            <a href="{{ p.document.url }}" target="_blank" class="btn btn-sm btn-outline-secondary">View</a>
+          {% else %}
+            —
+          {% endif %}
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="9" class="text-center text-muted">No records found.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+<script>
+document.body.addEventListener('htmx:afterSwap', function (e) {
+  // if the approved row got the flash class, remove it after animation
+  const el = e.detail.target.querySelector('.flash-approved');
+  if (el) {
+    setTimeout(() => el.remove(), 2000); // remove after animation
+  }
+});
+</script>
+
+{% endblock %}

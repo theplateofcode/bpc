@@ -1,0 +1,62 @@
+<table class="table table-bordered align-middle">
+  <thead class="table-light">
+    <tr>
+      <th>Booking</th>
+      <th>Client</th>
+      <th>Received On</th>
+      <th class="text-end">Amount (₹)</th>
+      <th>Mode</th>
+      <th>Submitted By</th>
+      <th>Remarks</th>
+      <th>Doc</th>
+      <th style="width: 180px">Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for it in items %}
+    <tr id="prow-{{ it.id }}">
+      <td>{{ it.booking.booking_id }}</td>
+      <td>
+        {{ it.booking.client.first_name }} {{ it.booking.client.last_name }}
+      </td>
+      <td>{{ it.received_on|date:"d-M-Y" }}</td>
+      <td class="text-end">{{ it.amount|floatformat:0 }}</td>
+      <td>{{ it.mode.name }}</td>
+      <td>
+        {{ it.received_by.get_full_name|default:it.received_by.username }}
+      </td>
+      <td>{{ it.remarks|default:"—" }}</td>
+      <td>
+        {% if it.document %}<a
+          href="{{ it.document.url }}"
+          target="_blank"
+          class="btn btn-sm btn-outline-secondary"
+          >View</a
+        >{% else %}—{% endif %}
+      </td>
+      <td>
+        <button
+          class="btn btn-sm btn-success"
+          hx-post="{% url 'approve' it.id %}"
+          hx-target="#approvals-table"
+          hx-swap="outerHTML"
+        >
+          Approve
+        </button>
+        <button
+          class="btn btn-sm btn-outline-danger"
+          hx-post="{% url 'reject' it.id %}"
+          hx-target="#approvals-table"
+          hx-swap="outerHTML"
+        >
+          Reject
+        </button>
+      </td>
+    </tr>
+    {% empty %}
+    <tr>
+      <td colspan="9" class="text-center text-muted">No pending approvals.</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>

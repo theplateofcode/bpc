@@ -1,0 +1,166 @@
+{% extends "base.html" %} {% load static %} {% block content %}
+<h3 class="mt-4">Payments Received</h3>
+
+<table class="table table-bordered align-middle">
+  <thead class="table-light">
+    <tr>
+      <th>Booking</th>
+      <th>Client</th>
+      <th>Tour Start</th>
+      <th class="text-end">Target (₹)</th>
+      <th class="text-end">Approved (₹)</th>
+      <th class="text-end">Pending (₹)</th>
+      <th class="text-end">Remaining (₹)</th>
+      <th style="width: 320px">Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for row in rows %}
+    <tr id="brow-{{ row.booking.id }}">
+      <td>{{ row.booking.booking_id }}</td>
+      <td>
+        {{ row.booking.client.first_name }} {{ row.booking.client.last_name }}
+      </td>
+      <td>{{ row.booking.tour_start_date|date:"d-M-Y" }}</td>
+      <td class="text-end">{{ row.target|floatformat:0 }}</td>
+      <td class="text-end">{{ row.approved|floatformat:0 }}</td>
+      <td class="text-end">{{ row.pending|floatformat:0 }}</td>
+      <td class="text-end">{{ row.remaining|floatformat:0 }}</td>
+      <td>
+       <button
+  class="btn btn-sm btn-info"
+  hx-get="{% url 'details' row.booking.id %}"
+  hx-target="#paymentsModal .modal-body"
+  hx-trigger="click"
+  data-bs-toggle="modal"
+  data-bs-target="#paymentsModal">
+  Details
+</button>
+
+
+
+        <button
+          class="btn btn-sm btn-primary"
+          hx-get="{% url 'details' row.booking.id %}"
+          hx-target="#paymentsModal .modal-body"
+          hx-trigger="revealed"
+          style="display: none"
+        ></button>
+
+       <button
+  class="btn btn-sm btn-success"
+  hx-post="{% url 'mark_full' row.booking.id %}"
+  hx-target="#brow-{{ row.booking.id }}"
+  hx-swap="outerHTML"
+  hx-confirm="Are you sure you want to mark this booking as fully received? This will close it for future payments.">
+  Mark Full
+</button>
+
+
+
+        <button
+          class="btn btn-sm btn-outline-success"
+          data-bs-toggle="modal"
+          data-bs-target="#addModal-{{ row.booking.id }}"
+        >
+          Add Installment
+        </button>
+
+        <!-- Add installment Modal -->
+        <div
+          class="modal fade"
+          id="addModal-{{ row.booking.id }}"
+          tabindex="-1"
+        >
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title">
+                  Add Installment — {{ row.booking.booking_id }}
+                </h5>
+                <button
+                  type="button"
+                  class="btn-close"
+                  data-bs-dismiss="modal"
+                ></button>
+              </div>
+              <div
+                class="modal-body"
+                hx-get="{% url 'details' row.booking.id %}"
+                hx-target="#paymentsModal .modal-body"
+                hx-trigger="revealed"
+                style="display: none"
+              ></div>
+
+              <div class="modal-body">
+                <form action="{% url 'add' row.booking.id %}"
+      method="post"
+      enctype="multipart/form-data">
+  {% csrf_token %}
+
+
+                  <div class="mb-3">
+                    <label class="form-label">Amount (₹)</label>
+                    <input
+                      type="number"
+                      step="1"
+                      min="1"
+                      class="form-control"
+                      name="amount"
+                      required
+                    />
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label">Mode</label>
+                    <select class="form-select" name="mode" required>
+                      <option value="">Select</option>
+                      {% for m in modes %}
+                      <option value="{{ m.id }}">{{ m.name }}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label">Document</label>
+                    <input type="file" class="form-control" name="document" />
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label">Remarks</label>
+                    <textarea
+                      class="form-control"
+                      name="remarks"
+                      rows="2"
+                    ></textarea>
+                  </div>
+                  <button class="btn btn-success" type="submit">Save</button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- /Add installment Modal -->
+      </td>
+    </tr>
+    {% empty %}
+    <tr>
+      <td colspan="8" class="text-center text-muted">No bookings found.</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<!-- Shared Details / Mark Full Modal -->
+<div class="modal fade" id="paymentsModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Payment Details</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+                <div class="text-center text-muted">Loading…</div>  
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

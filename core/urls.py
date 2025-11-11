@@ -6,6 +6,7 @@ from .views import (
     employee_bookings_report,
     employee_report_filters_data,
 )
+from . import views_actual
 
 urlpatterns = [
     # Employee home dashboard
@@ -18,4 +19,9 @@ urlpatterns = [
     path("employee/filtered/", employee_filtered_report, name="employee_filtered_report"),
     path("employee/bookings/", employee_bookings_report, name="employee_bookings_report"),
     path("employee/filters/", employee_report_filters_data, name="employee_report_filters_data"),
+
+    #actual report filters
+    path("staff-reports-actual/", views_actual.staff_actual_reports, name="staff_actual_reports"),
+    path("staff-reports-actual/filtered/", views_actual.staff_filtered_actual_report, name="staff_filtered_actual_report"),
+    path("staff-reports-actual/bookings/", views_actual.staff_bookings_report, name="staff_bookings_report"),
 ]

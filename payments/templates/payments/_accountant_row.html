@@ -1,0 +1,40 @@
+<tr id="payrow-{{ p.id }}">
+  <td>{{ p.booking.booking_id }}</td>
+  <td>{{ p.booking.client.first_name }} {{ p.booking.client.last_name }}</td>
+  <td class="text-end">{{ p.amount|floatformat:0 }}</td>
+  <td>{{ p.mode.name }}</td>
+  <td>
+    {% if p.approved %}
+      <span class="badge bg-success">Approved</span>
+    {% else %}
+      <div class="d-flex gap-1">
+        <button 
+          class="btn btn-success btn-sm"
+          hx-post="{% url 'approve' p.id %}"
+          hx-target="#payrow-{{ p.id }}"
+          hx-swap="outerHTML"
+          hx-confirm="Approve this payment?">
+          ✓ Approve
+        </button>
+        <button 
+          class="btn btn-danger btn-sm"
+          hx-post="{% url 'reject' p.id %}"
+          hx-target="#payrow-{{ p.id }}"
+          hx-swap="outerHTML"
+          hx-confirm="Reject and delete this payment?">
+          ✗ Reject
+        </button>
+      </div>
+    {% endif %}
+  </td>
+  <td class="text-end">{{ p.discount|floatformat:0 }}</td>
+  <td>{{ p.received_by.username }}</td>
+  <td>{{ p.created_at|date:"d-M-Y H:i" }}</td>
+  <td>
+    {% if p.document %}
+      <a href="{{ p.document.url }}" target="_blank" class="btn btn-sm btn-outline-secondary">View</a>
+    {% else %}
+      —
+    {% endif %}
+  </td>
+</tr>

@@ -42,7 +42,7 @@ def manage_groups(request):
 def employee_dashboard(request):
     """Main dashboard for logged-in employees (non-superusers)."""
     if request.user.is_superuser:
-        return render(request, "owner_reports.html")
+        return render(request, "owner_reports_actual.html")
     return render(request, "home.html")
 
 

@@ -1,0 +1,6 @@
+{% extends "base.html" %} {% block content %}
+<h3 class="mt-4">Payment Approvals</h3>
+<div id="approvals-table" hx-get="{% url 'approvals' %}" hx-trigger="load">
+  {% include "payments/_approvals_table.html" %}
+</div>
+{% endblock %}
