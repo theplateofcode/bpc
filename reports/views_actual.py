@@ -83,30 +83,38 @@ def filtered_actual_report(request):
 
         # --- Actuals from approved payments ---
         actual_sales = sum(to_float(p.amount) for p in payments)
-        total_discount = sum(to_float(p.discount) for p in payments)  # ✅ accountant-entered discount
+        total_discount = sum(to_float(p.discount) for p in payments)  # accountant-entered discount
         total_purchase = float(booking.purchase_total or 0)
 
-        total_profit = actual_sales - total_purchase
+        # 🔹 GST – only affects non-cash side
+        gst = to_float(getattr(booking, "sales_gst", 0))
 
         # --- Split by mode ---
-        cash_sales = sum(to_float(p.amount)
-                         for p in payments if p.mode and "cash" in p.mode.name.lower())
-        non_cash_sales = actual_sales - cash_sales
+        cash_sales = sum(
+            to_float(p.amount)
+            for p in payments
+            if p.mode and "cash" in p.mode.name.lower()
+        )
+        non_cash_sales_gross = actual_sales - cash_sales
+        non_cash_sales = non_cash_sales_gross - gst  # 🔹 subtract GST from Q
 
         cash_purchase = float(
-            total_purchase * (cash_sales / actual_sales)) if actual_sales else 0
+            total_purchase * (cash_sales / actual_sales)
+        ) if actual_sales else 0
         non_cash_purchase = total_purchase - cash_purchase
 
         cash_profit = cash_sales - cash_purchase
         non_cash_profit = non_cash_sales - non_cash_purchase
 
+        # (total_profit not used in JSON totals directly, so we don't need it here)
+
         # --- Totals (cards) ---
         results["totals"]["sales_cash"] += cash_sales
-        results["totals"]["sales_non_cash"] += non_cash_sales
+        results["totals"]["sales_non_cash"] += non_cash_sales  # 🔹 net of GST
         results["totals"]["purchase_cash"] += cash_purchase
         results["totals"]["purchase_non_cash"] += non_cash_purchase
         results["totals"]["profit_cash"] += cash_profit
-        results["totals"]["profit_non_cash"] += non_cash_profit
+        results["totals"]["profit_non_cash"] += non_cash_profit  # 🔹 net of GST
         results["totals"]["discount"] += total_discount
         results["totals"]["bookings"] += 1
 
@@ -120,11 +128,11 @@ def filtered_actual_report(request):
                 "discount": 0.0,
             })
             sdata["sales_cash"] += cash_sales
-            sdata["sales_non_cash"] += non_cash_sales
+            sdata["sales_non_cash"] += non_cash_sales  # 🔹 net of GST
             sdata["purchase_cash"] += cash_purchase
             sdata["purchase_non_cash"] += non_cash_purchase
             sdata["profit_cash"] += cash_profit
-            sdata["profit_non_cash"] += non_cash_profit
+            sdata["profit_non_cash"] += non_cash_profit  # 🔹 net of GST
             sdata["discount"] += total_discount
 
         # --- Employee Summary ---
@@ -136,11 +144,11 @@ def filtered_actual_report(request):
             "discount": 0.0,
         })
         edata["sales_cash"] += cash_sales
-        edata["sales_non_cash"] += non_cash_sales
+        edata["sales_non_cash"] += non_cash_sales  # 🔹 net of GST
         edata["purchase_cash"] += cash_purchase
         edata["purchase_non_cash"] += non_cash_purchase
         edata["profit_cash"] += cash_profit
-        edata["profit_non_cash"] += non_cash_profit
+        edata["profit_non_cash"] += non_cash_profit  # 🔹 net of GST
         edata["discount"] += total_discount
 
     # --- Totals Row ---
@@ -166,7 +174,6 @@ def filtered_actual_report(request):
 # ---------------------------
 @login_required
 def bookings_report(request):
-    
     service = request.GET.get("service")
     employee = request.GET.get("employee")
     year = request.GET.get("year")
@@ -205,39 +212,49 @@ def bookings_report(request):
         if not payments.exists():
             continue
 
-        # --- 1️⃣ Actual values from approved payments ---
+        # --- Actual values from approved payments ---
         actual_sales = sum(to_float(p.amount) for p in payments)
-        total_discount = sum(to_float(p.discount) for p in payments)  # ✅ exact from DB
+        total_discount = sum(to_float(p.discount) for p in payments)
         total_purchase = float(booking.purchase_total or 0)
-        total_profit = actual_sales - total_purchase
 
-        # --- 2️⃣ Split by mode ---
-        cash_sales = sum(to_float(p.amount)
-                         for p in payments if p.mode and "cash" in p.mode.name.lower())
-        non_cash_sales = actual_sales - cash_sales
+        # 🔹 GST – only affects non-cash
+        gst = to_float(getattr(booking, "sales_gst", 0))
+
+        # --- Split by mode ---
+        cash_sales = sum(
+            to_float(p.amount)
+            for p in payments
+            if p.mode and "cash" in p.mode.name.lower()
+        )
+        non_cash_sales_gross = actual_sales - cash_sales
+        non_cash_sales = non_cash_sales_gross - gst  # 🔹 net Q sales
 
         cash_purchase = float(
-            total_purchase * (cash_sales / actual_sales)) if actual_sales else 0
+            total_purchase * (cash_sales / actual_sales)
+        ) if actual_sales else 0
         non_cash_purchase = total_purchase - cash_purchase
 
         cash_profit = cash_sales - cash_purchase
-        non_cash_profit = non_cash_sales - non_cash_purchase
+        non_cash_profit = non_cash_sales - non_cash_purchase  # 🔹 net Q profit
 
-        # --- 3️⃣ Build service details ---
+        # 🔹 total profit now matches C+Q after GST
+        total_profit = cash_profit + non_cash_profit
+
+        # --- Build service details ---
         services_data = []
         for svc in booking.services.all():
             services_data.append({
                 "service": svc.name,
                 "mode": ", ".join({p.mode.name for p in payments if p.mode}),
-                "sales": actual_sales,
+                # You can keep gross or net here; I'm leaving net of GST total
+                "sales": actual_sales - gst,         # 🔹 total net sales (C+Q)
                 "purchase": total_purchase,
                 "profit": total_profit,
-                "discount": total_discount,  # ✅ shown clearly in modal
+                "discount": total_discount,
                 "entered_by": booking.created_by.get_full_name(),
             })
-        
 
-        # --- 4️⃣ Booking summary row ---
+        # --- Booking summary row ---
         data.append({
             "booking_id": booking.booking_id,
             "booking_date": booking.booking_date.strftime("%d-%b-%Y") if booking.booking_date else "",
@@ -245,11 +262,14 @@ def bookings_report(request):
             "client_name": f"{booking.client.first_name} {booking.client.last_name}" if booking.client else "Unknown",
             "services": services_data,
             "totals": {
-                "sales_cash": cash_sales, "sales_non_cash": non_cash_sales,
-                "purchase_cash": cash_purchase, "purchase_non_cash": non_cash_purchase,
-                "profit_cash": cash_profit, "profit_non_cash": non_cash_profit,
+                "sales_cash": cash_sales,
+                "sales_non_cash": non_cash_sales,          # 🔹 Q Sales net of GST
+                "purchase_cash": cash_purchase,
+                "purchase_non_cash": non_cash_purchase,
+                "profit_cash": cash_profit,
+                "profit_non_cash": non_cash_profit,        # 🔹 Q Profit net of GST
                 "discount": total_discount,
             },
         })
-        
+
     return JsonResponse({"data": data})
