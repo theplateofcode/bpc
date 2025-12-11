@@ -91,9 +91,12 @@ def delete_mode(request, pk):
 def sales_target_for_booking(booking_id):
     """
     Total sales target for a booking:
-    = sum of all services.sales_amount + booking.tcs_amount
+    = sum of all services.sales_amount + booking.tcs_amount (property)
     """
-    # Sum all services' sales_amount
+    # Get the booking instance so we can use the tcs_amount property
+    booking = Booking.objects.get(id=booking_id)
+
+    # Sum all services' sales_amount (same as your original behaviour)
     services_total = 0
     for qs in [
         Hotel.objects.filter(booking_id=booking_id).values_list("sales_amount", flat=True),
@@ -106,17 +109,10 @@ def sales_target_for_booking(booking_id):
     ]:
         services_total += sum(float(x or 0) for x in qs)
 
-    # Add TCS (once per booking)
-    tcs_amount = (
-        Booking.objects.filter(id=booking_id)
-        .values_list("tcs_amount", flat=True)
-        .first()
-        or 0
-    )
-    tcs_amount = float(tcs_amount or 0)
+    # Use the Python property (not ORM field)
+    tcs_amount = float(booking.tcs_amount or 0)
 
     return services_total + tcs_amount
-
 
 def payments_received_for_booking(booking_id):
     """Return (approved_sum, pending_sum)."""
