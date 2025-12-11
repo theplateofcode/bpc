@@ -1,139 +1,100 @@
 from django.contrib.auth import get_user_model
-# adjust if your Mode class lives elsewhere
-from .models import PaymentReceived, Mode
-from services.models import Hotel, Insurance, Passport, SightSeeing, Ticket, Transfer, Visa
-from bookings.models import Booking
-from django.utils import timezone
-from django.template.loader import render_to_string
-from django.db.models import Sum, Value, CharField
-from django.http import HttpResponseBadRequest, HttpResponse, JsonResponse
-from django.shortcuts import render, get_object_or_404
-from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required, user_passes_test
-from .models import Mode
-from .forms import ModeOfPaymentForm
+from django.db.models import Sum, Q
+from django.http import HttpResponseBadRequest, HttpResponse
+from django.shortcuts import render, get_object_or_404, redirect
+from django.template.loader import render_to_string
 
+from bookings.models import Booking
+from services.models import (
+    Hotel,
+    Insurance,
+    Passport,
+    SightSeeing,
+    Ticket,
+    Transfer,
+    Visa,
+)
+from .forms import ModeOfPaymentForm
+from .models import PaymentReceived, Mode
+
+
+User = get_user_model()
+ACCOUNTS_GROUP_NAME = "Accounts"  # change if your group name differs
+
+
+# =========================
+#   ROLE HELPERS
+# =========================
 
 def is_owner_or_admin(user):
-    return user.is_authenticated and (user.role == 'OWNER' or user.role == 'ADMIN')
+    return user.is_authenticated and (user.role == "OWNER" or user.role == "ADMIN")
 
+
+def is_accounts(user):
+    # Accounts users are identified by group or superuser
+    return user.is_superuser or user.groups.filter(name=ACCOUNTS_GROUP_NAME).exists()
+
+
+# =========================
+#   MODES OF PAYMENT (OWNER/ADMIN)
+# =========================
 
 @login_required
 @user_passes_test(is_owner_or_admin)
 def modes_of_payment(request):
-    modes = Mode.objects.all().order_by('name')
-    return render(request, 'modes_of_payment.html', {'modes': modes})
+    modes = Mode.objects.all().order_by("name")
+    return render(request, "modes_of_payment.html", {"modes": modes})
 
 
 @login_required
 @user_passes_test(is_owner_or_admin)
 def create_mode(request):
-    if request.method == 'POST':
+    if request.method == "POST":
         form = ModeOfPaymentForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect('modes_of_payment')
+            return redirect("modes_of_payment")
     else:
         form = ModeOfPaymentForm()
-    return render(request, 'forms/mode_form.html', {'form': form})
+    return render(request, "forms/mode_form.html", {"form": form})
 
 
 @login_required
 @user_passes_test(is_owner_or_admin)
 def update_mode(request, pk):
     mode = get_object_or_404(Mode, pk=pk)
-    if request.method == 'POST':
+    if request.method == "POST":
         form = ModeOfPaymentForm(request.POST, instance=mode)
         if form.is_valid():
             form.save()
-            return redirect('modes_of_payment')
+            return redirect("modes_of_payment")
     else:
         form = ModeOfPaymentForm(instance=mode)
-    return render(request, 'forms/mode_form.html', {'form': form})
+    return render(request, "forms/mode_form.html", {"form": form})
 
 
 @login_required
 @user_passes_test(is_owner_or_admin)
 def delete_mode(request, pk):
     mode = get_object_or_404(Mode, pk=pk)
-    if request.method == 'POST':
+    if request.method == "POST":
         mode.delete()
-        return redirect('modes_of_payment')
-    return render(request, 'payments/mode_confirm_delete.html', {'mode': mode})
+        return redirect("modes_of_payment")
+    return render(request, "payments/mode_confirm_delete.html", {"mode": mode})
 
 
-User = get_user_model()
-
-ACCOUNTS_GROUP_NAME = "Accounts"  # change if your group name differs
-
-
-def is_accounts(user):
-    return user.is_superuser or user.groups.filter(name=ACCOUNTS_GROUP_NAME).exists()
-
-# ---- Helpers ----
-
+# =========================
+#   PAYMENT HELPERS
+# =========================
 
 def sales_target_for_booking(booking_id):
-    """Sum of services.sales_amount for a booking (target goal)."""
-    # If you have a booking-level agreed price, swap this to read that field.
-    total = 0
-    for qs in [
-        Hotel.objects.filter(booking_id=booking_id).values_list(
-            "sales_amount", flat=True),
-        Insurance.objects.filter(booking_id=booking_id).values_list(
-            "sales_amount", flat=True),
-        Passport.objects.filter(booking_id=booking_id).values_list(
-            "sales_amount", flat=True),
-        SightSeeing.objects.filter(booking_id=booking_id).values_list(
-            "sales_amount", flat=True),
-        Ticket.objects.filter(booking_id=booking_id).values_list(
-            "sales_amount", flat=True),
-        Transfer.objects.filter(booking_id=booking_id).values_list(
-            "sales_amount", flat=True),
-        Visa.objects.filter(booking_id=booking_id).values_list(
-            "sales_amount", flat=True),
-    ]:
-        total += sum([float(x or 0) for x in qs])
-    return total
-
-
-def payments_received_for_booking(booking_id):
-    """Return (approved_sum, pending_sum)."""
-    approved = PaymentReceived.objects.filter(
-        booking_id=booking_id, approved=True).aggregate(s=Sum("amount"))["s"] or 0
-    pending = PaymentReceived.objects.filter(
-        booking_id=booking_id, approved=False).aggregate(s=Sum("amount"))["s"] or 0
-    return float(approved), float(pending)
-
-# You can reuse this in reports later
-
-
-def approved_sales_amount_for_booking(booking_id):
-    return float(PaymentReceived.objects.filter(booking_id=booking_id, approved=True).aggregate(s=Sum("amount"))["s"] or 0)
-
-# ---- Employee views ----
-
-
-from django.contrib.auth import get_user_model
-from django.db.models import Sum, Value, CharField
-from django.http import HttpResponseBadRequest, HttpResponse, JsonResponse
-from django.shortcuts import render, get_object_or_404, redirect
-from django.template.loader import render_to_string
-from django.utils import timezone
-
-from bookings.models import Booking
-from services.models import Hotel, Insurance, Passport, SightSeeing, Ticket, Transfer, Visa
-from .models import PaymentReceived, Mode
-
-User = get_user_model()
-ACCOUNTS_GROUP_NAME = "Accounts"  # change if needed
-
-def is_accounts(user):
-    return user.is_superuser or user.groups.filter(name=ACCOUNTS_GROUP_NAME).exists()
-
-# ---------- helpers ----------
-def sales_target_for_booking(booking_id):
-    total = 0
+    """
+    Total sales target for a booking:
+    = sum of all services.sales_amount + booking.tcs_amount
+    """
+    # Sum all services' sales_amount
+    services_total = 0
     for qs in [
         Hotel.objects.filter(booking_id=booking_id).values_list("sales_amount", flat=True),
         Insurance.objects.filter(booking_id=booking_id).values_list("sales_amount", flat=True),
@@ -143,21 +104,56 @@ def sales_target_for_booking(booking_id):
         Transfer.objects.filter(booking_id=booking_id).values_list("sales_amount", flat=True),
         Visa.objects.filter(booking_id=booking_id).values_list("sales_amount", flat=True),
     ]:
-        total += sum(float(x or 0) for x in qs)
-    return total
+        services_total += sum(float(x or 0) for x in qs)
+
+    # Add TCS (once per booking)
+    tcs_amount = (
+        Booking.objects.filter(id=booking_id)
+        .values_list("tcs_amount", flat=True)
+        .first()
+        or 0
+    )
+    tcs_amount = float(tcs_amount or 0)
+
+    return services_total + tcs_amount
+
 
 def payments_received_for_booking(booking_id):
-    approved = PaymentReceived.objects.filter(booking_id=booking_id, approved=True).aggregate(s=Sum("amount"))["s"] or 0
-    pending = PaymentReceived.objects.filter(booking_id=booking_id, approved=False).aggregate(s=Sum("amount"))["s"] or 0
+    """Return (approved_sum, pending_sum)."""
+    approved = (
+        PaymentReceived.objects.filter(booking_id=booking_id, approved=True)
+        .aggregate(s=Sum("amount"))["s"]
+        or 0
+    )
+    pending = (
+        PaymentReceived.objects.filter(booking_id=booking_id, approved=False)
+        .aggregate(s=Sum("amount"))["s"]
+        or 0
+    )
     return float(approved), float(pending)
 
-# ---------- employee views ----------
-from django.contrib.auth.decorators import login_required
+
+def approved_sales_amount_for_booking(booking_id):
+    """Sum of approved payment amounts for a booking."""
+    return float(
+        PaymentReceived.objects.filter(booking_id=booking_id, approved=True)
+        .aggregate(s=Sum("amount"))["s"]
+        or 0
+    )
+
+
+# =========================
+#   EMPLOYEE VIEWS
+# =========================
 
 @login_required
 def payments_home(request):
-    qs = Booking.objects.filter(
-    created_by=request.user).exclude(status_id=3).order_by("tour_start_date", "booking_date")
+    # Employee sees only own bookings that are not closed (status_id != 3)
+    qs = (
+        Booking.objects.filter(created_by=request.user)
+        .exclude(status_id=3)
+        .order_by("tour_start_date", "booking_date")
+    )
 
     rows = []
     for b in qs:
@@ -165,36 +161,47 @@ def payments_home(request):
         approved, pending = payments_received_for_booking(b.id)
         received_total = approved + pending
         remaining = max(0, target - received_total)
-        rows.append({
-            "booking": b,
-            "target": int(round(target)),
-            "approved": int(round(approved)),
-            "pending": int(round(pending)),
-            "remaining": int(round(remaining)),
-        })
+
+        rows.append(
+            {
+                "booking": b,
+                "target": int(round(target)),
+                "approved": int(round(approved)),
+                "pending": int(round(pending)),
+                "remaining": int(round(remaining)),
+            }
+        )
+
     modes = Mode.objects.all().order_by("name")
     return render(request, "payments/home.html", {"rows": rows, "modes": modes})
 
 
 @login_required
 def payment_details_modal(request, booking_id):
-    print("➡️ payment_details_modal called for booking", booking_id)
+    # Only allow the creator to see details
     b = get_object_or_404(Booking, id=booking_id, created_by=request.user)
     items = PaymentReceived.objects.filter(booking=b).order_by("-created_at")
     modes = Mode.objects.all().order_by("name")
-    print("✅ Found booking, items:", len(items))
-    html = render_to_string("payments/_details.html", {
-        "booking": b,
-        "items": items,
-        "modes": modes,
-    }, request=request)
-    return HttpResponse(html)
 
+    html = render_to_string(
+        "payments/_details.html",
+        {
+            "booking": b,
+            "items": items,
+            "modes": modes,
+        },
+        request=request,
+    )
+    return HttpResponse(html)
 
 
 @login_required
 def payment_add_installment(request, booking_id):
-    """Add an installment. For HTMX: return refreshed details partial. For normal: redirect to home."""
+    """
+    Add an installment.
+    - For HTMX: return refreshed details partial.
+    - For normal: redirect to payments_home.
+    """
     if request.method != "POST":
         return HttpResponseBadRequest("POST required")
 
@@ -212,6 +219,7 @@ def payment_add_installment(request, booking_id):
         return HttpResponseBadRequest("Invalid amount.")
 
     mode = get_object_or_404(Mode, id=mode_id)
+
     PaymentReceived.objects.create(
         booking=b,
         mode=mode,
@@ -223,15 +231,19 @@ def payment_add_installment(request, booking_id):
         approved=False,
     )
 
-    # HTMX? return refreshed details
+    # HTMX request: return updated details partial
     if request.headers.get("HX-Request"):
         items = PaymentReceived.objects.filter(booking=b).order_by("-created_at")
         modes = Mode.objects.all().order_by("name")
-        html = render_to_string("payments/_details.html", {
-            "booking": b,
-            "items": items,
-            "modes": modes,
-        }, request=request)
+        html = render_to_string(
+            "payments/_details.html",
+            {
+                "booking": b,
+                "items": items,
+                "modes": modes,
+            },
+            request=request,
+        )
         return HttpResponse(html)
 
     # Non-HTMX: full redirect
@@ -240,97 +252,111 @@ def payment_add_installment(request, booking_id):
 
 @login_required
 def payment_mark_full(request, booking_id):
+    """
+    Mark a booking as fully received (closing entry).
+    Creates a PaymentReceived record with:
+    - amount = 0
+    - discount = remaining (positive if underpaid, negative if overpaid)
+    Then sets booking.status_id = 3 (closed).
+    """
     b = get_object_or_404(Booking, id=booking_id, created_by=request.user)
 
-    if request.method == "POST":
-        # Calculate targets
-        target = sales_target_for_booking(b.id)
-        approved, pending = payments_received_for_booking(b.id)
-        received_total = approved + pending
-        remaining = max(0, target - received_total)
+    if request.method != "POST":
+        return HttpResponseBadRequest("POST required.")
 
-        # Compute discount: positive = underpaid, negative = overpaid
-        discount = 0
-        if remaining > 0:
-            discount = remaining
-        elif remaining < 0:
-            discount = remaining  # can be negative
+    # Calculate target and remaining
+    target = sales_target_for_booking(b.id)
+    approved, pending = payments_received_for_booking(b.id)
+    received_total = approved + pending
+    remaining = max(0, target - received_total)
 
-        # Create a closing payment record
-        PaymentReceived.objects.create(
-            booking=b,
-            mode=Mode.objects.first(),  # default mode or choose logically
-            amount=0,  # no actual new money, just marking full
-            received_by=request.user,
-            remarks="Marked as fully received",
-            is_full=True,
-            discount=discount,
-            sent_for_approval=True,
-            approved=False,
-        )
+    # discount: positive = underpaid, negative = overpaid
+    discount = 0
+    if remaining > 0:
+        discount = remaining
+    elif received_total > target:
+        # overpaid
+        discount = target - received_total  # negative
 
-        # Close the booking
-        b.status_id = 3  # closed
-        b.save(update_fields=["status_id"])
+    PaymentReceived.objects.create(
+        booking=b,
+        mode=Mode.objects.first(),  # choose default mode logically if needed
+        amount=0,  # no money, just closing adjustment
+        received_by=request.user,
+        remarks="Marked as fully received",
+        is_full=True,
+        discount=discount,
+        sent_for_approval=True,
+        approved=False,
+    )
 
-        # Respond HTMX: remove the row visually
-        return HttpResponse("")  # removes the table row
-    return HttpResponseBadRequest("POST required.")
+    # Close the booking
+    b.status_id = 3  # closed
+    b.save(update_fields=["status_id"])
+
+    # For HTMX: allow caller to remove the row
+    return HttpResponse("")
 
 
+# =========================
+#   ACCOUNTS / APPROVALS
+# =========================
 
 @login_required
 @user_passes_test(is_accounts)
 def payment_approvals(request):
     items = PaymentReceived.objects.filter(
-        sent_for_approval=True, approved=False).order_by("created_at")
+        sent_for_approval=True, approved=False
+    ).order_by("created_at")
     return render(request, "payments/approvals.html", {"items": items})
 
 
-from django.template.loader import render_to_string
-from django.http import HttpResponse
-
 @login_required
+@user_passes_test(is_accounts)
 def payment_approve(request, pk):
     item = get_object_or_404(PaymentReceived, pk=pk)
     item.approve(request.user)
 
-    if request.headers.get("Hx-Request"):
-        # Return a simple signal instead of row HTML
-        # so that front-end can fade it out
-        return HttpResponse('<tr id="payrow-{}" class="flash-approved"></tr>'.format(item.id))
+    if request.headers.get("HX-Request"):
+        # Frontend can fade out this row by ID
+        return HttpResponse(
+            '<tr id="payrow-{}" class="flash-approved"></tr>'.format(item.id)
+        )
 
     return redirect("approvals")
 
 
-
 @login_required
+@user_passes_test(is_accounts)
 def payment_reject(request, pk):
     item = get_object_or_404(PaymentReceived, pk=pk)
     item.delete()
 
-    # On reject: return an empty string to remove the row
-    if request.headers.get("Hx-Request"):
+    # HTMX: just remove the row
+    if request.headers.get("HX-Request"):
         return HttpResponse("")
 
     return redirect("approvals")
 
 
-
-
-
-from django.contrib.auth.decorators import login_required
-from django.db.models import Q
-from django.shortcuts import render
-from .models import PaymentReceived
+# =========================
+#   ACCOUNTANT DASHBOARD
+# =========================
 
 @login_required
 def accountant_dashboard(request):
-    # Only allow accountants, owners, admins
+    """
+    Dashboard for ACCOUNTANT / OWNER / ADMIN.
+    Shows all payments with filtering by client, status, and order.
+    """
     if request.user.role not in ["ACCOUNTANT", "OWNER", "ADMIN"]:
-        return render(request, "payments/accountant_dashboard.html", {"payments": []})
+        # Not authorized for full view
+        return render(
+            request,
+            "payments/accountant_dashboard.html",
+            {"payments": [], "client": "", "status": "", "order": "desc"},
+        )
 
-    # Base queryset: all received payments with linked booking/client
     qs = PaymentReceived.objects.select_related(
         "booking", "booking__client", "received_by", "mode"
     ).all()
@@ -356,11 +382,13 @@ def accountant_dashboard(request):
     else:
         qs = qs.order_by("-created_at")
 
-    print("Total payments for accountant:", qs.count())
-
-    return render(request, "payments/accountant_dashboard.html", {
-        "payments": qs,
-        "client": client,
-        "status": status,
-        "order": order,
-    })
+    return render(
+        request,
+        "payments/accountant_dashboard.html",
+        {
+            "payments": qs,
+            "client": client,
+            "status": status,
+            "order": order,
+        },
+    )
