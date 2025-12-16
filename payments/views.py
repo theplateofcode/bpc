@@ -33,7 +33,7 @@ def is_owner_or_admin(user):
 
 def is_accounts(user):
     # Accounts users are identified by group or superuser
-    return user.is_superuser or user.groups.filter(name=ACCOUNTS_GROUP_NAME).exists()
+    return user.is_superuser or user.role == "ACCOUNTANT" or user.groups.filter(name=ACCOUNTS_GROUP_NAME).exists()
 
 
 # =========================
