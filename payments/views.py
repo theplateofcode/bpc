@@ -319,7 +319,7 @@ def payment_approve(request, pk):
             '<tr id="payrow-{}" class="flash-approved"></tr>'.format(item.id)
         )
 
-    return redirect("approvals")
+    return redirect("accountant_dashboard")
 
 
 @login_required
@@ -332,11 +332,11 @@ def payment_reject(request, pk):
     if request.headers.get("HX-Request"):
         return HttpResponse("")
 
-    return redirect("approvals")
+    return redirect("accountant_dashboard")
 
 
 # =========================
-#   ACCOUNTANT DASHBOARD
+#   _ DASHBOARD
 # =========================
 
 @login_required
