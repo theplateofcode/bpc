@@ -20,7 +20,7 @@ from .models import PaymentReceived, Mode
 
 
 User = get_user_model()
-ACCOUNTS_GROUP_NAME = "Accounts"  # change if your group name differs
+ACCOUNTS_GROUP_NAME = "ACCOUNTANT"  # change if your group name differs
 
 
 # =========================
@@ -304,7 +304,7 @@ def payment_approvals(request):
     items = PaymentReceived.objects.filter(
         sent_for_approval=True, approved=False
     ).order_by("created_at")
-    return render(request, "payments/accountant_dashboard.html", {"items": items})
+    return render(request, "payments/approvals.html", {"items": items})
 
 
 @login_required
