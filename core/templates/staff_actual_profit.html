@@ -1,16 +1,39 @@
 {% extends "base.html" %}
 {% block content %}
 <div style="display: flex;">
-<h3 class="mt-4 text-primary fw-bold">Staff Actual Profit Dashboard</h3><span style="margin-top: 2rem; margin-left: 1rem; font-style: italic; color: gray;">Look at account-approved payment reports with real time discount</span>
+  <h3 class="mt-4 text-primary fw-bold">Staff Actual Profit Dashboard</h3>
+  <span style="margin-top: 2rem; margin-left: 1rem; font-style: italic; color: gray;">
+    Look at account-approved payment reports with real time discount
+  </span>
 </div>
 
 <!-- FILTERS -->
 <form id="reportFilters" class="row g-2 align-items-end">
-  <div class="col-md-2"><label class="form-label">Service</label><select id="service" name="service" class="form-select"><option value="">All</option></select></div>
-  <div class="col-md-2"><label class="form-label">Year</label><select id="year" name="year" class="form-select"><option value="">All</option></select></div>
-  <div class="col-md-2"><label class="form-label">Month</label><select id="month" name="month" class="form-select"><option value="">All</option></select></div>
-  <div class="col-md-2"><label class="form-label">Client</label><select id="client" name="client" class="form-select"><option value="">All</option></select></div>
-  <div class="col-md-2"><label class="form-label">Supplier</label><select id="supplier" name="supplier" class="form-select"><option value="">All</option></select></div>
+  <div class="col-md-2">
+    <label class="form-label">Service</label>
+    <select id="service" name="service" class="form-select"><option value="">All</option></select>
+  </div>
+
+  <div class="col-md-2">
+    <label class="form-label">Year</label>
+    <select id="year" name="year" class="form-select"><option value="">All</option></select>
+  </div>
+
+  <div class="col-md-2">
+    <label class="form-label">Month</label>
+    <select id="month" name="month" class="form-select"><option value="">All</option></select>
+  </div>
+
+  <div class="col-md-2">
+    <label class="form-label">Client</label>
+    <select id="client" name="client" class="form-select"><option value="">All</option></select>
+  </div>
+
+  <div class="col-md-2">
+    <label class="form-label">Supplier</label>
+    <select id="supplier" name="supplier" class="form-select"><option value="">All</option></select>
+  </div>
+
   <div class="col-md-auto d-flex align-items-end">
     <button type="button" id="applyFilters" class="btn btn-primary me-2">Apply</button>
     <button type="reset" id="resetFilters" class="btn btn-outline-secondary">Reset</button>
@@ -19,92 +42,287 @@
 
 <!-- SUMMARY CARDS -->
 <div class="row g-3 mt-3" id="reportResults">
-  <div class="col-md-3"><div class="card text-white bg-danger"><div class="card-body"><h5>Actual Sales</h5><h3 id="salesTotal">0</h3><small>(<span id="salesCash">0</span> C / <span id="salesNonCash">0</span> Q)</small></div></div></div>
-  <div class="col-md-3"><div class="card text-white bg-info"><div class="card-body"><h5>Total Purchase</h5><h3 id="purchaseTotal">0</h3><small>(<span id="purchaseCash">0</span> C / <span id="purchaseNonCash">0</span> Q)</small></div></div></div>
-  <div class="col-md-3"><div class="card text-white bg-success"><div class="card-body"><h5>Profit</h5><h3 id="profitTotal">0</h3><small>(<span id="profitCash">0</span> C / <span id="profitNonCash">0</span> Q)</small></div></div></div>
-  <div class="col-md-3"><div class="card text-white bg-warning"><div class="card-body"><h5>Discount (±)</h5><h3 id="discountTotal">0</h3><small>Total Bookings: <span id="bookingTotal">0</span></small></div></div></div>
+  <div class="col-md-3">
+    <div class="card text-white bg-danger">
+      <div class="card-body">
+        <h5>Actual Sales</h5>
+        <h3 id="salesTotal">0</h3>
+        <small>(<span id="salesCash">0</span> C / <span id="salesNonCash">0</span> Q)</small>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-3">
+    <div class="card text-white bg-info">
+      <div class="card-body">
+        <h5>Total Purchase</h5>
+        <h3 id="purchaseTotal">0</h3>
+        <small>(<span id="purchaseCash">0</span> C / <span id="purchaseNonCash">0</span> Q)</small>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-3">
+    <div class="card text-white bg-success">
+      <div class="card-body">
+        <h5>Profit</h5>
+        <h3 id="profitTotal">0</h3>
+        <small>(<span id="profitCash">0</span> C / <span id="profitNonCash">0</span> Q)</small>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-3">
+    <div class="card text-white bg-warning">
+      <div class="card-body">
+        <h5>Discount (±)</h5>
+        <h3 id="discountTotal">0</h3>
+        <small>Total Bookings: <span id="bookingTotal">0</span></small>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- SERVICE SUMMARY -->
 <h4 class="mt-4 text-primary">Service Summary (Actual)</h4>
 <table class="table table-bordered text-center" id="serviceSummary">
-  <thead class="table-light"><tr>
-    <th>Service</th><th colspan="2" class="bg-danger text-white">Sales</th>
-    <th colspan="2" class="bg-info text-white">Purchase</th>
-    <th colspan="2" class="bg-success text-white">Profit</th>
-    <th class="bg-warning text-dark">Discount</th>
-  </tr><tr><th></th><th>C</th><th>Q</th><th>C</th><th>Q</th><th>C</th><th>Q</th><th></th></tr></thead>
+  <thead class="table-light">
+    <tr>
+      <th>Service</th>
+      <th colspan="2" class="bg-danger text-white">Sales</th>
+      <th colspan="2" class="bg-info text-white">Purchase</th>
+      <th colspan="2" class="bg-success text-white">Profit</th>
+      <th class="bg-warning text-dark">Discount</th>
+    </tr>
+    <tr>
+      <th></th>
+      <th>C</th><th>Q</th>
+      <th>C</th><th>Q</th>
+      <th>C</th><th>Q</th>
+      <th></th>
+    </tr>
+  </thead>
   <tbody></tbody>
 </table>
 
 <!-- CLIENT BOOKINGS -->
 <h4 class="mt-4 text-primary">My Bookings Summary (Actual)</h4>
 <table class="table table-bordered text-center" id="clientSummary">
-  <thead class="table-light"><tr>
-    <th>Booking ID</th><th>Date</th><th>Client</th><th>Services</th>
-    <th class="bg-danger text-white">C Sales</th><th class="bg-danger text-white">Q Sales</th>
-    <th class="bg-info text-white">C Purchase</th><th class="bg-info text-white">Q Purchase</th>
-    <th class="bg-success text-white">C Profit</th><th class="bg-success text-white">Q Profit</th>
-    <th class="bg-warning text-dark">Discount</th>
-  </tr></thead><tbody></tbody>
+  <thead class="table-light">
+    <tr>
+      <th>Booking ID</th>
+      <th>Date</th>
+      <th>Client</th>
+      <th>Services</th>
+      <th class="bg-danger text-white">C Sales</th>
+      <th class="bg-danger text-white">Q Sales</th>
+      <th class="bg-info text-white">C Purchase</th>
+      <th class="bg-info text-white">Q Purchase</th>
+      <th class="bg-success text-white">C Profit</th>
+      <th class="bg-success text-white">Q Profit</th>
+      <th class="bg-warning text-dark">Discount</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
 </table>
 
 <!-- MODAL -->
-<div class="modal fade" id="serviceModal" tabindex="-1"><div class="modal-dialog modal-lg"><div class="modal-content">
-  <div class="modal-header bg-primary text-white"><h5 class="modal-title">Service Details</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
-  <div class="modal-body bg-light" id="serviceModalBody"></div>
-</div></div></div>
+<div class="modal fade" id="serviceModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title">Service Details</h5>
+        <button class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body bg-light" id="serviceModalBody"></div>
+    </div>
+  </div>
+</div>
 
 <script>
-document.addEventListener("DOMContentLoaded", () => {
-  const fmt = n => Math.round(n||0).toLocaleString("en-IN");
-  const safeSet = (id,v)=>{const e=document.getElementById(id);if(e)e.innerText=fmt(v)};
+document.addEventListener("DOMContentLoaded", async () => {
+  // store booking_id => services[]
+  let servicesStore = {};
 
-  async function loadFilters(){
-    const res=await fetch("{% url 'employee_report_filters_data' %}");
-    const data=await res.json();
-    const add=(id,it,f)=>{const el=document.getElementById(id);it.forEach(i=>el.insertAdjacentHTML("beforeend",`<option value="${i.id||i}">${f(i)}</option>`))};
-    add("service",data.services,s=>s);add("year",data.years,y=>y);add("month",data.months,m=>m);
-    add("client",data.clients,c=>c.name);add("supplier",data.suppliers,s=>s.name);
+  const fmt = (n) => Math.round(Number(n || 0)).toLocaleString("en-IN");
+  const safeSet = (id, v) => {
+    const e = document.getElementById(id);
+    if (e) e.innerText = fmt(v);
+  };
+
+  async function loadFilters() {
+    const res = await fetch("{% url 'employee_report_filters_data' %}");
+    if (!res.ok) return;
+    const data = await res.json();
+
+    const add = (id, items, labelFn) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      items.forEach((i) => {
+        el.insertAdjacentHTML(
+          "beforeend",
+          `<option value="${i.id || i}">${labelFn(i)}</option>`
+        );
+      });
+    };
+
+    add("service", data.services, (s) => s);
+    add("year", data.years, (y) => y);
+    add("month", data.months, (m) => m);
+    add("client", data.clients, (c) => c.name);
+    add("supplier", data.suppliers, (s) => s.name);
   }
 
-  async function loadReport(params=""){
-    const res=await fetch("{% url 'staff_filtered_actual_report' %}"+(params?"?"+params:""));
-    const js=await res.json(); const t=js.totals;
-    safeSet("salesTotal",t.sales_cash+t.sales_non_cash);safeSet("salesCash",t.sales_cash);safeSet("salesNonCash",t.sales_non_cash);
-    safeSet("purchaseTotal",t.purchase_cash+t.purchase_non_cash);safeSet("purchaseCash",t.purchase_cash);safeSet("purchaseNonCash",t.purchase_non_cash);
-    safeSet("profitTotal",t.profit_cash+t.profit_non_cash);safeSet("profitCash",t.profit_cash);safeSet("profitNonCash",t.profit_non_cash);
-    safeSet("discountTotal",t.discount);safeSet("bookingTotal",t.bookings);
+  async function loadReport(params = "") {
+    // SUMMARY (cards + service summary)
+    const res = await fetch("{% url 'staff_filtered_actual_report' %}" + (params ? "?" + params : ""));
+    if (!res.ok) return;
 
-    const sbody=document.querySelector("#serviceSummary tbody");sbody.innerHTML="";
-    Object.entries(js.service_summary).forEach(([k,v])=>sbody.insertAdjacentHTML("beforeend",
-      `<tr><td>${k}</td><td>${fmt(v.sales_cash)}</td><td>${fmt(v.sales_non_cash)}</td><td>${fmt(v.purchase_cash)}</td><td>${fmt(v.purchase_non_cash)}</td><td>${fmt(v.profit_cash)}</td><td>${fmt(v.profit_non_cash)}</td><td>${fmt(v.discount)}</td></tr>`));
+    const js = await res.json();
+    const t = js.totals || {};
 
-    const r=await fetch("{% url 'staff_bookings_report' %}"+(params?"?"+params:""));
-    const bd=await r.json();const tbody=document.querySelector("#clientSummary tbody");tbody.innerHTML="";
-    bd.data.forEach(b=>{
-      const s=b.services.map(s=>s.service).join(", ");
-      const modal=b.services.map(s=>`<div class='p-2 bg-white border mb-2'><b>${s.service}</b> (${s.mode})<br>Sales: ${fmt(s.sales)} | Purchase: ${fmt(s.purchase)} | Profit: ${fmt(s.profit)} | Discount: ${fmt(s.discount)}</div>`).join("");
-      tbody.insertAdjacentHTML("beforeend",
-        `<tr><td>${b.booking_id}</td><td>${b.booking_date}</td><td>${b.client_name}</td><td>${s} <button class='btn btn-sm btn-outline-primary ms-1' data-bs-toggle='modal' data-bs-target='#serviceModal' data-services='${encodeURIComponent(modal)}'>Show</button></td>
-        <td>${fmt(b.totals.sales_cash)}</td><td>${fmt(b.totals.sales_non_cash)}</td><td>${fmt(b.totals.purchase_cash)}</td><td>${fmt(b.totals.purchase_non_cash)}</td>
-        <td>${fmt(b.totals.profit_cash)}</td><td>${fmt(b.totals.profit_non_cash)}</td><td>${fmt(b.totals.discount)}</td></tr>`);
+    safeSet("salesTotal", (t.sales_cash || 0) + (t.sales_non_cash || 0));
+    safeSet("salesCash", t.sales_cash || 0);
+    safeSet("salesNonCash", t.sales_non_cash || 0);
+
+    safeSet("purchaseTotal", (t.purchase_cash || 0) + (t.purchase_non_cash || 0));
+    safeSet("purchaseCash", t.purchase_cash || 0);
+    safeSet("purchaseNonCash", t.purchase_non_cash || 0);
+
+    safeSet("profitTotal", (t.profit_cash || 0) + (t.profit_non_cash || 0));
+    safeSet("profitCash", t.profit_cash || 0);
+    safeSet("profitNonCash", t.profit_non_cash || 0);
+
+    safeSet("discountTotal", t.discount || 0);
+    safeSet("bookingTotal", t.bookings || 0);
+
+    const sbody = document.querySelector("#serviceSummary tbody");
+    sbody.innerHTML = "";
+    Object.entries(js.service_summary || {}).forEach(([k, v]) => {
+      sbody.insertAdjacentHTML(
+        "beforeend",
+        `<tr>
+          <td>${k}</td>
+          <td>${fmt(v.sales_cash)}</td>
+          <td>${fmt(v.sales_non_cash)}</td>
+          <td>${fmt(v.purchase_cash)}</td>
+          <td>${fmt(v.purchase_non_cash)}</td>
+          <td>${fmt(v.profit_cash)}</td>
+          <td>${fmt(v.profit_non_cash)}</td>
+          <td>${fmt(v.discount)}</td>
+        </tr>`
+      );
+    });
+
+    // BOOKINGS TABLE (with modal store)
+    const r = await fetch("{% url 'staff_bookings_report' %}" + (params ? "?" + params : ""));
+    if (!r.ok) return;
+
+    const bd = await r.json();
+    const tbody = document.querySelector("#clientSummary tbody");
+    tbody.innerHTML = "";
+
+    servicesStore = {}; // reset store each reload
+
+    (bd.data || []).forEach((b) => {
+      const svcNames = (b.services || []).map((s) => s.service).join(", ");
+      servicesStore[b.booking_id] = b.services || [];
+
+      tbody.insertAdjacentHTML(
+        "beforeend",
+        `<tr>
+          <td>${b.booking_id}</td>
+          <td>${b.booking_date}</td>
+          <td>${b.client_name}</td>
+          <td>
+            ${svcNames || "-"}
+            <button class="btn btn-sm btn-outline-primary ms-1"
+              data-bs-toggle="modal"
+              data-bs-target="#serviceModal"
+              data-booking="${b.booking_id}">
+              Show
+            </button>
+          </td>
+          <td>${fmt(b.totals?.sales_cash)}</td>
+          <td>${fmt(b.totals?.sales_non_cash)}</td>
+          <td>${fmt(b.totals?.purchase_cash)}</td>
+          <td>${fmt(b.totals?.purchase_non_cash)}</td>
+          <td>${fmt(b.totals?.profit_cash)}</td>
+          <td>${fmt(b.totals?.profit_non_cash)}</td>
+          <td>${fmt(b.totals?.discount)}</td>
+        </tr>`
+      );
     });
   }
 
-  document.getElementById("serviceModal").addEventListener("show.bs.modal",e=>{
-    document.getElementById("serviceModalBody").innerHTML=decodeURIComponent(e.relatedTarget.getAttribute("data-services"));
+  // Modal content
+  document.getElementById("serviceModal").addEventListener("show.bs.modal", (e) => {
+    const btn = e.relatedTarget;
+    const bookingId = btn.getAttribute("data-booking");
+    const services = servicesStore[bookingId] || [];
+
+    const html = services.map((s) => `
+      <div class="p-3 mb-3 bg-white shadow-sm rounded border">
+        <div class="d-flex justify-content-between align-items-center">
+          <h6 class="mb-0"><strong>${s.service}</strong> <span class="text-muted">(${s.mode || "-"})</span></h6>
+        </div>
+
+        <div class="row mt-2">
+          <div class="col-md-4">
+            <div class="small text-muted fw-bold">Sales</div>
+            <div>Cash: ${fmt(s.sales_cash)}</div>
+            <div>Non-cash: ${fmt(s.sales_non_cash)}</div>
+            <div class="fw-bold">Total: ${fmt(s.sales_total)}</div>
+          </div>
+
+          <div class="col-md-4">
+            <div class="small text-muted fw-bold">Purchase</div>
+            <div>Cash: ${fmt(s.purchase_cash)}</div>
+            <div>Non-cash: ${fmt(s.purchase_non_cash)}</div>
+            <div class="fw-bold">Total: ${fmt(s.purchase_total)}</div>
+          </div>
+
+          <div class="col-md-4">
+            <div class="small text-muted fw-bold">Profit</div>
+            <div>Cash: ${fmt(s.profit_cash)}</div>
+            <div>Non-cash: ${fmt(s.profit_non_cash)}</div>
+            <div class="fw-bold">Total: ${fmt(s.profit_total)}</div>
+          </div>
+        </div>
+
+        <div class="row mt-2">
+          <div class="col-md-6">
+            <div class="small text-muted fw-bold">Taxes</div>
+            <div>GST: ${fmt(s.gst)}</div>
+            <div>TCS: ${fmt(s.tcs)}</div>
+          </div>
+          <div class="col-md-6">
+            <div class="small text-muted fw-bold">Meta</div>
+            <div>Discount: ${fmt(s.discount || 0)}</div>
+            <div>Entered by: ${s.entered_by || "-"}</div>
+          </div>
+        </div>
+      </div>
+    `).join("");
+
+    document.getElementById("serviceModalBody").innerHTML =
+      html || `<div class="text-muted">No service rows found.</div>`;
   });
 
-  document.getElementById("applyFilters").addEventListener("click",()=>{
-    const p=new URLSearchParams(new FormData(document.getElementById("reportFilters"))).toString();
+  document.getElementById("applyFilters").addEventListener("click", (e) => {
+    e.preventDefault();
+    const p = new URLSearchParams(new FormData(document.getElementById("reportFilters"))).toString();
     loadReport(p);
   });
-  document.getElementById("resetFilters").addEventListener("click",()=>{
-    document.getElementById("reportFilters").reset();loadReport();
+
+  document.getElementById("resetFilters").addEventListener("click", (e) => {
+    e.preventDefault();
+    document.getElementById("reportFilters").reset();
+    loadReport();
   });
 
-  loadFilters();loadReport();
+  await loadFilters();
+  await loadReport();
 });
 </script>
 {% endblock %}

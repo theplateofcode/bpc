@@ -16,11 +16,20 @@ from django.conf import settings
 from django.utils import timezone
 
 from bookings.models import Booking
+from services.models import ServiceList
 # Reuse your existing payments mode model (table: payments_mode)
 # If your class name differs, adjust import accordingly.
 
 class PaymentReceived(models.Model):
     booking = models.ForeignKey(Booking, on_delete=models.CASCADE, related_name="payments")
+    # ✅ NEW: tie a payment to a specific service on that booking
+    service = models.ForeignKey(
+        ServiceList,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="payments"
+    )
     mode = models.ForeignKey(Mode, on_delete=models.PROTECT)
     amount = models.DecimalField(max_digits=12, decimal_places=2)
     received_on = models.DateField(default=timezone.now)

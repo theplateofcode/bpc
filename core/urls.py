@@ -11,6 +11,7 @@ from . import views_actual
 urlpatterns = [
     # Employee home dashboard
     path("", employee_dashboard, name="home"),
+    
 
     # Groups (superusers/staff only)
     path("manage-groups/", manage_groups, name="manage_groups"),
