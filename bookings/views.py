@@ -87,10 +87,8 @@ from django.db.models.functions import Coalesce, Least
 def bookings(request):
     # Role-based filtering
     if request.user.role in ['OWNER', 'ADMIN']:
-        bookings = Booking.objects.all().prefetch_related(
-            'tickets', 'passports', 'visas', 'insurances',
-            'hotels', 'sightseeings', 'transfers'
-        )
+        bookings = Booking.objects.all()
+        
     else:
         bookings = Booking.objects.filter(created_by=request.user).prefetch_related(
             'tickets', 'passports', 'visas', 'insurances',

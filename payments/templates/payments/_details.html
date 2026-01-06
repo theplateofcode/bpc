@@ -1,16 +1,17 @@
-<!-- payments/_details.html -->
 <div id="payments-details">
   <div class="d-flex justify-content-between align-items-center mb-2">
     <div>
       <strong>Booking:</strong> {{ booking.booking_id }}<br>
-      <small>Client: {{ booking.client.first_name }} {{ booking.client.last_name }}</small>
+      <small>Client: {{ booking.client.first_name }} {{ booking.client.last_name }}</small><br>
+      <small>Service: <strong>{{ service.name }}</strong></small>
     </div>
     <div>
       <button
         class="btn btn-outline-success btn-sm"
-        hx-get="{% url 'mark_full' booking.id %}"
+        hx-post="{% url 'mark_full' booking.id service.id %}"
         hx-target="#paymentsModal .modal-body"
-        hx-swap="innerHTML">
+        hx-swap="innerHTML"
+        hx-confirm="Mark THIS SERVICE as fully received? Will go for accountant approval.">
         Mark Full
       </button>
     </div>
@@ -20,7 +21,7 @@
 
   <h6 class="mb-2">Add Installment</h6>
   <form
-    hx-post="{% url 'add' booking.id %}"
+    hx-post="{% url 'add' booking.id service.id %}"
     hx-target="#paymentsModal .modal-body"
     hx-swap="innerHTML"
     hx-encoding="multipart/form-data">
@@ -31,6 +32,7 @@
       </div>
       <div class="col-md-3">
         <select name="mode" class="form-select" required>
+          <option value="">Select</option>
           {% for m in modes %}
             <option value="{{ m.id }}">{{ m.name }}</option>
           {% endfor %}

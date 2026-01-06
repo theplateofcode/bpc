@@ -30,6 +30,13 @@ class Mode(models.Model):
         return self.name
 
 
+from decimal import Decimal
+from django.db import models, transaction
+from django.conf import settings
+from django.db.models import Sum
+
+
+
 class Booking(models.Model):
     SERVICE_FLAG_MAP = {
         "ticket": "tickets_finished",
@@ -67,16 +74,13 @@ class Booking(models.Model):
         related_name='bookings'
     )
     status = models.ForeignKey(
-        Status,
+        'Status',
         on_delete=models.PROTECT,
-        default=2
+        default=1
     )
-    accounts_done = models.BooleanField(
-        default=False, verbose_name="Accounts Processed")
+    accounts_done = models.BooleanField(default=False)
 
-    # Service completion flags
-    # keep the choice field instead of boolean
-
+    # Service flags
     tickets_finished = models.BooleanField(default=False)
     visas_finished = models.BooleanField(default=False)
     hotels_finished = models.BooleanField(default=False)
@@ -86,7 +90,6 @@ class Booking(models.Model):
     passports_finished = models.BooleanField(default=False)
 
     def get_service_statuses(self):
-    # Map ServiceList code to booking flag and display name
         code_to_flag = {
             "ticket":      ("tickets_finished", "Tickets"),
             "visa":        ("visas_finished", "Visas"),
@@ -101,8 +104,7 @@ class Booking(models.Model):
             code = service.code.lower()
             flag, display = code_to_flag.get(code, (None, service.name))
             if flag:
-                finished = getattr(self, flag, False)
-                statuses.append((display, finished))
+                statuses.append((display, getattr(self, flag, False)))
         return statuses
 
     def save(self, *args, **kwargs):
@@ -111,9 +113,8 @@ class Booking(models.Model):
             last_num = last.id if last else 0
             self.booking_id = f"B-{last_num + 1:04d}"
         super().save(*args, **kwargs)
-    
+
     def delete(self, *args, **kwargs):
-        # 1. Delete all service entries
         self.tickets.all().delete()
         self.visas.all().delete()
         self.hotels.all().delete()
@@ -121,113 +122,148 @@ class Booking(models.Model):
         self.transfers.all().delete()
         self.sightseeings.all().delete()
         self.passports.all().delete()
-        
-        # 2. Clear many-to-many relationships
         self.services.clear()
-        
-        # 3. Delete BookingService through model instances
         self.bookingservice_set.all().delete()
-        
-        # 4. Delete the booking
         super().delete(*args, **kwargs)
 
     def __str__(self):
         return self.booking_id
 
+
+     # -----------------------
+    # Internal helper methods
+    # -----------------------
+    def _sum_decimal(self, qs, field_name: str) -> Decimal:
+        val = qs.aggregate(total=Sum(field_name))["total"]
+        return val or Decimal("0")
+
+    def _is_cash_mode_filter(self):
+        # Cash mode = mode.name contains "cash" (case-insensitive)
+        return {"mode__name__icontains": "cash"}
+
+    # -----------------------
+    # Purchase split (REAL)
+    # Uses SERVICE.mode (supplier payment mode)
+    # -----------------------
     @property
-    def purchase_total(self):
-        total = Decimal('0')
-        # Tickets (always included)
-        total += self.tickets.aggregate(total=Sum('purchase_amount')
-                                        )['total'] or Decimal('0')
-
-        # Visa/Passport/Insurance (exclude cash)
-        total += self.visas.exclude(mode__name='Cash').aggregate(
-            total=Sum('purchase_amount'))['total'] or Decimal('0')
-        total += self.passports.exclude(mode__name='Cash').aggregate(
-            total=Sum('purchase_amount'))['total'] or Decimal('0')
-        total += self.insurances.exclude(mode__name='Cash').aggregate(
-            total=Sum('purchase_amount'))['total'] or Decimal('0')
-
-        # Package services (exclude cash)
-        total += self._package_purchase_total
+    def purchase_cash(self) -> Decimal:
+        f = self._is_cash_mode_filter()
+        total = Decimal("0")
+        total += self._sum_decimal(self.tickets.filter(**f), "purchase_amount")
+        total += self._sum_decimal(self.visas.filter(**f), "purchase_amount")
+        total += self._sum_decimal(self.passports.filter(**f), "purchase_amount")
+        total += self._sum_decimal(self.insurances.filter(**f), "purchase_amount")
+        total += self._sum_decimal(self.hotels.filter(**f), "purchase_amount")
+        total += self._sum_decimal(self.sightseeings.filter(**f), "purchase_amount")
+        total += self._sum_decimal(self.transfers.filter(**f), "purchase_amount")
         return total
 
     @property
-    def _package_purchase_total(self):
-        return (
-            (self.hotels.exclude(mode__name='Cash').aggregate(total=Sum('purchase_amount'))['total'] or Decimal('0')) +
-            (self.sightseeings.exclude(mode__name='Cash').aggregate(total=Sum('purchase_amount'))['total'] or Decimal('0')) +
-            (self.transfers.exclude(mode__name='Cash').aggregate(
-                total=Sum('purchase_amount'))['total'] or Decimal('0'))
+    def purchase_non_cash(self) -> Decimal:
+        return (self.purchase_total or Decimal("0")) - self.purchase_cash
+
+    # -----------------------
+    # Sales split (TARGET / BOOKING TOTAL)
+    # This is NOT "actual sales"; it is sales_amount entered in services.
+    # If you want "actual", keep using PaymentReceived in reports.
+    # -----------------------
+    @property
+    def sales_cash_target(self) -> Decimal:
+        f = self._is_cash_mode_filter()
+        total = Decimal("0")
+        total += self._sum_decimal(self.tickets.filter(**f), "sales_amount")
+        total += self._sum_decimal(self.visas.filter(**f), "sales_amount")
+        total += self._sum_decimal(self.passports.filter(**f), "sales_amount")
+        total += self._sum_decimal(self.insurances.filter(**f), "sales_amount")
+        total += self._sum_decimal(self.hotels.filter(**f), "sales_amount")
+        total += self._sum_decimal(self.sightseeings.filter(**f), "sales_amount")
+        total += self._sum_decimal(self.transfers.filter(**f), "sales_amount")
+        return total
+
+    @property
+    def sales_non_cash_target(self) -> Decimal:
+        total = (
+            (self.tickets.aggregate(total=Sum("sales_amount"))["total"] or Decimal("0")) +
+            (self.visas.aggregate(total=Sum("sales_amount"))["total"] or Decimal("0")) +
+            (self.passports.aggregate(total=Sum("sales_amount"))["total"] or Decimal("0")) +
+            (self.insurances.aggregate(total=Sum("sales_amount"))["total"] or Decimal("0")) +
+            (self.hotels.aggregate(total=Sum("sales_amount"))["total"] or Decimal("0")) +
+            (self.sightseeings.aggregate(total=Sum("sales_amount"))["total"] or Decimal("0")) +
+            (self.transfers.aggregate(total=Sum("sales_amount"))["total"] or Decimal("0"))
         )
+        return total - self.sales_cash_target
+
+    @property
+    def purchase_total(self):
+        total = Decimal('0')
+        total += self.tickets.aggregate(total=Sum('purchase_amount'))['total'] or Decimal('0')
+        total += self.visas.aggregate(total=Sum('purchase_amount'))['total'] or Decimal('0')
+        total += self.passports.aggregate(total=Sum('purchase_amount'))['total'] or Decimal('0')
+        total += self.insurances.aggregate(total=Sum('purchase_amount'))['total'] or Decimal('0')
+        total += self.hotels.aggregate(total=Sum('purchase_amount'))['total'] or Decimal('0')
+        total += self.sightseeings.aggregate(total=Sum('purchase_amount'))['total'] or Decimal('0')
+        total += self.transfers.aggregate(total=Sum('purchase_amount'))['total'] or Decimal('0')
+        return total
 
     @property
     def sales_total(self):
         total = Decimal('0')
-        # Tickets (always included)
-        total += self.tickets.aggregate(total=Sum('sales_amount')
-                                        )['total'] or Decimal('0')
-
-        # Visa/Passport/Insurance (exclude cash)
-        total += self.visas.exclude(mode__name='Cash').aggregate(
-            total=Sum('sales_amount'))['total'] or Decimal('0')
-        total += self.passports.exclude(mode__name='Cash').aggregate(
-            total=Sum('sales_amount'))['total'] or Decimal('0')
-        total += self.insurances.exclude(mode__name='Cash').aggregate(
-            total=Sum('sales_amount'))['total'] or Decimal('0')
-
-        # Package services (exclude cash)
-        total += self._package_sales_total
+        total += self.tickets.aggregate(total=Sum('sales_amount'))['total'] or Decimal('0')
+        total += self.visas.aggregate(total=Sum('sales_amount'))['total'] or Decimal('0')
+        total += self.passports.aggregate(total=Sum('sales_amount'))['total'] or Decimal('0')
+        total += self.insurances.aggregate(total=Sum('sales_amount'))['total'] or Decimal('0')
+        total += self.hotels.aggregate(total=Sum('sales_amount'))['total'] or Decimal('0')
+        total += self.sightseeings.aggregate(total=Sum('sales_amount'))['total'] or Decimal('0')
+        total += self.transfers.aggregate(total=Sum('sales_amount'))['total'] or Decimal('0')
         return total
-
-    @property
-    def _package_sales_total(self):
-        return (
-            (self.hotels.exclude(mode__name='Cash').aggregate(total=Sum('sales_amount'))['total'] or Decimal('0')) +
-            (self.sightseeings.exclude(mode__name='Cash').aggregate(total=Sum('sales_amount'))['total'] or Decimal('0')) +
-            (self.transfers.exclude(mode__name='Cash').aggregate(
-                total=Sum('sales_amount'))['total'] or Decimal('0'))
-        )
-
-    # bookings/models.py
-    @property
-    def invoice_amount(self):
-        return self.sales_total + self.tcs_amount 
-
-    @property
-    def tcs_amount(self):
-        hotel_sales = self.hotels.exclude(mode__name__iexact='cash').filter(
-            travel_type__iexact='international'
-        ).aggregate(total=Sum('sales_amount'))['total'] or Decimal('0')
-        # print("DEBUG: hotel_sales", hotel_sales)
-        transfer_sales = self.transfers.exclude(mode__name__iexact='cash').filter(
-            travel_type__iexact='international'
-        ).aggregate(total=Sum('sales_amount'))['total'] or Decimal('0')
-        # print("DEBUG: transfer_sales", transfer_sales)
-        sightseeing_sales = self.sightseeings.exclude(mode__name__iexact='cash').filter(
-            travel_type__iexact='international'
-        ).aggregate(total=Sum('sales_amount'))['total'] or Decimal('0')
-        # print("DEBUG: sightseeing_sales", sightseeing_sales)
-        total = hotel_sales + transfer_sales + sightseeing_sales
-        # print("DEBUG: total TCS amount", total)
-        return total * Decimal('0.05')
 
     @property
     def gross_profit(self):
         return self.sales_total - self.purchase_total
 
     @property
+    def tcs_amount(self):
+        hotel_sales = self.hotels.exclude(mode__name__iexact='cash').filter(
+            travel_type__iexact='international'
+        ).aggregate(total=Sum('sales_amount'))['total'] or Decimal('0')
+
+        transfer_sales = self.transfers.exclude(mode__name__iexact='cash').filter(
+            travel_type__iexact='international'
+        ).aggregate(total=Sum('sales_amount'))['total'] or Decimal('0')
+
+        sightseeing_sales = self.sightseeings.exclude(mode__name__iexact='cash').filter(
+            travel_type__iexact='international'
+        ).aggregate(total=Sum('sales_amount'))['total'] or Decimal('0')
+
+        total = hotel_sales + transfer_sales + sightseeing_sales
+        return total * Decimal('0.05')
+
+    @property
+    def invoice_amount(self):
+        return self.sales_total + self.tcs_amount
+
+    @property
     def sales_gst(self):
-        gst_invoice = self.invoice_amount * Decimal('0.05')  # 5% of invoice
-        gst_profit = self.gross_profit * Decimal('0.18')     # 18% of gross profit
-        return min(gst_invoice, gst_profit)
+        gst = Decimal('0.0')
+        gst_rate = Decimal('0.18')
+
+        # Tickets: GST always applies
+        for t in self.tickets.all():
+            base = t.sales_amount - t.purchase_amount
+            gst += base * gst_rate
+
+        # Other services: GST only if mode is not cash
+        for qs in [self.visas, self.passports, self.insurances, self.hotels, self.sightseeings, self.transfers]:
+            for obj in qs.all():
+                is_cash = getattr(obj.mode, 'name', '').lower() == 'cash' if hasattr(obj, 'mode') else False
+                base = obj.sales_amount - obj.purchase_amount
+                gst += Decimal('0') if is_cash else base * gst_rate
+
+        return gst
 
     @property
     def net_profit(self):
         return self.gross_profit - self.sales_gst
-    
-
 
 class BookingService(models.Model):
     booking = models.ForeignKey(Booking, on_delete=models.CASCADE)
@@ -246,34 +282,3 @@ class BookingService(models.Model):
 
     def __str__(self):
         return f"{self.booking.booking_id} - {self.service.name}"
-
-# bookings/models.py
-import os
-from django.db import models
-from services.models import ServiceList  # Your existing service model
-from clients.models import Client  # Your existing client model
-from suppliers.models import Supplier  # Your existing supplier model
-from bookings.models import Booking  # Your existing booking model
-
-from django.utils import timezone
-from django.utils.text import slugify
-
-def booking_document_path(instance, filename):
-    booking_id = instance.booking.booking_id if instance.booking else 'no_booking'
-    return os.path.join("booking_documents", booking_id, filename)
-
-import os
-from django.utils import timezone
-from django.utils.text import slugify
-
-
-
-class BookingDocument(models.Model):
-    booking = models.ForeignKey(Booking, on_delete=models.CASCADE, related_name='documents')
-    service = models.ForeignKey(ServiceList, on_delete=models.PROTECT)
-    supplier = models.ForeignKey(Supplier, on_delete=models.PROTECT)
-    document = models.FileField(upload_to=booking_document_path)  # Use the simplified function
-    uploaded_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"Document for {self.booking.booking_id}"

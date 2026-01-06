@@ -31,6 +31,8 @@ urlpatterns = [
     path('payments/', include('payments.urls')),
     path('accounts/', include('accounts.urls')),
     path('reports/', include('reports.urls')),
+    path('etc/', include('gst_tcs.urls'))
+
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATICFILES_DIRS[0])
