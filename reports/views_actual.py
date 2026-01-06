@@ -257,7 +257,7 @@ def owner_actual_reports(request):
 
 # ---------------------------
 # Filtered Report (Cards + Summaries)
-# (UPDATED: KPI totals include legacy booking-wise)
+# (UPDATED: KPI totals + employee summary include legacy booking-wise)
 # ---------------------------
 
 @login_required
@@ -322,7 +322,7 @@ def filtered_actual_report(request):
         svc = a.service
         service_code = _svc_code(svc)
 
-        # ✅ If this booking is legacy-only, do NOT count it here (avoid wrong gating/splits)
+        # ✅ If this booking is legacy-only, skip here to avoid wrong splits
         if _booking_is_legacy_only(booking.id):
             legacy_seen_booking_ids.add(booking.id)
             continue
@@ -348,7 +348,7 @@ def filtered_actual_report(request):
         # TCS reduces NON-CASH sales
         sales_non_cash_net = sales_non_cash - tcs_amt
 
-        # ✅ Your rule: NO GST in cash profit.
+        # ✅ Your rule: NO GST in cash profit. GST subtract only from non-cash bucket.
         profit_cash = sales_cash - purch_cash
         profit_non_cash = (sales_non_cash_net - purch_non_cash) - gst_amt
 
@@ -390,6 +390,7 @@ def filtered_actual_report(request):
             "profit_cash": 0.0, "profit_non_cash": 0.0,
             "discount": 0.0,
             "gst": 0.0, "tcs": 0.0,
+            "legacy_bookings": 0,
         })
         edata["sales_cash"] += float(sales_cash)
         edata["sales_non_cash"] += float(sales_non_cash_net)
@@ -402,7 +403,7 @@ def filtered_actual_report(request):
         edata["tcs"] += float(tcs_amt)
 
     # ---------------------------
-    # (B) Legacy-only bookings -> KPI cards ONLY
+    # (B) Legacy-only bookings -> KPI totals + employee summary
     # ---------------------------
     legacy_bookings = (
         Booking.objects
@@ -425,8 +426,10 @@ def filtered_actual_report(request):
     if client:
         legacy_bookings = legacy_bookings.filter(client_id=client)
 
-    # NOTE: service/supplier/employee filters cannot be applied safely for legacy multi-service.
-    # We keep legacy inclusive (your requirement: include all old bookings in totals).
+    # Important:
+    # - service/supplier filters cannot be applied safely
+    # - employee filter is also not safely applicable to legacy multi-service
+    # We include legacy in totals/summaries for correctness and visibility.
     for b in legacy_bookings:
         if not _booking_is_legacy_only(b.id):
             continue
@@ -437,13 +440,14 @@ def filtered_actual_report(request):
 
         purchase_total = to_decimal(getattr(b, "purchase_total", 0))
 
-        # no split exists on legacy => place into NON-CASH bucket
+        # No reliable split for legacy purchase => keep in NON-CASH bucket
         purch_cash = Decimal("0")
         purch_non_cash = purchase_total
 
         profit_cash = sales_cash - purch_cash
         profit_non_cash = sales_non_cash - purch_non_cash
 
+        # KPI totals
         results["totals"]["sales_cash"] += float(sales_cash)
         results["totals"]["sales_non_cash"] += float(sales_non_cash)
         results["totals"]["purchase_cash"] += float(purch_cash)
@@ -452,23 +456,49 @@ def filtered_actual_report(request):
         results["totals"]["profit_non_cash"] += float(profit_non_cash)
         results["totals"]["discount"] += float(discount_total)
 
+        # Employee summary attribution rule for legacy: booking.created_by
+        legacy_owner = b.created_by
+        emp_name = (legacy_owner.get_full_name() or legacy_owner.username) if legacy_owner else "Unknown"
+        edata = results["employee_summary"].setdefault(emp_name, {
+            "sales_cash": 0.0, "sales_non_cash": 0.0,
+            "purchase_cash": 0.0, "purchase_non_cash": 0.0,
+            "profit_cash": 0.0, "profit_non_cash": 0.0,
+            "discount": 0.0,
+            "gst": 0.0, "tcs": 0.0,
+            "legacy_bookings": 0,
+        })
+        edata["sales_cash"] += float(sales_cash)
+        edata["sales_non_cash"] += float(sales_non_cash)
+        edata["purchase_cash"] += float(purch_cash)
+        edata["purchase_non_cash"] += float(purch_non_cash)
+        edata["profit_cash"] += float(profit_cash)
+        edata["profit_non_cash"] += float(profit_non_cash)
+        edata["discount"] += float(discount_total)
+        edata["legacy_bookings"] += 1
+
         legacy_seen_booking_ids.add(b.id)
 
     # booking counts
     results["totals"]["bookings"] = len(seen_booking_ids.union(legacy_seen_booking_ids))
     results["totals"]["legacy_bookings"] = len(legacy_seen_booking_ids)
 
-    # Add TOTAL rows to summaries (unchanged)
+    # Add TOTAL rows to summaries (updated: sums legacy_bookings too if present)
     def add_total(block: Dict):
-        totals = {k: 0.0 for k in [
+        base_keys = [
             "sales_cash", "sales_non_cash",
             "purchase_cash", "purchase_non_cash",
             "profit_cash", "profit_non_cash",
             "discount", "gst", "tcs",
-        ]}
+        ]
+        totals = {k: 0.0 for k in base_keys}
+        legacy_cnt = 0
+
         for v in block.values():
-            for k in totals:
-                totals[k] += v[k]
+            for k in base_keys:
+                totals[k] += float(v.get(k, 0.0))
+            legacy_cnt += int(v.get("legacy_bookings", 0))
+
+        totals["legacy_bookings"] = legacy_cnt
         block["TOTAL"] = totals
 
     add_total(results["service_summary"])
@@ -479,7 +509,7 @@ def filtered_actual_report(request):
 
 # ---------------------------
 # Booking-wise Summary (Client Table)
-# (UNCHANGED: new-system only, fully service-attributed)
+# UPDATED: includes legacy bookings too
 # ---------------------------
 
 @login_required
@@ -491,16 +521,19 @@ def bookings_report(request):
     client = request.GET.get("client")
     supplier = request.GET.get("supplier")
 
+    # Include any booking that has at least one approved payment (legacy or new)
     bookings = (
         Booking.objects
         .filter(
-            id__in=PaymentReceived.objects.filter(approved=True, service__isnull=False)
+            id__in=PaymentReceived.objects.filter(approved=True)
             .values_list("booking_id", flat=True)
             .distinct()
         )
         .select_related("client", "created_by")
+        .distinct()
     )
 
+    # Booking-level filters
     if year:
         bookings = bookings.filter(booking_date__year=year)
     if month:
@@ -510,6 +543,7 @@ def bookings_report(request):
         except ValueError:
             pass
     if employee:
+        # keeping your old meaning here: created_by filter for booking table
         bookings = bookings.filter(created_by_id=employee)
     if client:
         bookings = bookings.filter(client_id=client)
@@ -517,6 +551,78 @@ def bookings_report(request):
     data = []
 
     for booking in bookings:
+        # ---------------------------
+        # Legacy-only booking row
+        # ---------------------------
+        if _booking_is_legacy_only(booking.id):
+            # If service filter is applied, legacy bookings cannot match (no split exists)
+            if service:
+                continue
+
+            sales_total, sales_cash, sales_non_cash, discount_total = _legacy_booking_sales_from_payments(booking.id)
+            if sales_total <= 0:
+                continue
+
+            purchase_total = to_decimal(getattr(booking, "purchase_total", 0))
+
+            # Legacy purchase split unknown => keep in non-cash bucket
+            purch_cash = Decimal("0")
+            purch_non_cash = purchase_total
+
+            profit_cash = sales_cash - purch_cash
+            profit_non_cash = sales_non_cash - purch_non_cash
+            profit_total = profit_cash + profit_non_cash
+
+            entered_by = booking.created_by.get_full_name() or booking.created_by.username
+
+            # One pseudo service row so UI stays consistent
+            services_data = [{
+                "service": "LEGACY (Not split)",
+                "mode": "NA",
+
+                "sales_cash": float(sales_cash),
+                "sales_non_cash": float(sales_non_cash),
+                "sales_total": float(sales_total),
+
+                "purchase_cash": float(purch_cash),
+                "purchase_non_cash": float(purch_non_cash),
+                "purchase_total": float(purchase_total),
+
+                "profit_cash": float(profit_cash),
+                "profit_non_cash": float(profit_non_cash),
+                "profit_total": float(profit_total),
+
+                "gst": 0.0,
+                "tcs": 0.0,
+                "discount": float(discount_total),
+                "entered_by": entered_by,
+            }]
+
+            data.append({
+                "booking_id": booking.booking_id,
+                "booking_date": booking.booking_date.strftime("%d-%b-%Y") if booking.booking_date else "",
+                "created_by": entered_by,
+                "client_name": f"{booking.client.first_name} {booking.client.last_name}" if booking.client else "Unknown",
+                "services": services_data,
+                "totals": {
+                    "sales_cash": float(sales_cash),
+                    "sales_non_cash": float(sales_non_cash),
+                    "purchase_cash": float(purch_cash),
+                    "purchase_non_cash": float(purch_non_cash),
+                    "profit_cash": float(profit_cash),
+                    "profit_non_cash": float(profit_non_cash),
+                    "total_profit": float(profit_total),
+                    "discount": float(discount_total),
+                    "gst": 0.0,
+                    "tcs": 0.0,
+                },
+                "is_legacy": True,
+            })
+            continue
+
+        # ---------------------------
+        # New system booking row (service-attributed)
+        # ---------------------------
         if not booking_all_services_fully_approved(booking.id):
             continue
 
@@ -526,6 +632,10 @@ def bookings_report(request):
             .select_related("service")
             .distinct()
         )
+
+        # service filter (new system only)
+        if service:
+            bs_qs = bs_qs.filter(service__name=service)
 
         services_data = []
 
@@ -569,17 +679,14 @@ def bookings_report(request):
                 model = SERVICE_MODEL_MAP.get(service_code)
                 if not model:
                     return fallback_user
-
                 obj = (
                     model.objects
                     .filter(booking_id=booking_id)
                     .select_related("created_by")
                     .first()
                 )
-
                 if obj and obj.created_by:
                     return obj.created_by.get_full_name() or obj.created_by.username
-
                 return fallback_user
 
             entered_by = get_service_creator_name(
@@ -642,6 +749,7 @@ def bookings_report(request):
                 "gst": float(book_gst),
                 "tcs": float(book_tcs),
             },
+            "is_legacy": False,
         })
 
     return JsonResponse({"data": data})
