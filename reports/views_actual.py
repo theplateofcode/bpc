@@ -402,7 +402,7 @@ def filtered_actual_report(request):
         edata["tcs"] += float(tcs_amt)
 
     # ---------------------------
-    # (B) Legacy-only bookings -> KPI cards + Employee Summary
+    # (B) Legacy-only bookings -> KPI cards ONLY
     # ---------------------------
     legacy_bookings = (
         Booking.objects
@@ -426,7 +426,7 @@ def filtered_actual_report(request):
         legacy_bookings = legacy_bookings.filter(client_id=client)
 
     # NOTE: service/supplier/employee filters cannot be applied safely for legacy multi-service.
-    # We keep legacy inclusive (your requirement: include all old bookings).
+    # We keep legacy inclusive (your requirement: include all old bookings in totals).
     for b in legacy_bookings:
         if not _booking_is_legacy_only(b.id):
             continue
@@ -437,16 +437,13 @@ def filtered_actual_report(request):
 
         purchase_total = to_decimal(getattr(b, "purchase_total", 0))
 
-        # Legacy has no reliable cash/non-cash purchase split -> keep purchase in NON-CASH bucket
+        # no split exists on legacy => place into NON-CASH bucket
         purch_cash = Decimal("0")
         purch_non_cash = purchase_total
 
         profit_cash = sales_cash - purch_cash
         profit_non_cash = sales_non_cash - purch_non_cash
 
-        # ---------------------------
-        # Add to KPI totals (cards)
-        # ---------------------------
         results["totals"]["sales_cash"] += float(sales_cash)
         results["totals"]["sales_non_cash"] += float(sales_non_cash)
         results["totals"]["purchase_cash"] += float(purch_cash)
@@ -455,38 +452,7 @@ def filtered_actual_report(request):
         results["totals"]["profit_non_cash"] += float(profit_non_cash)
         results["totals"]["discount"] += float(discount_total)
 
-        # gst/tcs are not computable in legacy context -> keep as 0 for legacy
-        # (do NOT touch results["totals"]["gst"]/["tcs"] here)
-
-        # ---------------------------
-        # Add to Employee Summary (legacy attribution)
-        # Attribution rule: booking.created_by owns the legacy booking totals
-        # ---------------------------
-        legacy_owner = b.created_by
-        emp_name = (legacy_owner.get_full_name() or legacy_owner.username) if legacy_owner else "Unknown"
-
-        edata = results["employee_summary"].setdefault(emp_name, {
-            "sales_cash": 0.0, "sales_non_cash": 0.0,
-            "purchase_cash": 0.0, "purchase_non_cash": 0.0,
-            "profit_cash": 0.0, "profit_non_cash": 0.0,
-            "discount": 0.0,
-            "gst": 0.0, "tcs": 0.0,
-            # Optional: helps you show legacy count per employee (safe to keep even if UI ignores it)
-            "legacy_bookings": 0,
-        })
-
-        edata["sales_cash"] += float(sales_cash)
-        edata["sales_non_cash"] += float(sales_non_cash)
-        edata["purchase_cash"] += float(purch_cash)
-        edata["purchase_non_cash"] += float(purch_non_cash)
-        edata["profit_cash"] += float(profit_cash)
-        edata["profit_non_cash"] += float(profit_non_cash)
-        edata["discount"] += float(discount_total)
-        # gst/tcs remain unchanged (0 add)
-        edata["legacy_bookings"] += 1
-
         legacy_seen_booking_ids.add(b.id)
-
 
     # booking counts
     results["totals"]["bookings"] = len(seen_booking_ids.union(legacy_seen_booking_ids))
