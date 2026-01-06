@@ -219,6 +219,20 @@ def staff_filtered_actual_report(request):
     client = request.GET.get("client")
     supplier = request.GET.get("supplier")
 
+    results = {
+        "totals": {
+            "sales_cash": 0.0, "sales_non_cash": 0.0,
+            "purchase_cash": 0.0, "purchase_non_cash": 0.0,
+            "profit_cash": 0.0, "profit_non_cash": 0.0,
+            "discount": 0.0, "bookings": 0,
+        },
+        "service_summary": {},  # keep same behavior (service-linked only)
+        "legacy_bookings_visible": 0,
+    }
+
+    # ------------------------------------------------------------
+    # (A) NEW / SERVICE-LINKED totals: attributable to employee
+    # ------------------------------------------------------------
     assignments = (
         BookingService.objects
         .select_related("booking", "booking__client", "service")
@@ -230,6 +244,7 @@ def staff_filtered_actual_report(request):
         )
     )
 
+    # booking-level filters
     if year:
         assignments = assignments.filter(booking__booking_date__year=year)
     if month:
@@ -239,20 +254,10 @@ def staff_filtered_actual_report(request):
             pass
     if client:
         assignments = assignments.filter(booking__client_id=client)
+
+    # service filter (applies only to service-linked side)
     if service:
         assignments = assignments.filter(service__name=service)
-
-    results = {
-        "totals": {
-            "sales_cash": 0.0, "sales_non_cash": 0.0,
-            "purchase_cash": 0.0, "purchase_non_cash": 0.0,
-            "profit_cash": 0.0, "profit_non_cash": 0.0,
-            "discount": 0.0, "bookings": 0,
-        },
-        "service_summary": {},
-        # optional: show how many legacy bookings exist in filtered scope
-        "legacy_bookings_visible": 0,
-    }
 
     seen_booking_ids = set()
     legacy_seen = set()
@@ -260,20 +265,18 @@ def staff_filtered_actual_report(request):
     for a in assignments:
         booking = a.booking
 
-        # If booking is legacy-unassigned, we do NOT include it in staff totals,
-        # because payments are not attributable to any service/employee.
-        if booking_has_legacy_unassigned_payments(booking.id):
+        # if legacy-unassigned exists, skip from attributable staff totals
+        if PaymentReceived.objects.filter(booking_id=booking.id, approved=True, service__isnull=True).exists():
             legacy_seen.add(booking.id)
             continue
 
-        # else: enforce full approval on service-linked data
         if not booking_all_services_fully_approved(booking.id):
             continue
 
         svc = a.service
         scode = _svc_code(svc)
 
-        # supplier filter
+        # supplier filter depends on service table
         if supplier:
             model = SERVICE_MODEL_MAP.get(scode)
             if not model or not model.objects.filter(booking_id=booking.id, supplier_id=supplier).exists():
@@ -289,14 +292,7 @@ def staff_filtered_actual_report(request):
         # TCS reduces non-cash sales
         sales_non_cash_net = sales_non_cash - tcs_amt
 
-        # IMPORTANT: no GST deduction on cash unless Ticket applies to cash side via service table logic.
-        # Since GST is computed per service table rows and you want: non-ticket cash => no GST,
-        # the simplest consistent reporting is:
-        # - profit_cash = sales_cash - purch_cash  (NO GST subtraction)
-        # - profit_non_cash = (sales_non_cash - tcs) - purch_non_cash - gst_amt  (GST only impacts non-cash side)
-        #
-        # For Ticket: GST always applies; but you still do not want it deducted from cash profit.
-        # That means we always deduct GST from non-cash bucket for reporting split.
+        # Your rule: DO NOT deduct GST from cash profit at all.
         profit_cash = sales_cash - purch_cash
         profit_non_cash = (sales_non_cash_net - purch_non_cash) - gst_amt
 
@@ -310,6 +306,7 @@ def staff_filtered_actual_report(request):
 
         seen_booking_ids.add(booking.id)
 
+        # service_summary remains service-linked only (unchanged)
         sname = svc.name
         sdata = results["service_summary"].setdefault(sname, {
             "sales_cash": 0.0, "sales_non_cash": 0.0,
@@ -325,10 +322,86 @@ def staff_filtered_actual_report(request):
         sdata["profit_non_cash"] += float(profit_non_cash)
         sdata["discount"] += float(discount_total)
 
-    results["totals"]["bookings"] = len(seen_booking_ids)
-    results["legacy_bookings_visible"] = len(legacy_seen)
-    return JsonResponse(results)
+    # ------------------------------------------------------------
+    # (B) LEGACY totals: add into KPI cards ONLY
+    #     (not into service_summary)
+    # ------------------------------------------------------------
+    legacy_bookings = (
+        Booking.objects
+        .filter(
+            Q(created_by=user) |
+            Q(id__in=BookingService.objects.filter(assigned_to=user).values_list("booking_id", flat=True))
+        )
+        .filter(id__in=PaymentReceived.objects.filter(approved=True, service__isnull=True)
+                .values_list("booking_id", flat=True).distinct())
+        .select_related("client")
+        .distinct()
+    )
 
+    # same booking-level filters
+    if year:
+        legacy_bookings = legacy_bookings.filter(booking_date__year=year)
+    if month:
+        try:
+            legacy_bookings = legacy_bookings.filter(booking_date__month=datetime.strptime(month, "%B").month)
+        except ValueError:
+            pass
+    if client:
+        legacy_bookings = legacy_bookings.filter(client_id=client)
+
+    # supplier + service filter:
+    # legacy payments have no service mapping, so we can only apply supplier/service
+    # safely when booking has exactly one service in BookingService.
+    # Otherwise we ignore these filters for legacy to avoid wrong exclusion.
+    if supplier or service:
+        filtered_ids = []
+        for b in legacy_bookings:
+            bs = list(BookingService.objects.filter(booking_id=b.id).select_related("service"))
+            if len(bs) == 1:
+                svc_obj = bs[0].service
+                if service and svc_obj.name != service:
+                    continue
+                if supplier:
+                    scode = _svc_code(svc_obj)
+                    model = SERVICE_MODEL_MAP.get(scode)
+                    if not model or not model.objects.filter(booking_id=b.id, supplier_id=supplier).exists():
+                        continue
+                filtered_ids.append(b.id)
+            else:
+                # multi-service legacy: cannot safely filter by supplier/service
+                # keep it (so totals remain inclusive & honest)
+                filtered_ids.append(b.id)
+        legacy_bookings = legacy_bookings.filter(id__in=filtered_ids)
+
+    for b in legacy_bookings:
+        sales_total, sales_cash, sales_non_cash, discount_total = _legacy_booking_sales_from_payments(b.id)
+        if sales_total <= 0:
+            continue
+
+        purchase_total = to_decimal(getattr(b, "purchase_total", 0))
+
+        # no cash/non-cash purchase split exists for legacy => put into non-cash bucket
+        purch_cash = Decimal("0")
+        purch_non_cash = purchase_total
+
+        profit_cash = sales_cash - purch_cash
+        profit_non_cash = sales_non_cash - purch_non_cash
+
+        results["totals"]["sales_cash"] += float(sales_cash)
+        results["totals"]["sales_non_cash"] += float(sales_non_cash)
+        results["totals"]["purchase_cash"] += float(purch_cash)
+        results["totals"]["purchase_non_cash"] += float(purch_non_cash)
+        results["totals"]["profit_cash"] += float(profit_cash)
+        results["totals"]["profit_non_cash"] += float(profit_non_cash)
+        results["totals"]["discount"] += float(discount_total)
+
+        legacy_seen.add(b.id)
+
+    # bookings count on KPI cards: include both sets
+    results["totals"]["bookings"] = len(seen_booking_ids.union(legacy_seen))
+    results["legacy_bookings_visible"] = len(legacy_seen)
+
+    return JsonResponse(results)
 
 # ---------------------------
 # Staff Bookings Report
