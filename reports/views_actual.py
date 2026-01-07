@@ -16,14 +16,13 @@ from services.models import Hotel, Transfer, SightSeeing, Ticket, Visa, Insuranc
 
 User = get_user_model()
 
+GST_RATE = Decimal("0.18")
+TCS_RATE = Decimal("0.05")
+
 
 # ---------------------------
 # Small utils
 # ---------------------------
-
-GST_RATE = Decimal("0.18")
-TCS_RATE = Decimal("0.05")
-
 
 def to_decimal(val) -> Decimal:
     try:
@@ -33,62 +32,13 @@ def to_decimal(val) -> Decimal:
 
 
 def is_cash_mode(mode) -> bool:
-    """
-    Cash detection rule:
-    mode is cash if its name is exactly 'cash' (case-insensitive).
-    """
     if not mode or not getattr(mode, "name", None):
         return False
     return mode.name.strip().lower() == "cash"
 
 
 # ---------------------------
-# Legacy helpers (service is NULL)
-# ---------------------------
-
-def _legacy_booking_sales_from_payments(booking_id: int) -> Tuple[Decimal, Decimal, Decimal, Decimal]:
-    """
-    Legacy booking-wise totals from approved payments where service is NULL.
-    Returns (sales_total, sales_cash, sales_non_cash, discount_total)
-    """
-    qs = (
-        PaymentReceived.objects
-        .filter(booking_id=booking_id, approved=True, service__isnull=True)
-        .select_related("mode")
-    )
-    if not qs.exists():
-        z = Decimal("0")
-        return z, z, z, z
-
-    sales_total = sum(to_decimal(p.amount) for p in qs)
-    sales_cash = sum(to_decimal(p.amount) for p in qs if is_cash_mode(p.mode))
-    sales_non_cash = sales_total - sales_cash
-    discount_total = sum(to_decimal(p.discount) for p in qs)
-
-    return sales_total, sales_cash, sales_non_cash, discount_total
-
-
-def _booking_is_legacy_only(booking_id: int) -> bool:
-    """
-    Legacy-only booking means:
-      - it has approved payments with service NULL
-      - and it has NO approved payments with service NOT NULL
-    This avoids double counting when mixed data exists.
-    """
-    has_legacy = PaymentReceived.objects.filter(
-        booking_id=booking_id, approved=True, service__isnull=True
-    ).exists()
-    if not has_legacy:
-        return False
-
-    has_new = PaymentReceived.objects.filter(
-        booking_id=booking_id, approved=True, service__isnull=False
-    ).exists()
-    return not has_new
-
-
-# ---------------------------
-# Service mapping (purchase/sales source)
+# Service mapping
 # ---------------------------
 
 SERVICE_MODEL_MAP = {
@@ -103,10 +53,6 @@ SERVICE_MODEL_MAP = {
 
 
 def _svc_code(service_obj) -> str:
-    """
-    BookingService.service is ServiceList.
-    Typically .code is lowercase like 'hotel', 'ticket', etc.
-    """
     return (
         (getattr(service_obj, "code", "") or getattr(service_obj, "name", "") or "")
         .strip()
@@ -116,14 +62,10 @@ def _svc_code(service_obj) -> str:
 
 
 # ---------------------------
-# Purchase totals (service table: supplier-side)
+# Purchase totals (supplier-side) - per booking + service_code
 # ---------------------------
 
 def _svc_purchase_totals(booking_id: int, service_code: str) -> Tuple[Decimal, Decimal, Decimal]:
-    """
-    Returns (purchase_total, purchase_cash, purchase_non_cash) for THIS booking + THIS service.
-    Uses the service table's Mode (supplier-side).
-    """
     model = SERVICE_MODEL_MAP.get(service_code)
     z = Decimal("0")
     if not model:
@@ -135,19 +77,16 @@ def _svc_purchase_totals(booking_id: int, service_code: str) -> Tuple[Decimal, D
         .aggregate(s=Sum("purchase_amount"))["s"]
         or z
     )
-    non_cash = total - cash
+    non_cash = to_decimal(total) - to_decimal(cash)
     return to_decimal(total), to_decimal(cash), to_decimal(non_cash)
 
 
 # ---------------------------
-# Sales totals (payments table: customer-side actuals)
+# Sales totals (customer-side actuals) - per booking + service_id
+# NEW SYSTEM ONLY => service_id IS NOT NULL
 # ---------------------------
 
 def _svc_sales_totals_from_payments(booking_id: int, service_id: int) -> Tuple[Decimal, Decimal, Decimal, Decimal]:
-    """
-    Returns (sales_total, sales_cash, sales_non_cash, discount_total) for THIS booking+service
-    from approved PaymentReceived rows.
-    """
     payments = (
         PaymentReceived.objects
         .filter(booking_id=booking_id, service_id=service_id, approved=True)
@@ -158,30 +97,19 @@ def _svc_sales_totals_from_payments(booking_id: int, service_id: int) -> Tuple[D
         z = Decimal("0")
         return z, z, z, z
 
-    sales_cash = sum(to_decimal(p.amount) for p in payments if is_cash_mode(p.mode))
     sales_total = sum(to_decimal(p.amount) for p in payments)
+    sales_cash = sum(to_decimal(p.amount) for p in payments if is_cash_mode(p.mode))
     sales_non_cash = sales_total - sales_cash
     discount_total = sum(to_decimal(p.discount) for p in payments)
-    return sales_total, sales_cash, sales_non_cash, discount_total
+
+    return to_decimal(sales_total), to_decimal(sales_cash), to_decimal(sales_non_cash), to_decimal(discount_total)
 
 
 # ---------------------------
-# GST/TCS helpers (service-row rules: NOT payments)
+# GST/TCS from service rows (your rules)
 # ---------------------------
 
 def _svc_tax_totals_from_service_rows(booking_id: int, service_code: str) -> Tuple[Decimal, Decimal]:
-    """
-    Returns (gst_total, tcs_total) for THIS booking + THIS service, computed from service rows.
-
-    GST rules:
-      - Ticket: GST ALWAYS on (sales_amount - purchase_amount) * 18% (even cash)
-      - Others: GST only if NON-CASH on that service row
-
-    TCS rules:
-      - Only for Hotel/Transfer/Sightseeing
-      - Only if NON-CASH AND travel_type == 'international'
-      - TCS = sales_amount * 5%
-    """
     model = SERVICE_MODEL_MAP.get(service_code)
     z = Decimal("0")
     if not model:
@@ -210,16 +138,20 @@ def _svc_tax_totals_from_service_rows(booking_id: int, service_code: str) -> Tup
 
         # TCS
         if service_code in {"hotel", "transfer", "sightseeing"}:
-            travel_type = getattr(obj, "travel_type", "") or ""
-            is_international = travel_type.strip().lower() == "international"
+            travel_type = (getattr(obj, "travel_type", "") or "").strip().lower()
+            is_international = travel_type == "international"
             if (not row_is_cash) and is_international:
                 tcs_total += (sales_amount * TCS_RATE)
 
-    return gst_total, tcs_total
+    return to_decimal(gst_total), to_decimal(tcs_total)
 
 
 # ---------------------------
-# Booking “fully approved” gate (new system)
+# Booking gate (NEW SYSTEM ONLY)
+# Requires:
+# - BookingService exists
+# - No pending payments for those services
+# - Every service has >= 1 approved payment (service_id not null)
 # ---------------------------
 
 def booking_all_services_fully_approved(booking_id: int) -> bool:
@@ -232,6 +164,7 @@ def booking_all_services_fully_approved(booking_id: int) -> bool:
     if not service_ids:
         return False
 
+    # any pending for any assigned service => not eligible
     if PaymentReceived.objects.filter(
         booking_id=booking_id,
         service_id__in=service_ids,
@@ -239,15 +172,20 @@ def booking_all_services_fully_approved(booking_id: int) -> bool:
     ).exists():
         return False
 
+    # each service must have at least 1 approved payment (new system)
     for sid in service_ids:
-        if not PaymentReceived.objects.filter(booking_id=booking_id, service_id=sid, approved=True).exists():
+        if not PaymentReceived.objects.filter(
+            booking_id=booking_id,
+            service_id=sid,
+            approved=True
+        ).exists():
             return False
 
     return True
 
 
 # ---------------------------
-# Main Page
+# Page
 # ---------------------------
 
 @login_required
@@ -256,27 +194,31 @@ def owner_actual_reports(request):
 
 
 # ---------------------------
-# Filtered Report (Cards + Summaries)
-# (UPDATED: KPI totals + employee summary include legacy booking-wise)
+# Filtered Report (Cards + Summaries) - NEW SYSTEM ONLY
+# Employee summary is service-attributed via BookingService.assigned_to
 # ---------------------------
 
 @login_required
 def filtered_actual_report(request):
-    service = request.GET.get("service")
-    employee = request.GET.get("employee")
+    service = request.GET.get("service")      # ServiceList.name
+    employee = request.GET.get("employee")    # assigned_to id
     year = request.GET.get("year")
     month = request.GET.get("month")
     client = request.GET.get("client")
     supplier = request.GET.get("supplier")
 
+    # Only consider bookings that have approved NEW payments (service_id NOT NULL)
+    approved_new_booking_ids = (
+        PaymentReceived.objects
+        .filter(approved=True, service__isnull=False)
+        .values_list("booking_id", flat=True)
+        .distinct()
+    )
+
     assignments = (
         BookingService.objects
         .select_related("booking", "booking__client", "booking__created_by", "service", "assigned_to")
-        .filter(
-            booking_id__in=PaymentReceived.objects.filter(approved=True)
-            .values_list("booking_id", flat=True)
-            .distinct()
-        )
+        .filter(booking_id__in=approved_new_booking_ids)
     )
 
     # Booking-level filters
@@ -305,26 +247,20 @@ def filtered_actual_report(request):
             "discount": 0.0,
             "gst": 0.0, "tcs": 0.0,
             "bookings": 0,
-            "legacy_bookings": 0,
         },
         "service_summary": {},
         "employee_summary": {},
     }
 
     seen_booking_ids = set()
-    legacy_seen_booking_ids = set()
 
-    # ---------------------------
-    # (A) New system (service-attributed)
-    # ---------------------------
     for a in assignments:
         booking = a.booking
         svc = a.service
         service_code = _svc_code(svc)
 
-        # ✅ If this booking is legacy-only, skip here to avoid wrong splits
-        if _booking_is_legacy_only(booking.id):
-            legacy_seen_booking_ids.add(booking.id)
+        # Gate: only include bookings that are fully approved in NEW system
+        if not booking_all_services_fully_approved(booking.id):
             continue
 
         # Supplier filter: service-table supplier
@@ -333,6 +269,7 @@ def filtered_actual_report(request):
             if not model.objects.filter(booking_id=booking.id, supplier_id=supplier).exists():
                 continue
 
+        # Actual sales per service from NEW payments only
         sales_total, sales_cash, sales_non_cash, discount_total = _svc_sales_totals_from_payments(
             booking_id=booking.id,
             service_id=svc.id
@@ -342,17 +279,20 @@ def filtered_actual_report(request):
 
         seen_booking_ids.add(booking.id)
 
-        purch_total, purch_cash, purch_non_cash = _svc_purchase_totals(booking.id, service_code)
+        # Purchase per service from service rows
+        _, purch_cash, purch_non_cash = _svc_purchase_totals(booking.id, service_code)
+
+        # Taxes per service from service rows
         gst_amt, tcs_amt = _svc_tax_totals_from_service_rows(booking.id, service_code)
 
-        # TCS reduces NON-CASH sales
+        # Non-cash sales net of TCS
         sales_non_cash_net = sales_non_cash - tcs_amt
 
-        # ✅ Your rule: NO GST in cash profit. GST subtract only from non-cash bucket.
+        # Rule: no GST in cash profit; GST subtract only from non-cash bucket
         profit_cash = sales_cash - purch_cash
         profit_non_cash = (sales_non_cash_net - purch_non_cash) - gst_amt
 
-        # Cards totals
+        # Totals (cards)
         results["totals"]["sales_cash"] += float(sales_cash)
         results["totals"]["sales_non_cash"] += float(sales_non_cash_net)
         results["totals"]["purchase_cash"] += float(purch_cash)
@@ -382,7 +322,7 @@ def filtered_actual_report(request):
         sdata["gst"] += float(gst_amt)
         sdata["tcs"] += float(tcs_amt)
 
-        # Employee summary
+        # Employee summary (service attribution = BookingService.assigned_to)
         emp_name = a.assigned_to.get_full_name() or a.assigned_to.username
         edata = results["employee_summary"].setdefault(emp_name, {
             "sales_cash": 0.0, "sales_non_cash": 0.0,
@@ -390,7 +330,6 @@ def filtered_actual_report(request):
             "profit_cash": 0.0, "profit_non_cash": 0.0,
             "discount": 0.0,
             "gst": 0.0, "tcs": 0.0,
-            "legacy_bookings": 0,
         })
         edata["sales_cash"] += float(sales_cash)
         edata["sales_non_cash"] += float(sales_non_cash_net)
@@ -402,103 +341,19 @@ def filtered_actual_report(request):
         edata["gst"] += float(gst_amt)
         edata["tcs"] += float(tcs_amt)
 
-    # ---------------------------
-    # (B) Legacy-only bookings -> KPI totals + employee summary
-    # ---------------------------
-    legacy_bookings = (
-        Booking.objects
-        .filter(
-            id__in=PaymentReceived.objects.filter(approved=True, service__isnull=True)
-            .values_list("booking_id", flat=True)
-            .distinct()
-        )
-        .select_related("client", "created_by")
-    )
+    results["totals"]["bookings"] = len(seen_booking_ids)
 
-    # same booking-level filters
-    if year:
-        legacy_bookings = legacy_bookings.filter(booking_date__year=year)
-    if month:
-        try:
-            legacy_bookings = legacy_bookings.filter(booking_date__month=datetime.strptime(month, "%B").month)
-        except ValueError:
-            pass
-    if client:
-        legacy_bookings = legacy_bookings.filter(client_id=client)
-
-    # Important:
-    # - service/supplier filters cannot be applied safely
-    # - employee filter is also not safely applicable to legacy multi-service
-    # We include legacy in totals/summaries for correctness and visibility.
-    for b in legacy_bookings:
-        if not _booking_is_legacy_only(b.id):
-            continue
-
-        sales_total, sales_cash, sales_non_cash, discount_total = _legacy_booking_sales_from_payments(b.id)
-        if sales_total <= 0:
-            continue
-
-        purchase_total = to_decimal(getattr(b, "purchase_total", 0))
-
-        # No reliable split for legacy purchase => keep in NON-CASH bucket
-        purch_cash = Decimal("0")
-        purch_non_cash = purchase_total
-
-        profit_cash = sales_cash - purch_cash
-        profit_non_cash = sales_non_cash - purch_non_cash
-
-        # KPI totals
-        results["totals"]["sales_cash"] += float(sales_cash)
-        results["totals"]["sales_non_cash"] += float(sales_non_cash)
-        results["totals"]["purchase_cash"] += float(purch_cash)
-        results["totals"]["purchase_non_cash"] += float(purch_non_cash)
-        results["totals"]["profit_cash"] += float(profit_cash)
-        results["totals"]["profit_non_cash"] += float(profit_non_cash)
-        results["totals"]["discount"] += float(discount_total)
-
-        # Employee summary attribution rule for legacy: booking.created_by
-        legacy_owner = b.created_by
-        emp_name = (legacy_owner.get_full_name() or legacy_owner.username) if legacy_owner else "Unknown"
-        edata = results["employee_summary"].setdefault(emp_name, {
-            "sales_cash": 0.0, "sales_non_cash": 0.0,
-            "purchase_cash": 0.0, "purchase_non_cash": 0.0,
-            "profit_cash": 0.0, "profit_non_cash": 0.0,
-            "discount": 0.0,
-            "gst": 0.0, "tcs": 0.0,
-            "legacy_bookings": 0,
-        })
-        edata["sales_cash"] += float(sales_cash)
-        edata["sales_non_cash"] += float(sales_non_cash)
-        edata["purchase_cash"] += float(purch_cash)
-        edata["purchase_non_cash"] += float(purch_non_cash)
-        edata["profit_cash"] += float(profit_cash)
-        edata["profit_non_cash"] += float(profit_non_cash)
-        edata["discount"] += float(discount_total)
-        edata["legacy_bookings"] += 1
-
-        legacy_seen_booking_ids.add(b.id)
-
-    # booking counts
-    results["totals"]["bookings"] = len(seen_booking_ids.union(legacy_seen_booking_ids))
-    results["totals"]["legacy_bookings"] = len(legacy_seen_booking_ids)
-
-    # Add TOTAL rows to summaries (updated: sums legacy_bookings too if present)
     def add_total(block: Dict):
-        base_keys = [
+        keys = [
             "sales_cash", "sales_non_cash",
             "purchase_cash", "purchase_non_cash",
             "profit_cash", "profit_non_cash",
             "discount", "gst", "tcs",
         ]
-        totals = {k: 0.0 for k in base_keys}
-        legacy_cnt = 0
-
+        totals = {k: 0.0 for k in keys}
         for v in block.values():
-            for k in base_keys:
+            for k in keys:
                 totals[k] += float(v.get(k, 0.0))
-            legacy_cnt += int(v.get("legacy_bookings", 0))
-
-        totals["legacy_bookings"] = legacy_cnt
         block["TOTAL"] = totals
 
     add_total(results["service_summary"])
@@ -508,8 +363,7 @@ def filtered_actual_report(request):
 
 
 # ---------------------------
-# Booking-wise Summary (Client Table)
-# UPDATED: includes legacy bookings too
+# Booking-wise Summary (Client table) - NEW SYSTEM ONLY
 # ---------------------------
 
 @login_required
@@ -521,11 +375,11 @@ def bookings_report(request):
     client = request.GET.get("client")
     supplier = request.GET.get("supplier")
 
-    # Include any booking that has at least one approved payment (legacy or new)
+    # Only bookings with approved NEW payments (service_id not null)
     bookings = (
         Booking.objects
         .filter(
-            id__in=PaymentReceived.objects.filter(approved=True)
+            id__in=PaymentReceived.objects.filter(approved=True, service__isnull=False)
             .values_list("booking_id", flat=True)
             .distinct()
         )
@@ -543,7 +397,7 @@ def bookings_report(request):
         except ValueError:
             pass
     if employee:
-        # keeping your old meaning here: created_by filter for booking table
+        # Booking table meaning (as in your UI): created_by
         bookings = bookings.filter(created_by_id=employee)
     if client:
         bookings = bookings.filter(client_id=client)
@@ -551,78 +405,6 @@ def bookings_report(request):
     data = []
 
     for booking in bookings:
-        # ---------------------------
-        # Legacy-only booking row
-        # ---------------------------
-        if _booking_is_legacy_only(booking.id):
-            # If service filter is applied, legacy bookings cannot match (no split exists)
-            if service:
-                continue
-
-            sales_total, sales_cash, sales_non_cash, discount_total = _legacy_booking_sales_from_payments(booking.id)
-            if sales_total <= 0:
-                continue
-
-            purchase_total = to_decimal(getattr(booking, "purchase_total", 0))
-
-            # Legacy purchase split unknown => keep in non-cash bucket
-            purch_cash = Decimal("0")
-            purch_non_cash = purchase_total
-
-            profit_cash = sales_cash - purch_cash
-            profit_non_cash = sales_non_cash - purch_non_cash
-            profit_total = profit_cash + profit_non_cash
-
-            entered_by = booking.created_by.get_full_name() or booking.created_by.username
-
-            # One pseudo service row so UI stays consistent
-            services_data = [{
-                "service": "LEGACY (Not split)",
-                "mode": "NA",
-
-                "sales_cash": float(sales_cash),
-                "sales_non_cash": float(sales_non_cash),
-                "sales_total": float(sales_total),
-
-                "purchase_cash": float(purch_cash),
-                "purchase_non_cash": float(purch_non_cash),
-                "purchase_total": float(purchase_total),
-
-                "profit_cash": float(profit_cash),
-                "profit_non_cash": float(profit_non_cash),
-                "profit_total": float(profit_total),
-
-                "gst": 0.0,
-                "tcs": 0.0,
-                "discount": float(discount_total),
-                "entered_by": entered_by,
-            }]
-
-            data.append({
-                "booking_id": booking.booking_id,
-                "booking_date": booking.booking_date.strftime("%d-%b-%Y") if booking.booking_date else "",
-                "created_by": entered_by,
-                "client_name": f"{booking.client.first_name} {booking.client.last_name}" if booking.client else "Unknown",
-                "services": services_data,
-                "totals": {
-                    "sales_cash": float(sales_cash),
-                    "sales_non_cash": float(sales_non_cash),
-                    "purchase_cash": float(purch_cash),
-                    "purchase_non_cash": float(purch_non_cash),
-                    "profit_cash": float(profit_cash),
-                    "profit_non_cash": float(profit_non_cash),
-                    "total_profit": float(profit_total),
-                    "discount": float(discount_total),
-                    "gst": 0.0,
-                    "tcs": 0.0,
-                },
-                "is_legacy": True,
-            })
-            continue
-
-        # ---------------------------
-        # New system booking row (service-attributed)
-        # ---------------------------
         if not booking_all_services_fully_approved(booking.id):
             continue
 
@@ -633,7 +415,7 @@ def bookings_report(request):
             .distinct()
         )
 
-        # service filter (new system only)
+        # Service filter (new system only)
         if service:
             bs_qs = bs_qs.filter(service__name=service)
 
@@ -665,12 +447,11 @@ def bookings_report(request):
             if sales_total <= 0:
                 continue
 
-            purch_total, purch_cash, purch_non_cash = _svc_purchase_totals(booking.id, service_code)
+            _, purch_cash, purch_non_cash = _svc_purchase_totals(booking.id, service_code)
             gst_amt, tcs_amt = _svc_tax_totals_from_service_rows(booking.id, service_code)
 
             sales_non_cash_net = sales_non_cash - tcs_amt
 
-            # ✅ no GST in cash profit; GST subtract from non-cash bucket
             profit_cash = sales_cash - purch_cash
             profit_non_cash = (sales_non_cash_net - purch_non_cash) - gst_amt
             profit_total = profit_cash + profit_non_cash
@@ -696,16 +477,17 @@ def bookings_report(request):
             )
 
             services_data.append({
+                "service_id": svc.id,
                 "service": svc.name,
                 "mode": "Mixed",
 
                 "sales_cash": float(sales_cash),
                 "sales_non_cash": float(sales_non_cash_net),
-                "sales_total": float(sales_cash + sales_non_cash_net),
+                "sales_total": float(to_decimal(sales_cash + sales_non_cash_net)),
 
                 "purchase_cash": float(purch_cash),
                 "purchase_non_cash": float(purch_non_cash),
-                "purchase_total": float(purch_cash + purch_non_cash),
+                "purchase_total": float(to_decimal(purch_cash + purch_non_cash)),
 
                 "profit_cash": float(profit_cash),
                 "profit_non_cash": float(profit_non_cash),
@@ -713,8 +495,8 @@ def bookings_report(request):
 
                 "gst": float(gst_amt),
                 "tcs": float(tcs_amt),
-
                 "discount": float(discount_total),
+
                 "entered_by": entered_by,
             })
 

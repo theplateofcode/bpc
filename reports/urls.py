@@ -20,9 +20,9 @@ urlpatterns = [
     path("owner-reports/bookings-report/", views.bookings_report, name="bookings_report"),
 
     # Actuals reports
-    path("owner-reports-actual/", views_actual.owner_actual_reports, name="owner_actual_reports"),
-    path("owner-reports-actual/filtered/", views_actual.filtered_actual_report, name="filtered_actual_report"),
-    path("owner-reports-actual/bookings_report/", views_actual.bookings_report, name="bookings_report"),
+    path("owner/actual/", views_actual.owner_actual_reports, name="owner_actual_reports"),
+    path("owner/actual/data/", views_actual.filtered_actual_report, name="filtered_actual_report"),
+    path("owner/actual/bookings/", views_actual.bookings_report, name="bookings_report"),
 
 
 ]
