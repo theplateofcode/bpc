@@ -73,7 +73,7 @@ def _svc_purchase_totals(booking_id: int, service_code: str) -> Tuple[Decimal, D
 
     total = model.objects.filter(booking_id=booking_id).aggregate(s=Sum("purchase_amount"))["s"] or z
     cash = (
-        model.objects.filter(booking_id=booking_id, mode__name__iexact="cash")
+        model.objects.filter(booking_id=booking_id, mode__name__iexact="Cash")
         .aggregate(s=Sum("purchase_amount"))["s"]
         or z
     )
