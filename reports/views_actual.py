@@ -6,23 +6,23 @@ from typing import Dict, Tuple
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import get_user_model
-from django.db.models import Sum
+from django.db.models import Sum, Q
 from django.http import JsonResponse
 from django.shortcuts import render
 
 from bookings.models import Booking, BookingService
-from payments.models import PaymentReceived
+from payments.models import PaymentReceived, Mode
 from services.models import Hotel, Transfer, SightSeeing, Ticket, Visa, Insurance, Passport
 
 User = get_user_model()
 
-GST_RATE = Decimal("0.18")
-TCS_RATE = Decimal("0.05")
-
-
 # ---------------------------
 # Small utils
 # ---------------------------
+
+GST_RATE = Decimal("0.18")
+TCS_RATE = Decimal("0.05")
+
 
 def to_decimal(val) -> Decimal:
     try:
@@ -32,13 +32,25 @@ def to_decimal(val) -> Decimal:
 
 
 def is_cash_mode(mode) -> bool:
+    """
+    PaymentReceived.mode cash detection:
+    mode is cash if its name is exactly 'cash' (case-insensitive).
+    """
     if not mode or not getattr(mode, "name", None):
         return False
     return mode.name.strip().lower() == "cash"
 
 
+def get_cash_mode_ids() -> Tuple[int, ...]:
+    """
+    Robust 'cash' detection for service purchase rows.
+    Uses Mode IDs (avoids join+string issues).
+    """
+    return tuple(Mode.objects.filter(name__iexact="cash").values_list("id", flat=True))
+
+
 # ---------------------------
-# Service mapping
+# Service mapping (purchase/sales source)
 # ---------------------------
 
 SERVICE_MODEL_MAP = {
@@ -53,6 +65,10 @@ SERVICE_MODEL_MAP = {
 
 
 def _svc_code(service_obj) -> str:
+    """
+    BookingService.service is ServiceList.
+    Typically .code is lowercase like 'hotel', 'ticket', etc.
+    """
     return (
         (getattr(service_obj, "code", "") or getattr(service_obj, "name", "") or "")
         .strip()
@@ -62,31 +78,50 @@ def _svc_code(service_obj) -> str:
 
 
 # ---------------------------
-# Purchase totals (supplier-side) - per booking + service_code
+# Purchase totals (service table: supplier-side)
 # ---------------------------
 
-def _svc_purchase_totals(booking_id: int, service_code: str) -> Tuple[Decimal, Decimal, Decimal]:
+def _svc_purchase_totals(
+    booking_id: int,
+    service_code: str,
+    cash_mode_ids: Tuple[int, ...],
+) -> Tuple[Decimal, Decimal, Decimal]:
+    """
+    Returns (purchase_total, purchase_cash, purchase_non_cash) for THIS booking + THIS service.
+    Cash is detected by mode_id IN cash_mode_ids (NOT mode__name join).
+    """
     model = SERVICE_MODEL_MAP.get(service_code)
     z = Decimal("0")
     if not model:
         return z, z, z
 
-    total = model.objects.filter(booking_id=booking_id).aggregate(s=Sum("purchase_amount"))["s"] or z
-    cash = (
-        model.objects.filter(booking_id=booking_id, mode__name__iexact="Cash")
-        .aggregate(s=Sum("purchase_amount"))["s"]
-        or z
+    agg = (
+        model.objects
+        .filter(booking_id=booking_id)
+        .aggregate(
+            total=Sum("purchase_amount"),
+            cash=Sum("purchase_amount", filter=Q(mode_id__in=cash_mode_ids)) if cash_mode_ids else None,
+        )
     )
-    non_cash = to_decimal(total) - to_decimal(cash)
-    return to_decimal(total), to_decimal(cash), to_decimal(non_cash)
+
+    total = to_decimal(agg["total"])
+    cash = to_decimal(agg["cash"])
+    non_cash = total - cash
+    return total, cash, non_cash
 
 
 # ---------------------------
-# Sales totals (customer-side actuals) - per booking + service_id
-# NEW SYSTEM ONLY => service_id IS NOT NULL
+# Sales totals (payments table: customer-side actuals)
 # ---------------------------
 
-def _svc_sales_totals_from_payments(booking_id: int, service_id: int) -> Tuple[Decimal, Decimal, Decimal, Decimal]:
+def _svc_sales_totals_from_payments(
+    booking_id: int,
+    service_id: int
+) -> Tuple[Decimal, Decimal, Decimal, Decimal]:
+    """
+    Returns (sales_total, sales_cash, sales_non_cash, discount_total) for THIS booking+service
+    from approved PaymentReceived rows.
+    """
     payments = (
         PaymentReceived.objects
         .filter(booking_id=booking_id, service_id=service_id, approved=True)
@@ -97,32 +132,48 @@ def _svc_sales_totals_from_payments(booking_id: int, service_id: int) -> Tuple[D
         z = Decimal("0")
         return z, z, z, z
 
-    sales_total = sum(to_decimal(p.amount) for p in payments)
     sales_cash = sum(to_decimal(p.amount) for p in payments if is_cash_mode(p.mode))
+    sales_total = sum(to_decimal(p.amount) for p in payments)
     sales_non_cash = sales_total - sales_cash
     discount_total = sum(to_decimal(p.discount) for p in payments)
-
-    return to_decimal(sales_total), to_decimal(sales_cash), to_decimal(sales_non_cash), to_decimal(discount_total)
+    return sales_total, sales_cash, sales_non_cash, discount_total
 
 
 # ---------------------------
-# GST/TCS from service rows (your rules)
+# GST/TCS helpers (service-row rules: NOT payments)
 # ---------------------------
 
-def _svc_tax_totals_from_service_rows(booking_id: int, service_code: str) -> Tuple[Decimal, Decimal]:
+def _svc_tax_totals_from_service_rows(
+    booking_id: int,
+    service_code: str,
+    cash_mode_ids: Tuple[int, ...],
+) -> Tuple[Decimal, Decimal]:
+    """
+    Returns (gst_total, tcs_total) for THIS booking + THIS service, computed from service rows.
+
+    GST rules:
+      - Ticket: GST ALWAYS on (sales_amount - purchase_amount) * 18% (even cash)
+      - Others: GST only if NON-CASH on that service row
+
+    TCS rules:
+      - Only for Hotel/Transfer/Sightseeing
+      - Only if NON-CASH AND travel_type == 'international'
+      - TCS = sales_amount * 5%
+
+    IMPORTANT: cash detection uses obj.mode_id IN cash_mode_ids.
+    """
     model = SERVICE_MODEL_MAP.get(service_code)
     z = Decimal("0")
     if not model:
         return z, z
 
-    qs = model.objects.filter(booking_id=booking_id).select_related("mode")
+    qs = model.objects.filter(booking_id=booking_id)
 
     gst_total = Decimal("0")
     tcs_total = Decimal("0")
 
     for obj in qs:
-        mode = getattr(obj, "mode", None)
-        row_is_cash = bool(mode and getattr(mode, "name", "").strip().lower() == "cash")
+        is_cash = bool(getattr(obj, "mode_id", None) in cash_mode_ids)
 
         sales_amount = to_decimal(getattr(obj, "sales_amount", 0))
         purchase_amount = to_decimal(getattr(obj, "purchase_amount", 0))
@@ -132,7 +183,7 @@ def _svc_tax_totals_from_service_rows(booking_id: int, service_code: str) -> Tup
         if service_code == "ticket":
             gst = base_amount * GST_RATE
         else:
-            gst = Decimal("0") if row_is_cash else base_amount * GST_RATE
+            gst = Decimal("0") if is_cash else base_amount * GST_RATE
 
         gst_total += gst
 
@@ -140,21 +191,23 @@ def _svc_tax_totals_from_service_rows(booking_id: int, service_code: str) -> Tup
         if service_code in {"hotel", "transfer", "sightseeing"}:
             travel_type = (getattr(obj, "travel_type", "") or "").strip().lower()
             is_international = travel_type == "international"
-            if (not row_is_cash) and is_international:
+            if (not is_cash) and is_international:
                 tcs_total += (sales_amount * TCS_RATE)
 
-    return to_decimal(gst_total), to_decimal(tcs_total)
+    return gst_total, tcs_total
 
 
 # ---------------------------
-# Booking gate (NEW SYSTEM ONLY)
-# Requires:
-# - BookingService exists
-# - No pending payments for those services
-# - Every service has >= 1 approved payment (service_id not null)
+# Booking “fully approved” gate
 # ---------------------------
 
 def booking_all_services_fully_approved(booking_id: int) -> bool:
+    """
+    Booking is eligible only if:
+    - booking has services assigned in BookingService
+    - AND there are NO pending (approved=False) payments for that booking+assigned services
+    - AND each assigned service has at least 1 approved payment row
+    """
     service_ids = list(
         BookingService.objects
         .filter(booking_id=booking_id)
@@ -164,7 +217,6 @@ def booking_all_services_fully_approved(booking_id: int) -> bool:
     if not service_ids:
         return False
 
-    # any pending for any assigned service => not eligible
     if PaymentReceived.objects.filter(
         booking_id=booking_id,
         service_id__in=service_ids,
@@ -172,7 +224,6 @@ def booking_all_services_fully_approved(booking_id: int) -> bool:
     ).exists():
         return False
 
-    # each service must have at least 1 approved payment (new system)
     for sid in service_ids:
         if not PaymentReceived.objects.filter(
             booking_id=booking_id,
@@ -185,7 +236,7 @@ def booking_all_services_fully_approved(booking_id: int) -> bool:
 
 
 # ---------------------------
-# Page
+# Main Page
 # ---------------------------
 
 @login_required
@@ -194,31 +245,31 @@ def owner_actual_reports(request):
 
 
 # ---------------------------
-# Filtered Report (Cards + Summaries) - NEW SYSTEM ONLY
-# Employee summary is service-attributed via BookingService.assigned_to
+# Filtered Report (Cards + Summaries)
+# NEW SYSTEM ONLY
 # ---------------------------
 
 @login_required
 def filtered_actual_report(request):
-    service = request.GET.get("service")      # ServiceList.name
+    service = request.GET.get("service")      # ServiceList.name from UI
     employee = request.GET.get("employee")    # assigned_to id
     year = request.GET.get("year")
     month = request.GET.get("month")
     client = request.GET.get("client")
     supplier = request.GET.get("supplier")
 
-    # Only consider bookings that have approved NEW payments (service_id NOT NULL)
-    approved_new_booking_ids = (
-        PaymentReceived.objects
-        .filter(approved=True, service__isnull=False)
-        .values_list("booking_id", flat=True)
-        .distinct()
-    )
+    cash_mode_ids = get_cash_mode_ids()
+
+    # Restrict to bookings that have at least one approved payment with a service (new system)
+    new_booking_ids = PaymentReceived.objects.filter(
+        approved=True,
+        service__isnull=False
+    ).values_list("booking_id", flat=True).distinct()
 
     assignments = (
         BookingService.objects
         .select_related("booking", "booking__client", "booking__created_by", "service", "assigned_to")
-        .filter(booking_id__in=approved_new_booking_ids)
+        .filter(booking_id__in=new_booking_ids)
     )
 
     # Booking-level filters
@@ -256,20 +307,21 @@ def filtered_actual_report(request):
 
     for a in assignments:
         booking = a.booking
-        svc = a.service
-        service_code = _svc_code(svc)
 
-        # Gate: only include bookings that are fully approved in NEW system
+        # Gate: only fully-approved new system bookings
         if not booking_all_services_fully_approved(booking.id):
             continue
 
-        # Supplier filter: service-table supplier
+        svc = a.service
+        service_code = _svc_code(svc)
+
+        # Supplier filter: check service model rows
         model = SERVICE_MODEL_MAP.get(service_code)
         if supplier and model:
             if not model.objects.filter(booking_id=booking.id, supplier_id=supplier).exists():
                 continue
 
-        # Actual sales per service from NEW payments only
+        # Sales from payments (actual received)
         sales_total, sales_cash, sales_non_cash, discount_total = _svc_sales_totals_from_payments(
             booking_id=booking.id,
             service_id=svc.id
@@ -279,20 +331,24 @@ def filtered_actual_report(request):
 
         seen_booking_ids.add(booking.id)
 
-        # Purchase per service from service rows
-        _, purch_cash, purch_non_cash = _svc_purchase_totals(booking.id, service_code)
+        # Purchase from service rows (robust cash split)
+        purch_total, purch_cash, purch_non_cash = _svc_purchase_totals(
+            booking.id, service_code, cash_mode_ids
+        )
 
-        # Taxes per service from service rows
-        gst_amt, tcs_amt = _svc_tax_totals_from_service_rows(booking.id, service_code)
+        # Taxes from service rows (robust cash check)
+        gst_amt, tcs_amt = _svc_tax_totals_from_service_rows(
+            booking.id, service_code, cash_mode_ids
+        )
 
-        # Non-cash sales net of TCS
+        # Apply TCS to NON-CASH sales (net)
         sales_non_cash_net = sales_non_cash - tcs_amt
 
-        # Rule: no GST in cash profit; GST subtract only from non-cash bucket
+        # Your rule: NO GST in cash profit; GST subtract from non-cash bucket only
         profit_cash = sales_cash - purch_cash
         profit_non_cash = (sales_non_cash_net - purch_non_cash) - gst_amt
 
-        # Totals (cards)
+        # Totals
         results["totals"]["sales_cash"] += float(sales_cash)
         results["totals"]["sales_non_cash"] += float(sales_non_cash_net)
         results["totals"]["purchase_cash"] += float(purch_cash)
@@ -322,7 +378,7 @@ def filtered_actual_report(request):
         sdata["gst"] += float(gst_amt)
         sdata["tcs"] += float(tcs_amt)
 
-        # Employee summary (service attribution = BookingService.assigned_to)
+        # Employee summary (assigned_to gets service contribution)
         emp_name = a.assigned_to.get_full_name() or a.assigned_to.username
         edata = results["employee_summary"].setdefault(emp_name, {
             "sales_cash": 0.0, "sales_non_cash": 0.0,
@@ -363,7 +419,8 @@ def filtered_actual_report(request):
 
 
 # ---------------------------
-# Booking-wise Summary (Client table) - NEW SYSTEM ONLY
+# Booking-wise Summary (Client Table)
+# NEW SYSTEM ONLY
 # ---------------------------
 
 @login_required
@@ -375,7 +432,9 @@ def bookings_report(request):
     client = request.GET.get("client")
     supplier = request.GET.get("supplier")
 
-    # Only bookings with approved NEW payments (service_id not null)
+    cash_mode_ids = get_cash_mode_ids()
+
+    # Only bookings that have approved payments with a service (new system)
     bookings = (
         Booking.objects
         .filter(
@@ -384,7 +443,6 @@ def bookings_report(request):
             .distinct()
         )
         .select_related("client", "created_by")
-        .distinct()
     )
 
     # Booking-level filters
@@ -397,8 +455,7 @@ def bookings_report(request):
         except ValueError:
             pass
     if employee:
-        # Booking table meaning (as in your UI): created_by
-        bookings = bookings.filter(created_by_id=employee)
+        bookings = bookings.filter(created_by_id=employee)  # your existing meaning
     if client:
         bookings = bookings.filter(client_id=client)
 
@@ -415,7 +472,7 @@ def bookings_report(request):
             .distinct()
         )
 
-        # Service filter (new system only)
+        # service filter applies here too
         if service:
             bs_qs = bs_qs.filter(service__name=service)
 
@@ -447,19 +504,25 @@ def bookings_report(request):
             if sales_total <= 0:
                 continue
 
-            _, purch_cash, purch_non_cash = _svc_purchase_totals(booking.id, service_code)
-            gst_amt, tcs_amt = _svc_tax_totals_from_service_rows(booking.id, service_code)
+            purch_total, purch_cash, purch_non_cash = _svc_purchase_totals(
+                booking.id, service_code, cash_mode_ids
+            )
+            gst_amt, tcs_amt = _svc_tax_totals_from_service_rows(
+                booking.id, service_code, cash_mode_ids
+            )
 
             sales_non_cash_net = sales_non_cash - tcs_amt
 
+            # Your rule: NO GST in cash profit; GST subtract from non-cash bucket
             profit_cash = sales_cash - purch_cash
             profit_non_cash = (sales_non_cash_net - purch_non_cash) - gst_amt
             profit_total = profit_cash + profit_non_cash
 
-            def get_service_creator_name(booking_id, service_code, fallback_user):
+            def get_service_creator_name(booking_id: int, service_code: str, fallback_user: str) -> str:
                 model = SERVICE_MODEL_MAP.get(service_code)
                 if not model:
                     return fallback_user
+
                 obj = (
                     model.objects
                     .filter(booking_id=booking_id)
@@ -477,17 +540,16 @@ def bookings_report(request):
             )
 
             services_data.append({
-                "service_id": svc.id,
                 "service": svc.name,
                 "mode": "Mixed",
 
                 "sales_cash": float(sales_cash),
                 "sales_non_cash": float(sales_non_cash_net),
-                "sales_total": float(to_decimal(sales_cash + sales_non_cash_net)),
+                "sales_total": float(sales_cash + sales_non_cash_net),
 
                 "purchase_cash": float(purch_cash),
                 "purchase_non_cash": float(purch_non_cash),
-                "purchase_total": float(to_decimal(purch_cash + purch_non_cash)),
+                "purchase_total": float(purch_cash + purch_non_cash),
 
                 "profit_cash": float(profit_cash),
                 "profit_non_cash": float(profit_non_cash),
@@ -495,8 +557,8 @@ def bookings_report(request):
 
                 "gst": float(gst_amt),
                 "tcs": float(tcs_amt),
-                "discount": float(discount_total),
 
+                "discount": float(discount_total),
                 "entered_by": entered_by,
             })
 
@@ -531,7 +593,6 @@ def bookings_report(request):
                 "gst": float(book_gst),
                 "tcs": float(book_tcs),
             },
-            "is_legacy": False,
         })
 
     return JsonResponse({"data": data})
