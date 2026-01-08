@@ -326,6 +326,14 @@ def payments_home(request):
         b = a.booking
         svc = a.service
 
+        # ✅ if settlement already created (pending OR approved), hide from employee list
+        if PaymentReceived.objects.filter(
+            booking_id=b.id,
+            service_id=svc.id,
+            is_full=True,
+        ).exists():
+            continue
+
         target = _service_target_with_tcs(b, svc)  # ✅ includes TCS allocation
         approved, pending = _service_payments_totals(b.id, svc.id)
         received_total = _q2(approved + pending)
