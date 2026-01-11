@@ -2,6 +2,7 @@
 from django.urls import path
 from . import views
 from . import views_actual
+from . import views_legacy
 
 urlpatterns = [
     # Main report page
@@ -24,5 +25,10 @@ urlpatterns = [
     path("owner/actual/data/", views_actual.filtered_actual_report, name="filtered_actual_report"),
     path("owner/actual/bookings/", views_actual.bookings_report, name="bookings_report"),
 
+    # Legacy reports
+    path("owner-reports-legacy/", views_legacy.owner_legacy_reports, name="owner_legacy_reports"),
+    path("owner-reports-legacy/filters/", views_legacy.report_filters_data_legacy, name="report_filters_data_legacy"),
+    path("owner-reports-legacy/summary/", views_legacy.filtered_legacy_report, name="filtered_legacy_report"),
+    path("owner-reports-legacy/bookings/", views_legacy.bookings_report_legacy, name="bookings_report_legacy"),
 
 ]
