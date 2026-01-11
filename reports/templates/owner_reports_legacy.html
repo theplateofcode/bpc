@@ -1,7 +1,9 @@
-{% extends "base.html" %} {% block content %}
+{% extends "base.html" %}
+{% block content %}
 
 <h3 class="mt-4 text-danger fw-bold">Actual Profit Reports (Legacy)</h3>
 
+<!-- Filters -->
 <form id="reportFilters" class="row g-2 align-items-end">
   <div class="col-md-2">
     <label for="service" class="form-label">Service</label>
@@ -9,30 +11,35 @@
       <option value="">All</option>
     </select>
   </div>
+
   <div class="col-md-2">
     <label for="employee" class="form-label">Employee</label>
     <select id="employee" name="employee" class="form-select">
       <option value="">All</option>
     </select>
   </div>
+
   <div class="col-md-2">
     <label for="year" class="form-label">Year</label>
     <select id="year" name="year" class="form-select">
       <option value="">All</option>
     </select>
   </div>
+
   <div class="col-md-2">
     <label for="month" class="form-label">Month</label>
     <select id="month" name="month" class="form-select">
       <option value="">All</option>
     </select>
   </div>
+
   <div class="col-md-2">
     <label for="client" class="form-label">Client</label>
     <select id="client" name="client" class="form-select">
       <option value="">All</option>
     </select>
   </div>
+
   <div class="col-md-2">
     <label for="supplier" class="form-label">Supplier</label>
     <select id="supplier" name="supplier" class="form-select">
@@ -46,6 +53,7 @@
   </div>
 </form>
 
+<!-- Cards -->
 <div id="reportResults" class="row g-3 mt-3">
   <div class="col-md-3">
     <div class="card text-white" style="background-color: #e74c3c">
@@ -56,6 +64,7 @@
       </div>
     </div>
   </div>
+
   <div class="col-md-3">
     <div class="card text-white" style="background-color: #3498db">
       <div class="card-body">
@@ -65,6 +74,7 @@
       </div>
     </div>
   </div>
+
   <div class="col-md-3">
     <div class="card text-white" style="background-color: #2ecc71">
       <div class="card-body">
@@ -74,6 +84,7 @@
       </div>
     </div>
   </div>
+
   <div class="col-md-3">
     <div class="card text-white" style="background-color: #f39c12">
       <div class="card-body">
@@ -84,34 +95,112 @@
   </div>
 </div>
 
+<!-- Bookings Count -->
 <div class="text-end mt-2">
   <strong>Total Bookings:</strong> <span id="bookingTotal">0</span>
 </div>
 
+<!-- Service Summary -->
+<h4 class="mt-4 text-danger">Service Summary (Legacy)</h4>
+<table class="table table-bordered" id="serviceSummary">
+  <thead class="table-light text-center">
+    <tr>
+      <th rowspan="2">Service</th>
+      <th colspan="2" style="background-color: #e74c3c; color: white">Sales</th>
+      <th colspan="2" style="background-color: #3498db; color: white">Purchase</th>
+      <th colspan="2" style="background-color: #2ecc71; color: white">Profit</th>
+      <th rowspan="2" style="background-color: #f39c12; color: white">Discount</th>
+    </tr>
+    <tr>
+      <th>C</th><th>Q</th>
+      <th>C</th><th>Q</th>
+      <th>C</th><th>Q</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<!-- Employee Summary -->
+<h4 class="mt-4 text-danger">Employee Summary (Legacy)</h4>
+<table class="table table-bordered" id="employeeSummary">
+  <thead class="table-light text-center">
+    <tr>
+      <th rowspan="2">Employee</th>
+      <th colspan="2" style="background-color: #e74c3c; color: white">Sales</th>
+      <th colspan="2" style="background-color: #3498db; color: white">Purchase</th>
+      <th colspan="2" style="background-color: #2ecc71; color: white">Profit</th>
+      <th rowspan="2" style="background-color: #f39c12; color: white">Discount</th>
+    </tr>
+    <tr>
+      <th>C</th><th>Q</th>
+      <th>C</th><th>Q</th>
+      <th>C</th><th>Q</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<!-- Client Summary -->
+<h4 class="mt-4 text-danger">Client Bookings Summary (Legacy)</h4>
+<table class="table table-bordered" id="clientSummary">
+  <thead class="table-light text-center">
+    <tr>
+      <th>Booking ID</th>
+      <th>Booking Date</th>
+      <th>Created By</th>
+      <th>Client Name</th>
+      <th>Service Details</th>
+      <th style="background-color: #e74c3c; color: white">C Sales</th>
+      <th style="background-color: #e74c3c; color: white">Q Sales</th>
+      <th style="background-color: #3498db; color: white">C Purchase</th>
+      <th style="background-color: #3498db; color: white">Q Purchase</th>
+      <th style="background-color: #2ecc71; color: white">C Profit</th>
+      <th style="background-color: #2ecc71; color: white">Q Profit</th>
+      <th style="background-color: #f39c12; color: white">Discount</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<!-- Modal -->
+<div class="modal fade" id="serviceModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title">Legacy Service Details</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" id="serviceModalBody" style="background-color: #f8f9fa"></div>
+    </div>
+  </div>
+</div>
+
+<!-- JS -->
 <script>
   document.addEventListener("DOMContentLoaded", async () => {
-    const clean = (n) =>
-      n != null ? Math.round(n).toLocaleString("en-IN") : "0";
+    const clean = (n) => (n != null ? Math.round(n).toLocaleString("en-IN") : "0");
     const safeSet = (id, val) => {
       const el = document.getElementById(id);
       if (el) el.innerText = clean(val);
     };
 
-    // 1. Updated to Legacy Filter Data
     async function loadFilters() {
       const res = await fetch("{% url 'report_filters_data_legacy' %}");
       if (!res.ok) return;
+
       const data = await res.json();
+
       const add = (id, items, txt) => {
         const sel = document.getElementById(id);
         if (!sel) return;
-        items.forEach((i) =>
+        items.forEach((i) => {
           sel.insertAdjacentHTML(
             "beforeend",
             `<option value="${i.id || i}">${txt(i)}</option>`
-          )
-        );
+          );
+        });
       };
+
       add("service", data.services, (s) => s);
       add("employee", data.employees, (e) => e.name);
       add("year", data.years, (y) => y);
@@ -121,104 +210,147 @@
     }
 
     async function loadReportData(params = "") {
-      // 2. Updated to Legacy Report Data
-      const res = await fetch(
-        "{% url 'filtered_legacy_report' %}" + (params ? "?" + params : "")
-      );
+      const res = await fetch("{% url 'filtered_legacy_report' %}" + (params ? "?" + params : ""));
       if (!res.ok) return;
+
       const summary = await res.json();
-      const t = summary.totals;
+      const t = summary.totals || {};
 
-      // --- Totals Rendering Logic ---
-      safeSet("salesTotal", t.sales_cash + t.sales_non_cash);
-      safeSet("salesCash", t.sales_cash);
-      safeSet("salesNonCash", t.sales_non_cash);
-      safeSet("purchaseTotal", t.purchase_cash + t.purchase_non_cash);
-      safeSet("purchaseCash", t.purchase_cash);
-      safeSet("purchaseNonCash", t.purchase_non_cash);
-      safeSet("profitTotal", t.profit_cash + t.profit_non_cash);
-      safeSet("profitCash", t.profit_cash);
-      safeSet("profitNonCash", t.profit_non_cash);
-      safeSet("discountTotal", t.discount);
-      safeSet("bookingTotal", t.bookings);
+      // Totals
+      safeSet("salesTotal", (t.sales_cash || 0) + (t.sales_non_cash || 0));
+      safeSet("salesCash", t.sales_cash || 0);
+      safeSet("salesNonCash", t.sales_non_cash || 0);
 
-      // --- Service Summary Rendering Logic ---
+      safeSet("purchaseTotal", (t.purchase_cash || 0) + (t.purchase_non_cash || 0));
+      safeSet("purchaseCash", t.purchase_cash || 0);
+      safeSet("purchaseNonCash", t.purchase_non_cash || 0);
+
+      safeSet("profitTotal", (t.profit_cash || 0) + (t.profit_non_cash || 0));
+      safeSet("profitCash", t.profit_cash || 0);
+      safeSet("profitNonCash", t.profit_non_cash || 0);
+
+      safeSet("discountTotal", t.discount || 0);
+      safeSet("bookingTotal", t.bookings || 0);
+
+      // Service Summary
       const sbody = document.querySelector("#serviceSummary tbody");
-      sbody.innerHTML = "";
-      Object.entries(summary.service_summary).forEach(([k, v]) => {
-        const total = k === "TOTAL";
-        sbody.insertAdjacentHTML("beforeend", `
-          <tr${total ? ' style="font-weight:bold;background:#f8f9fa;"' : ""}>
-            <td>${k}</td>
-            <td>${clean(v.sales_cash)}</td><td>${clean(v.sales_non_cash)}</td>
-            <td>${clean(v.purchase_cash)}</td><td>${clean(v.purchase_non_cash)}</td>
-            <td>${clean(v.profit_cash)}</td><td>${clean(v.profit_non_cash)}</td>
-            <td>${clean(v.discount)}</td>
-          </tr>`);
-      });
+      if (sbody) {
+        sbody.innerHTML = "";
+        Object.entries(summary.service_summary || {}).forEach(([k, v]) => {
+          const total = k === "TOTAL";
+          sbody.insertAdjacentHTML(
+            "beforeend",
+            `
+            <tr${total ? ' style="font-weight:bold;background:#f8f9fa;"' : ""}>
+              <td>${k}</td>
+              <td>${clean(v.sales_cash || 0)}</td><td>${clean(v.sales_non_cash || 0)}</td>
+              <td>${clean(v.purchase_cash || 0)}</td><td>${clean(v.purchase_non_cash || 0)}</td>
+              <td>${clean(v.profit_cash || 0)}</td><td>${clean(v.profit_non_cash || 0)}</td>
+              <td>${clean(v.discount || 0)}</td>
+            </tr>
+          `
+          );
+        });
+      }
 
-      // --- Employee Summary Rendering Logic ---
+      // Employee Summary
       const ebody = document.querySelector("#employeeSummary tbody");
-      ebody.innerHTML = "";
-      Object.entries(summary.employee_summary).forEach(([k, v]) => {
-        const total = k === "TOTAL";
-        ebody.insertAdjacentHTML("beforeend", `
-          <tr${total ? ' style="font-weight:bold;background:#f8f9fa;"' : ""}>
-            <td>${k}</td>
-            <td>${clean(v.sales_cash)}</td><td>${clean(v.sales_non_cash)}</td>
-            <td>${clean(v.purchase_cash)}</td><td>${clean(v.purchase_non_cash)}</td>
-            <td>${clean(v.profit_cash)}</td><td>${clean(v.profit_non_cash)}</td>
-            <td>${clean(v.discount)}</td>
-          </tr>`);
-      });
+      if (ebody) {
+        ebody.innerHTML = "";
+        Object.entries(summary.employee_summary || {}).forEach(([k, v]) => {
+          const total = k === "TOTAL";
+          ebody.insertAdjacentHTML(
+            "beforeend",
+            `
+            <tr${total ? ' style="font-weight:bold;background:#f8f9fa;"' : ""}>
+              <td>${k}</td>
+              <td>${clean(v.sales_cash || 0)}</td><td>${clean(v.sales_non_cash || 0)}</td>
+              <td>${clean(v.purchase_cash || 0)}</td><td>${clean(v.purchase_non_cash || 0)}</td>
+              <td>${clean(v.profit_cash || 0)}</td><td>${clean(v.profit_non_cash || 0)}</td>
+              <td>${clean(v.discount || 0)}</td>
+            </tr>
+          `
+          );
+        });
+      }
 
-      // 3. Updated to Legacy Bookings Report
-      const resp = await fetch(
-        "{% url 'bookings_report_legacy' %}" + (params ? "?" + params : "")
-      );
+      // Client Summary
+      const resp = await fetch("{% url 'bookings_report_legacy' %}" + (params ? "?" + params : ""));
       if (!resp.ok) return;
+
       const bookings = await resp.json();
       const tbody = document.querySelector("#clientSummary tbody");
+      if (!tbody) return;
+
       tbody.innerHTML = "";
-      bookings.data.forEach((b) => {
-        const svc = b.services.map((s) => s.service).join(", ");
-        const mod = b.services.map((s) => `
-          <div class="p-3 mb-3 bg-white shadow-sm rounded border">
-            <h6><strong>${s.service}</strong> (${s.mode})</h6>
-            <p>Sales: ${clean(s.sales)}<br>Purchase: ${clean(s.purchase)}<br>
-            Profit: ${clean(s.profit)}<br>Entered by: ${s.entered_by}</p>
-          </div>`).join("");
-        
-        tbody.insertAdjacentHTML("beforeend", `
-          <tr>
-            <td>${b.booking_id}</td><td>${b.booking_date}</td>
-            <td>${b.created_by}</td><td>${b.client_name}</td>
-            <td>${svc} <button class="btn btn-sm btn-outline-danger ms-2" 
-                data-bs-toggle="modal" data-bs-target="#serviceModal"
-                data-services='${encodeURIComponent(mod)}'>Show</button></td>
-            <td>${clean(b.totals.sales_cash)}</td><td>${clean(b.totals.sales_non_cash)}</td>
-            <td>${clean(b.totals.purchase_cash)}</td><td>${clean(b.totals.purchase_non_cash)}</td>
-            <td>${clean(b.totals.profit_cash)}</td><td>${clean(b.totals.profit_non_cash)}</td>
-            <td>${clean(b.totals.discount || 0)}</td>
-          </tr>`);
+
+      (bookings.data || []).forEach((b) => {
+        const services = b.services || [];
+        const svc = services.map((s) => s.service).join(", ");
+
+        const mod = services
+          .map(
+            (s) => `
+              <div class="p-3 mb-3 bg-white shadow-sm rounded border">
+                <h6><strong>${s.service}</strong> (${s.mode || "—"})</h6>
+                <p>
+                  Sales: ${clean(s.sales || 0)}<br>
+                  Purchase: ${clean(s.purchase || 0)}<br>
+                  Profit: ${clean(s.profit || 0)}<br>
+                  Entered by: ${s.entered_by || "—"}
+                </p>
+              </div>
+            `
+          )
+          .join("");
+
+        tbody.insertAdjacentHTML(
+          "beforeend",
+          `
+            <tr>
+              <td>${b.booking_id || ""}</td>
+              <td>${b.booking_date || ""}</td>
+              <td>${b.created_by || ""}</td>
+              <td>${b.client_name || ""}</td>
+              <td>
+                ${svc}
+                <button class="btn btn-sm btn-outline-danger ms-2"
+                  data-bs-toggle="modal" data-bs-target="#serviceModal"
+                  data-services='${encodeURIComponent(mod)}'>Show</button>
+              </td>
+              <td>${clean((b.totals && b.totals.sales_cash) || 0)}</td>
+              <td>${clean((b.totals && b.totals.sales_non_cash) || 0)}</td>
+              <td>${clean((b.totals && b.totals.purchase_cash) || 0)}</td>
+              <td>${clean((b.totals && b.totals.purchase_non_cash) || 0)}</td>
+              <td>${clean((b.totals && b.totals.profit_cash) || 0)}</td>
+              <td>${clean((b.totals && b.totals.profit_non_cash) || 0)}</td>
+              <td>${clean((b.totals && b.totals.discount) || 0)}</td>
+            </tr>
+          `
+        );
       });
     }
 
-    // Modal and Filter Listeners
-    document.getElementById("serviceModal").addEventListener("show.bs.modal", (e) => {
-      document.getElementById("serviceModalBody").innerHTML =
-        decodeURIComponent(e.relatedTarget.getAttribute("data-services"));
-    });
+    // Modal listener (guarded)
+    const serviceModal = document.getElementById("serviceModal");
+    const serviceModalBody = document.getElementById("serviceModalBody");
+    if (serviceModal && serviceModalBody) {
+      serviceModal.addEventListener("show.bs.modal", (e) => {
+        const btn = e.relatedTarget;
+        serviceModalBody.innerHTML = decodeURIComponent(btn?.getAttribute("data-services") || "");
+      });
+    }
 
-    document.getElementById("applyFilters").addEventListener("click", (e) => {
+    // Filter buttons
+    document.getElementById("applyFilters")?.addEventListener("click", (e) => {
       e.preventDefault();
       const params = new URLSearchParams(new FormData(document.getElementById("reportFilters"))).toString();
       loadReportData(params);
     });
 
-    document.getElementById("resetFilters").addEventListener("click", (e) => {
+    document.getElementById("resetFilters")?.addEventListener("click", (e) => {
       e.preventDefault();
-      document.getElementById("reportFilters").reset();
+      document.getElementById("reportFilters")?.reset();
       loadReportData();
     });
 
