@@ -165,7 +165,7 @@ def booking_matches_supplier(booking_id: int, supplier_id: int) -> bool:
 @user_passes_test(superuser_only)
 def owner_legacy_reports(request):
     # Your file is: reports/templates/owner_reports/legacy.html
-    return render(request, "owner_reports/legacy.html")
+    return render(request, "owner_reports_legacy.html")
 
 
 # ---------------------------
