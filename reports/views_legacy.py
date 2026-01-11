@@ -25,8 +25,7 @@ from suppliers.models import Supplier
 # ---------------------------
 # Access control (Owner/Admin)
 # ---------------------------
-def is_owner_or_admin(user):
-    return user.is_authenticated and getattr(user, "role", "") in ["OWNER", "ADMIN"]
+
 
 
 # ---------------------------
@@ -115,14 +114,12 @@ def _svc_sales_totals_from_payments(booking_id: int, service_id: int) -> Tuple[D
 # Pages
 # ---------------------------
 @login_required
-@user_passes_test(is_owner_or_admin)
 def owner_legacy_reports(request):
     # Template lives under reports/templates/reports/...
     return render(request, "owner_reports_legacy.html")
 
 
 @login_required
-@user_passes_test(is_owner_or_admin)
 def report_filters_data_legacy(request):
     services = list(ServiceList.objects.all().order_by("name").values_list("name", flat=True))
 
@@ -174,7 +171,6 @@ def report_filters_data_legacy(request):
 
 
 @login_required
-@user_passes_test(is_owner_or_admin)
 def filtered_legacy_report(request):
     service = request.GET.get("service")      # ServiceList.name
     employee = request.GET.get("employee")    # BookingService.assigned_to id
@@ -312,7 +308,6 @@ def filtered_legacy_report(request):
 
 
 @login_required
-@user_passes_test(is_owner_or_admin)
 def bookings_report_legacy(request):
     service = request.GET.get("service")
     employee = request.GET.get("employee")
