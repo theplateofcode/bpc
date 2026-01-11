@@ -1,0 +1,230 @@
+{% extends "base.html" %} {% block content %}
+
+<h3 class="mt-4 text-danger fw-bold">Actual Profit Reports (Legacy)</h3>
+
+<form id="reportFilters" class="row g-2 align-items-end">
+  <div class="col-md-2">
+    <label for="service" class="form-label">Service</label>
+    <select id="service" name="service" class="form-select">
+      <option value="">All</option>
+    </select>
+  </div>
+  <div class="col-md-2">
+    <label for="employee" class="form-label">Employee</label>
+    <select id="employee" name="employee" class="form-select">
+      <option value="">All</option>
+    </select>
+  </div>
+  <div class="col-md-2">
+    <label for="year" class="form-label">Year</label>
+    <select id="year" name="year" class="form-select">
+      <option value="">All</option>
+    </select>
+  </div>
+  <div class="col-md-2">
+    <label for="month" class="form-label">Month</label>
+    <select id="month" name="month" class="form-select">
+      <option value="">All</option>
+    </select>
+  </div>
+  <div class="col-md-2">
+    <label for="client" class="form-label">Client</label>
+    <select id="client" name="client" class="form-select">
+      <option value="">All</option>
+    </select>
+  </div>
+  <div class="col-md-2">
+    <label for="supplier" class="form-label">Supplier</label>
+    <select id="supplier" name="supplier" class="form-select">
+      <option value="">All</option>
+    </select>
+  </div>
+
+  <div class="col-md-auto d-flex align-items-end">
+    <button type="button" id="applyFilters" class="btn btn-danger me-2">Apply</button>
+    <button type="reset" id="resetFilters" class="btn btn-outline-dark">Reset</button>
+  </div>
+</form>
+
+<div id="reportResults" class="row g-3 mt-3">
+  <div class="col-md-3">
+    <div class="card text-white" style="background-color: #e74c3c">
+      <div class="card-body">
+        <h5 class="card-title">Actual Sales</h5>
+        <p class="card-text mb-1"><span id="salesTotal">0</span></p>
+        <small>(<span id="salesCash">0</span> C / <span id="salesNonCash">0</span> Q)</small>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card text-white" style="background-color: #3498db">
+      <div class="card-body">
+        <h5 class="card-title">Total Purchase</h5>
+        <p class="card-text mb-1"><span id="purchaseTotal">0</span></p>
+        <small>(<span id="purchaseCash">0</span> C / <span id="purchaseNonCash">0</span> Q)</small>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card text-white" style="background-color: #2ecc71">
+      <div class="card-body">
+        <h5 class="card-title">Actual Profit</h5>
+        <p class="card-text mb-1"><span id="profitTotal">0</span></p>
+        <small>(<span id="profitCash">0</span> C / <span id="profitNonCash">0</span> Q)</small>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card text-white" style="background-color: #f39c12">
+      <div class="card-body">
+        <h5 class="card-title">Discount (±)</h5>
+        <p class="card-text mb-1"><span id="discountTotal">0</span></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="text-end mt-2">
+  <strong>Total Bookings:</strong> <span id="bookingTotal">0</span>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", async () => {
+    const clean = (n) =>
+      n != null ? Math.round(n).toLocaleString("en-IN") : "0";
+    const safeSet = (id, val) => {
+      const el = document.getElementById(id);
+      if (el) el.innerText = clean(val);
+    };
+
+    // 1. Updated to Legacy Filter Data
+    async function loadFilters() {
+      const res = await fetch("{% url 'report_filters_data_legacy' %}");
+      if (!res.ok) return;
+      const data = await res.json();
+      const add = (id, items, txt) => {
+        const sel = document.getElementById(id);
+        if (!sel) return;
+        items.forEach((i) =>
+          sel.insertAdjacentHTML(
+            "beforeend",
+            `<option value="${i.id || i}">${txt(i)}</option>`
+          )
+        );
+      };
+      add("service", data.services, (s) => s);
+      add("employee", data.employees, (e) => e.name);
+      add("year", data.years, (y) => y);
+      add("month", data.months, (m) => m);
+      add("client", data.clients, (c) => c.name);
+      add("supplier", data.suppliers, (s) => s.name);
+    }
+
+    async function loadReportData(params = "") {
+      // 2. Updated to Legacy Report Data
+      const res = await fetch(
+        "{% url 'filtered_legacy_report' %}" + (params ? "?" + params : "")
+      );
+      if (!res.ok) return;
+      const summary = await res.json();
+      const t = summary.totals;
+
+      // --- Totals Rendering Logic ---
+      safeSet("salesTotal", t.sales_cash + t.sales_non_cash);
+      safeSet("salesCash", t.sales_cash);
+      safeSet("salesNonCash", t.sales_non_cash);
+      safeSet("purchaseTotal", t.purchase_cash + t.purchase_non_cash);
+      safeSet("purchaseCash", t.purchase_cash);
+      safeSet("purchaseNonCash", t.purchase_non_cash);
+      safeSet("profitTotal", t.profit_cash + t.profit_non_cash);
+      safeSet("profitCash", t.profit_cash);
+      safeSet("profitNonCash", t.profit_non_cash);
+      safeSet("discountTotal", t.discount);
+      safeSet("bookingTotal", t.bookings);
+
+      // --- Service Summary Rendering Logic ---
+      const sbody = document.querySelector("#serviceSummary tbody");
+      sbody.innerHTML = "";
+      Object.entries(summary.service_summary).forEach(([k, v]) => {
+        const total = k === "TOTAL";
+        sbody.insertAdjacentHTML("beforeend", `
+          <tr${total ? ' style="font-weight:bold;background:#f8f9fa;"' : ""}>
+            <td>${k}</td>
+            <td>${clean(v.sales_cash)}</td><td>${clean(v.sales_non_cash)}</td>
+            <td>${clean(v.purchase_cash)}</td><td>${clean(v.purchase_non_cash)}</td>
+            <td>${clean(v.profit_cash)}</td><td>${clean(v.profit_non_cash)}</td>
+            <td>${clean(v.discount)}</td>
+          </tr>`);
+      });
+
+      // --- Employee Summary Rendering Logic ---
+      const ebody = document.querySelector("#employeeSummary tbody");
+      ebody.innerHTML = "";
+      Object.entries(summary.employee_summary).forEach(([k, v]) => {
+        const total = k === "TOTAL";
+        ebody.insertAdjacentHTML("beforeend", `
+          <tr${total ? ' style="font-weight:bold;background:#f8f9fa;"' : ""}>
+            <td>${k}</td>
+            <td>${clean(v.sales_cash)}</td><td>${clean(v.sales_non_cash)}</td>
+            <td>${clean(v.purchase_cash)}</td><td>${clean(v.purchase_non_cash)}</td>
+            <td>${clean(v.profit_cash)}</td><td>${clean(v.profit_non_cash)}</td>
+            <td>${clean(v.discount)}</td>
+          </tr>`);
+      });
+
+      // 3. Updated to Legacy Bookings Report
+      const resp = await fetch(
+        "{% url 'bookings_report_legacy' %}" + (params ? "?" + params : "")
+      );
+      if (!resp.ok) return;
+      const bookings = await resp.json();
+      const tbody = document.querySelector("#clientSummary tbody");
+      tbody.innerHTML = "";
+      bookings.data.forEach((b) => {
+        const svc = b.services.map((s) => s.service).join(", ");
+        const mod = b.services.map((s) => `
+          <div class="p-3 mb-3 bg-white shadow-sm rounded border">
+            <h6><strong>${s.service}</strong> (${s.mode})</h6>
+            <p>Sales: ${clean(s.sales)}<br>Purchase: ${clean(s.purchase)}<br>
+            Profit: ${clean(s.profit)}<br>Entered by: ${s.entered_by}</p>
+          </div>`).join("");
+        
+        tbody.insertAdjacentHTML("beforeend", `
+          <tr>
+            <td>${b.booking_id}</td><td>${b.booking_date}</td>
+            <td>${b.created_by}</td><td>${b.client_name}</td>
+            <td>${svc} <button class="btn btn-sm btn-outline-danger ms-2" 
+                data-bs-toggle="modal" data-bs-target="#serviceModal"
+                data-services='${encodeURIComponent(mod)}'>Show</button></td>
+            <td>${clean(b.totals.sales_cash)}</td><td>${clean(b.totals.sales_non_cash)}</td>
+            <td>${clean(b.totals.purchase_cash)}</td><td>${clean(b.totals.purchase_non_cash)}</td>
+            <td>${clean(b.totals.profit_cash)}</td><td>${clean(b.totals.profit_non_cash)}</td>
+            <td>${clean(b.totals.discount || 0)}</td>
+          </tr>`);
+      });
+    }
+
+    // Modal and Filter Listeners
+    document.getElementById("serviceModal").addEventListener("show.bs.modal", (e) => {
+      document.getElementById("serviceModalBody").innerHTML =
+        decodeURIComponent(e.relatedTarget.getAttribute("data-services"));
+    });
+
+    document.getElementById("applyFilters").addEventListener("click", (e) => {
+      e.preventDefault();
+      const params = new URLSearchParams(new FormData(document.getElementById("reportFilters"))).toString();
+      loadReportData(params);
+    });
+
+    document.getElementById("resetFilters").addEventListener("click", (e) => {
+      e.preventDefault();
+      document.getElementById("reportFilters").reset();
+      loadReportData();
+    });
+
+    await loadFilters();
+    await loadReportData();
+  });
+</script>
+
+{% endblock %}
