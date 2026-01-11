@@ -26,7 +26,8 @@ urlpatterns = [
     path("owner/actual/bookings/", views_actual.bookings_report, name="bookings_report"),
 
     # Legacy reports
-     path("owner-reports-legacy/", views_legacy.owner_legacy_reports, name="owner_legacy_reports"),
-    path("report-filters-legacy/", views_legacy.report_filters_data_legacy, name="report_filters_data_legacy"),
-    path("legacy-booking-summary/", views_legacy.legacy_booking_summary, name="legacy_booking_summary"),
+    path("owner-reports-legacy/", views_legacy.owner_legacy_reports, name="owner_legacy_reports"),
+    path("api/report-filters-legacy/", views_legacy.report_filters_data_legacy, name="report_filters_data_legacy"),
+    path("api/filtered-legacy-report/", views_legacy.filtered_legacy_report, name="filtered_legacy_report"),
+    path("api/bookings-report-legacy/", views_legacy.bookings_report_legacy, name="bookings_report_legacy"),
 ]
