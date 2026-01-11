@@ -1,0 +1,265 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="d-flex align-items-baseline gap-3">
+  <h3 class="mt-4 text-danger fw-bold mb-0">Staff Legacy Profit Dashboard</h3>
+  <span class="text-muted" style="font-style: italic;">
+    Booking-wise only (payments approved, service = NULL). Mixed bookings are excluded.
+  </span>
+</div>
+
+<!-- FILTERS -->
+<form id="legacyFilters" class="row g-2 align-items-end mt-2">
+  <div class="col-md-2">
+    <label class="form-label">Year</label>
+    <select id="year" name="year" class="form-select">
+      <option value="">All</option>
+    </select>
+  </div>
+
+  <div class="col-md-2">
+    <label class="form-label">Month</label>
+    <select id="month" name="month" class="form-select">
+      <option value="">All</option>
+    </select>
+  </div>
+
+  <div class="col-md-3">
+    <label class="form-label">Client</label>
+    <select id="client" name="client" class="form-select">
+      <option value="">All</option>
+    </select>
+  </div>
+
+  <div class="col-md-3">
+    <label class="form-label">Supplier</label>
+    <select id="supplier" name="supplier" class="form-select">
+      <option value="">All</option>
+    </select>
+  </div>
+
+  <div class="col-md-auto d-flex align-items-end">
+    <button type="button" id="applyFilters" class="btn btn-danger me-2">Apply</button>
+    <button type="reset" id="resetFilters" class="btn btn-outline-dark">Reset</button>
+  </div>
+</form>
+
+<!-- CARDS -->
+<div class="row g-3 mt-3">
+  <div class="col-md-3">
+    <div class="card text-white" style="background-color:#e74c3c;">
+      <div class="card-body">
+        <h5 class="card-title mb-1">Sales (Legacy)</h5>
+        <div class="fs-4 fw-bold" id="salesTotal">0</div>
+        <small>(<span id="salesCash">0</span> C / <span id="salesNonCash">0</span> Q)</small>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-3">
+    <div class="card text-white" style="background-color:#3498db;">
+      <div class="card-body">
+        <h5 class="card-title mb-1">Purchase (Supplier)</h5>
+        <div class="fs-4 fw-bold" id="purchaseTotal">0</div>
+        <small>(<span id="purchaseCash">0</span> C / <span id="purchaseNonCash">0</span> Q)</small>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-3">
+    <div class="card text-white" style="background-color:#2ecc71;">
+      <div class="card-body">
+        <h5 class="card-title mb-1">Profit</h5>
+        <div class="fs-4 fw-bold" id="profitTotal">0</div>
+        <small>(<span id="profitCash">0</span> C / <span id="profitNonCash">0</span> Q)</small>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-3">
+    <div class="card text-dark" style="background-color:#f39c12;">
+      <div class="card-body">
+        <h5 class="card-title mb-1">Discount (±)</h5>
+        <div class="fs-4 fw-bold" id="discountTotal">0</div>
+        <small>Total Bookings: <span id="bookingTotal">0</span></small>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- BOOKINGS TABLE -->
+<h4 class="mt-4 text-danger">Legacy Bookings Summary</h4>
+<table class="table table-bordered text-center" id="legacyBookingsTable">
+  <thead class="table-light">
+    <tr>
+      <th>Booking ID</th>
+      <th>Date</th>
+      <th>Client</th>
+      <th>Purchase Breakdown</th>
+      <th class="text-white" style="background:#e74c3c;">C Sales</th>
+      <th class="text-white" style="background:#e74c3c;">Q Sales</th>
+      <th class="text-white" style="background:#3498db;">C Purchase</th>
+      <th class="text-white" style="background:#3498db;">Q Purchase</th>
+      <th class="text-white" style="background:#2ecc71;">C Profit</th>
+      <th class="text-white" style="background:#2ecc71;">Q Profit</th>
+      <th class="text-dark" style="background:#f39c12;">Discount</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<!-- MODAL -->
+<div class="modal fade" id="purchaseModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title">Purchase Breakdown (by Service Table)</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body bg-light" id="purchaseModalBody"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", async () => {
+  let purchaseStore = {}; // booking_id -> breakdown array
+
+  const fmt = (n) => Math.round(Number(n || 0)).toLocaleString("en-IN");
+  const safeSet = (id, v) => {
+    const e = document.getElementById(id);
+    if (e) e.innerText = fmt(v);
+  };
+
+  async function loadFilters() {
+    const res = await fetch("{% url 'staff_legacy_filters_data' %}");
+    if (!res.ok) return;
+    const data = await res.json();
+
+    const add = (id, items, labelFn) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      (items || []).forEach((i) => {
+        el.insertAdjacentHTML("beforeend", `<option value="${i.id || i}">${labelFn(i)}</option>`);
+      });
+    };
+
+    add("year", data.years, (y) => y);
+    add("month", data.months, (m) => m);
+    add("client", data.clients, (c) => c.name);
+    add("supplier", data.suppliers, (s) => s.name);
+  }
+
+  async function loadSummary(params="") {
+    const res = await fetch("{% url 'staff_legacy_summary' %}" + (params ? "?" + params : ""));
+    if (!res.ok) return;
+    const js = await res.json();
+    const t = js.totals || {};
+
+    safeSet("salesTotal", (t.sales_cash || 0) + (t.sales_non_cash || 0));
+    safeSet("salesCash", t.sales_cash || 0);
+    safeSet("salesNonCash", t.sales_non_cash || 0);
+
+    safeSet("purchaseTotal", (t.purchase_cash || 0) + (t.purchase_non_cash || 0));
+    safeSet("purchaseCash", t.purchase_cash || 0);
+    safeSet("purchaseNonCash", t.purchase_non_cash || 0);
+
+    safeSet("profitTotal", (t.profit_cash || 0) + (t.profit_non_cash || 0));
+    safeSet("profitCash", t.profit_cash || 0);
+    safeSet("profitNonCash", t.profit_non_cash || 0);
+
+    safeSet("discountTotal", t.discount || 0);
+    safeSet("bookingTotal", t.bookings || 0);
+  }
+
+  async function loadBookings(params="") {
+    const res = await fetch("{% url 'staff_legacy_bookings' %}" + (params ? "?" + params : ""));
+    if (!res.ok) return;
+
+    const js = await res.json();
+    const tbody = document.querySelector("#legacyBookingsTable tbody");
+    tbody.innerHTML = "";
+    purchaseStore = {};
+
+    (js.data || []).forEach((b) => {
+      purchaseStore[b.booking_id] = b.purchase_breakdown || [];
+      const hasBreakdown = (purchaseStore[b.booking_id] || []).length > 0;
+
+      tbody.insertAdjacentHTML("beforeend", `
+        <tr>
+          <td>${b.booking_id || ""}</td>
+          <td>${b.booking_date || ""}</td>
+          <td>${b.client_name || ""}</td>
+          <td>
+            ${hasBreakdown ? "Service-wise" : "-"}
+            <button class="btn btn-sm btn-outline-danger ms-2"
+              ${hasBreakdown ? "" : "disabled"}
+              data-bs-toggle="modal"
+              data-bs-target="#purchaseModal"
+              data-booking="${b.booking_id}">
+              Show
+            </button>
+          </td>
+          <td>${fmt(b.totals?.sales_cash)}</td>
+          <td>${fmt(b.totals?.sales_non_cash)}</td>
+          <td>${fmt(b.totals?.purchase_cash)}</td>
+          <td>${fmt(b.totals?.purchase_non_cash)}</td>
+          <td>${fmt(b.totals?.profit_cash)}</td>
+          <td>${fmt(b.totals?.profit_non_cash)}</td>
+          <td>${fmt(b.totals?.discount)}</td>
+        </tr>
+      `);
+    });
+  }
+
+  // Modal
+  const purchaseModal = document.getElementById("purchaseModal");
+  if (purchaseModal) {
+    purchaseModal.addEventListener("show.bs.modal", (e) => {
+      const btn = e.relatedTarget;
+      const bookingId = btn?.getAttribute("data-booking");
+      const rows = purchaseStore[bookingId] || [];
+
+      const html = rows.map((r) => `
+        <div class="p-3 mb-2 bg-white border rounded">
+          <div class="d-flex justify-content-between">
+            <strong>${r.service}</strong>
+            <span class="text-muted">Total: ${fmt(r.purchase_total)}</span>
+          </div>
+          <div class="small mt-1">
+            Cash: ${fmt(r.purchase_cash)} <br>
+            Non-cash: ${fmt(r.purchase_non_cash)}
+          </div>
+        </div>
+      `).join("");
+
+      document.getElementById("purchaseModalBody").innerHTML =
+        html || `<div class="text-muted">No purchase rows found for this booking.</div>`;
+    });
+  }
+
+  function currentParams() {
+    return new URLSearchParams(new FormData(document.getElementById("legacyFilters"))).toString();
+  }
+
+  document.getElementById("applyFilters").addEventListener("click", (e) => {
+    e.preventDefault();
+    const p = currentParams();
+    loadSummary(p);
+    loadBookings(p);
+  });
+
+  document.getElementById("resetFilters").addEventListener("click", (e) => {
+    e.preventDefault();
+    document.getElementById("legacyFilters").reset();
+    loadSummary("");
+    loadBookings("");
+  });
+
+  await loadFilters();
+  await loadSummary("");
+  await loadBookings("");
+});
+</script>
+
+{% endblock %}

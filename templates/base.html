@@ -92,6 +92,14 @@
           <span>Staff Actual Reports</span>
         </a>
       </div>
+
+      <div class="nav-item mb-1">
+        <a href="{% url 'staff_legacy_reports' %}"
+           class="nav-link d-flex align-items-center gap-2 rounded px-3 py-2{% if '/staff_legacy_reports' in request.path %} active{% endif %}">
+          <i class="bi bi-stopwatch"></i>
+          <span>Staff Legacy Reports</span>
+        </a>
+      </div>
       {% endif %}
       
 
@@ -198,7 +206,7 @@
 </div>
         <div class="nav-item mb-1">
           <a href="{% url 'owner_actual_reports' %}"
-             class="nav-link d-flex align-items-center gap-2 rounded px-3 py-2{% if '/owner-reports-actual' in request.path %} active{% endif %}">
+             class="nav-link d-flex align-items-center gap-2 rounded px-3 py-2{% if '/owner/actual/' in request.path %} active{% endif %}">
             <i class="bi bi-bar-chart-fill"></i>
             <span>Post Reports</span>
           </a>
