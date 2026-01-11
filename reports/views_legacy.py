@@ -118,7 +118,7 @@ def _svc_sales_totals_from_payments(booking_id: int, service_id: int) -> Tuple[D
 @user_passes_test(is_owner_or_admin)
 def owner_legacy_reports(request):
     # Template lives under reports/templates/reports/...
-    return render(request, "reports/owner_reports_legacy.html")
+    return render(request, "owner_reports_legacy.html")
 
 
 @login_required
