@@ -3,7 +3,7 @@
 <div style="display: flex;">
   <h3 class="mt-4 text-primary fw-bold">Staff Actual Profit Dashboard</h3>
   <span style="margin-top: 2rem; margin-left: 1rem; font-style: italic; color: gray;">
-    Look at account-approved payment reports with real time discount
+    NEW entries only (service-linked, account-approved payments)
   </span>
 </div>
 
@@ -141,7 +141,6 @@
 
 <script>
 document.addEventListener("DOMContentLoaded", async () => {
-  // store booking_id => services[]
   let servicesStore = {};
 
   const fmt = (n) => Math.round(Number(n || 0)).toLocaleString("en-IN");
@@ -159,10 +158,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       const el = document.getElementById(id);
       if (!el) return;
       items.forEach((i) => {
-        el.insertAdjacentHTML(
-          "beforeend",
-          `<option value="${i.id || i}">${labelFn(i)}</option>`
-        );
+        el.insertAdjacentHTML("beforeend", `<option value="${i.id || i}">${labelFn(i)}</option>`);
       });
     };
 
@@ -174,7 +170,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   async function loadReport(params = "") {
-    // SUMMARY (cards + service summary)
     const res = await fetch("{% url 'staff_filtered_actual_report' %}" + (params ? "?" + params : ""));
     if (!res.ok) return;
 
@@ -199,22 +194,18 @@ document.addEventListener("DOMContentLoaded", async () => {
     const sbody = document.querySelector("#serviceSummary tbody");
     sbody.innerHTML = "";
     Object.entries(js.service_summary || {}).forEach(([k, v]) => {
-      sbody.insertAdjacentHTML(
-        "beforeend",
-        `<tr>
-          <td>${k}</td>
-          <td>${fmt(v.sales_cash)}</td>
-          <td>${fmt(v.sales_non_cash)}</td>
-          <td>${fmt(v.purchase_cash)}</td>
-          <td>${fmt(v.purchase_non_cash)}</td>
-          <td>${fmt(v.profit_cash)}</td>
-          <td>${fmt(v.profit_non_cash)}</td>
-          <td>${fmt(v.discount)}</td>
-        </tr>`
-      );
+      sbody.insertAdjacentHTML("beforeend", `<tr>
+        <td>${k}</td>
+        <td>${fmt(v.sales_cash)}</td>
+        <td>${fmt(v.sales_non_cash)}</td>
+        <td>${fmt(v.purchase_cash)}</td>
+        <td>${fmt(v.purchase_non_cash)}</td>
+        <td>${fmt(v.profit_cash)}</td>
+        <td>${fmt(v.profit_non_cash)}</td>
+        <td>${fmt(v.discount)}</td>
+      </tr>`);
     });
 
-    // BOOKINGS TABLE (with modal store)
     const r = await fetch("{% url 'staff_bookings_report' %}" + (params ? "?" + params : ""));
     if (!r.ok) return;
 
@@ -222,92 +213,89 @@ document.addEventListener("DOMContentLoaded", async () => {
     const tbody = document.querySelector("#clientSummary tbody");
     tbody.innerHTML = "";
 
-    servicesStore = {}; // reset store each reload
+    servicesStore = {};
 
     (bd.data || []).forEach((b) => {
       const svcNames = (b.services || []).map((s) => s.service).join(", ");
       servicesStore[b.booking_id] = b.services || [];
 
-      tbody.insertAdjacentHTML(
-        "beforeend",
-        `<tr>
-          <td>${b.booking_id}</td>
-          <td>${b.booking_date}</td>
-          <td>${b.client_name}</td>
-          <td>
-            ${svcNames || "-"}
-            <button class="btn btn-sm btn-outline-primary ms-1"
-              data-bs-toggle="modal"
-              data-bs-target="#serviceModal"
-              data-booking="${b.booking_id}">
-              Show
-            </button>
-          </td>
-          <td>${fmt(b.totals?.sales_cash)}</td>
-          <td>${fmt(b.totals?.sales_non_cash)}</td>
-          <td>${fmt(b.totals?.purchase_cash)}</td>
-          <td>${fmt(b.totals?.purchase_non_cash)}</td>
-          <td>${fmt(b.totals?.profit_cash)}</td>
-          <td>${fmt(b.totals?.profit_non_cash)}</td>
-          <td>${fmt(b.totals?.discount)}</td>
-        </tr>`
-      );
+      tbody.insertAdjacentHTML("beforeend", `<tr>
+        <td>${b.booking_id}</td>
+        <td>${b.booking_date}</td>
+        <td>${b.client_name}</td>
+        <td>
+          ${svcNames || "-"}
+          <button class="btn btn-sm btn-outline-primary ms-1"
+            data-bs-toggle="modal"
+            data-bs-target="#serviceModal"
+            data-booking="${b.booking_id}">
+            Show
+          </button>
+        </td>
+        <td>${fmt(b.totals?.sales_cash)}</td>
+        <td>${fmt(b.totals?.sales_non_cash)}</td>
+        <td>${fmt(b.totals?.purchase_cash)}</td>
+        <td>${fmt(b.totals?.purchase_non_cash)}</td>
+        <td>${fmt(b.totals?.profit_cash)}</td>
+        <td>${fmt(b.totals?.profit_non_cash)}</td>
+        <td>${fmt(b.totals?.discount)}</td>
+      </tr>`);
     });
   }
 
-  // Modal content
-  document.getElementById("serviceModal").addEventListener("show.bs.modal", (e) => {
-    const btn = e.relatedTarget;
-    const bookingId = btn.getAttribute("data-booking");
-    const services = servicesStore[bookingId] || [];
+  const serviceModal = document.getElementById("serviceModal");
+  if (serviceModal) {
+    serviceModal.addEventListener("show.bs.modal", (e) => {
+      const btn = e.relatedTarget;
+      const bookingId = btn?.getAttribute("data-booking");
+      const services = servicesStore[bookingId] || [];
 
-    const html = services.map((s) => `
-      <div class="p-3 mb-3 bg-white shadow-sm rounded border">
-        <div class="d-flex justify-content-between align-items-center">
-          <h6 class="mb-0"><strong>${s.service}</strong> <span class="text-muted">(${s.mode || "-"})</span></h6>
+      const html = services.map((s) => `
+        <div class="p-3 mb-3 bg-white shadow-sm rounded border">
+          <h6 class="mb-2"><strong>${s.service}</strong> <span class="text-muted">(${s.mode || "-"})</span></h6>
+
+          <div class="row">
+            <div class="col-md-4">
+              <div class="small text-muted fw-bold">Sales</div>
+              <div>Cash: ${fmt(s.sales_cash)}</div>
+              <div>Non-cash: ${fmt(s.sales_non_cash)}</div>
+              <div class="fw-bold">Total: ${fmt(s.sales_total)}</div>
+            </div>
+
+            <div class="col-md-4">
+              <div class="small text-muted fw-bold">Purchase</div>
+              <div>Cash: ${fmt(s.purchase_cash)}</div>
+              <div>Non-cash: ${fmt(s.purchase_non_cash)}</div>
+              <div class="fw-bold">Total: ${fmt(s.purchase_total)}</div>
+            </div>
+
+            <div class="col-md-4">
+              <div class="small text-muted fw-bold">Profit</div>
+              <div>Cash: ${fmt(s.profit_cash)}</div>
+              <div>Non-cash: ${fmt(s.profit_non_cash)}</div>
+              <div class="fw-bold">Total: ${fmt(s.profit_total)}</div>
+            </div>
+          </div>
+
+          <div class="row mt-2">
+            <div class="col-md-6">
+              <div class="small text-muted fw-bold">Taxes</div>
+              <div>GST: ${fmt(s.gst)}</div>
+              <div>TCS: ${fmt(s.tcs)}</div>
+            </div>
+            <div class="col-md-6">
+              <div class="small text-muted fw-bold">Meta</div>
+              <div>Discount: ${fmt(s.discount || 0)}</div>
+              <div>Entered by: ${s.entered_by || "-"}</div>
+            </div>
+          </div>
         </div>
+      `).join("");
 
-        <div class="row mt-2">
-          <div class="col-md-4">
-            <div class="small text-muted fw-bold">Sales</div>
-            <div>Cash: ${fmt(s.sales_cash)}</div>
-            <div>Non-cash: ${fmt(s.sales_non_cash)}</div>
-            <div class="fw-bold">Total: ${fmt(s.sales_total)}</div>
-          </div>
-
-          <div class="col-md-4">
-            <div class="small text-muted fw-bold">Purchase</div>
-            <div>Cash: ${fmt(s.purchase_cash)}</div>
-            <div>Non-cash: ${fmt(s.purchase_non_cash)}</div>
-            <div class="fw-bold">Total: ${fmt(s.purchase_total)}</div>
-          </div>
-
-          <div class="col-md-4">
-            <div class="small text-muted fw-bold">Profit</div>
-            <div>Cash: ${fmt(s.profit_cash)}</div>
-            <div>Non-cash: ${fmt(s.profit_non_cash)}</div>
-            <div class="fw-bold">Total: ${fmt(s.profit_total)}</div>
-          </div>
-        </div>
-
-        <div class="row mt-2">
-          <div class="col-md-6">
-            <div class="small text-muted fw-bold">Taxes</div>
-            <div>GST: ${fmt(s.gst)}</div>
-            <div>TCS: ${fmt(s.tcs)}</div>
-          </div>
-          <div class="col-md-6">
-            <div class="small text-muted fw-bold">Meta</div>
-            <div>Discount: ${fmt(s.discount || 0)}</div>
-            <div>Entered by: ${s.entered_by || "-"}</div>
-          </div>
-        </div>
-      </div>
-    `).join("");
-
-    document.getElementById("serviceModalBody").innerHTML =
-      html || `<div class="text-muted">No service rows found.</div>`;
-  });
+      document.getElementById("serviceModalBody").innerHTML =
+        html || `<div class="text-muted">No service rows found.</div>`;
+    });
+  }
 
   document.getElementById("applyFilters").addEventListener("click", (e) => {
     e.preventDefault();
