@@ -1,9 +1,10 @@
-from .views import bookings, create_booking, edit_booking, delete_booking, booking_pdf
+from .views import bookings, booking_rows, create_booking, edit_booking, delete_booking, booking_pdf
 from .views import status_list, status_create, status_update, status_delete
 from django.urls import path
 
 urlpatterns = [
     path('', bookings, name='bookings'),
+    path('rows/', booking_rows, name='booking_rows'),
     path('create/', create_booking, name='create_booking'),
     path('<int:pk>/edit/', edit_booking, name='edit_booking'),
     path('<int:pk>/delete/', delete_booking, name='delete_booking'),

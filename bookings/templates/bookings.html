@@ -1,7 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
 {% block content %}
-{% load indian_number %}
 
 <div class="container py-4">
   <div class="d-flex justify-content-between align-items-center mb-3">
@@ -13,7 +12,7 @@
     </div>
 
     <div class="d-flex align-items-center" style="gap: 1rem;">
-      <div id="filter-chips"></div> {# Removed mb-1 here #}
+      <div id="filter-chips"></div>
       <div class="action-controls" style="display: flex; align-items: center; gap: 0.5rem;">
         <div class="btn-group">
           <button type="button" class="btn btn-outline-secondary dropdown-toggle"
@@ -50,69 +49,24 @@
         </thead>
 
         <tbody id="bookings-tbody">
-          {% for booking in bookings %}
-          <tr data-booking-id="{{ booking.id }}">
-            <td class="sticky-col first-col">
-              <input type="radio" name="booking_selector"
-                     class="form-check-input row-selector"
-                     value="{{ booking.id }}">
-            </td>
-            <td class="sticky-col second-col">{{ booking.booking_id }}</td>
-            <td class="sticky-col third-col">{{ booking.created_by }}</td>
-            <td>{{ booking.booking_date|date:"d/m/y" }}</td>
-            <td>{{ booking.client }}</td>
-            <td>
-              {% for service_name, finished in booking.get_service_statuses %}
-                {% if finished %}
-                  <span class="text-success">{{ service_name }}</span>
-                {% else %}
-                  <span class="text-danger">{{ service_name }}</span>
-                {% endif %}
-                {% if not forloop.last %}, {% endif %}
-              {% endfor %}
-            </td>
-            <td>{{ booking.purchase_total|indian_number }}</td>
-            <td>{{ booking.sales_total|indian_number }}</td>
-            <td>{{ booking.sales_gst|indian_number }}</td>
-            <td>{{ booking.net_profit|indian_number }}</td>
-            <td>
-              {% if booking.status.name|lower == "closed" %}
-                <span class="badge bg-success">closed</span>
-              {% elif booking.status.name|lower == "in process" %}
-                <span class="badge bg-warning text-dark">in process</span>
-              {% elif booking.status.name|lower == "open" %}
-                <span class="badge bg-info">open</span>
-              {% else %}
-                <span class="badge bg-secondary">Unknown</span>
-              {% endif %}
-            </td>
-          </tr>
-          {% empty %}
-          <tr>
-            <td colspan="11" class="text-center">No bookings found.</td>
-          </tr>
-          {% endfor %}
+          {% include "bookings/_booking_rows.html" %}
         </tbody>
       </table>
     </div>
   </div>
-  <nav>
-    <ul class="pagination justify-content-end" id="table-pagination"></ul>
-  </nav>
 </div>
 
 <style>
-  /* General table styling for borders */
   #bookings-table {
-    border-collapse: collapse; /* Ensure borders are merged */
-    border: 1px solid #dee2e6; /* Outer border for the table */
-    table-layout: fixed; /* Keep this to respect column widths */
-    width: 100%; /* Ensures the table takes full width of its container, then overflows if content is wider */
+    border-collapse: collapse;
+    border: 1px solid #dee2e6;
+    table-layout: fixed;
+    width: 100%;
   }
 
   #bookings-table th,
   #bookings-table td {
-    border: 1px solid #dee2e6; /* Cell borders */
+    border: 1px solid #dee2e6;
   }
 
   .table-header-menu {
@@ -156,16 +110,13 @@
     cursor: pointer;
     color: #888;
   }
-
-  /* Wrapper for vertical scroll */
   .table-container-wrapper {
-    max-height: 70vh; /* Adjust this value as needed, e.g., 50vh, 600px */
+    max-height: 70vh;
     overflow-y: auto;
-    border-radius: 0.375rem; /* Matches Bootstrap's default border-radius */
+    border-radius: 0.375rem;
   }
-
   .table-responsive {
-    overflow-x: auto; /* This handles horizontal scrolling if table content exceeds container */
+    overflow-x: auto;
   }
   .row-selector {
     margin: 0;
@@ -177,16 +128,13 @@
     border-radius: 0px;
     border: 1px solid #dee2e6;
   }
-  
-  /* THIS IS THE KEY CHANGE: Highlight all cells in the selected row */
   #bookings-table tbody tr.selected-row td {
-      background-color: #e9f7fe !important; /* Apply to ALL cells in a selected row */
+    background-color: #e9f7fe !important;
   }
-
-  th, td { /* Combined for centering */
+  th, td {
     text-align: center;
     vertical-align: middle !important;
-    word-wrap: break-word; /* Ensures long text breaks to fit column */
+    word-wrap: break-word;
   }
   th {
     position: relative;
@@ -207,9 +155,6 @@
   .resizer:hover,
   .resizing {
     border-right: 2px solid #217bb2;
-  }
-  .pagination {
-    margin-top: 1rem;
   }
   .table-header-menu .filter-val {
     border: 1.5px solid #b6d6f5;
@@ -234,136 +179,35 @@
     background: #185a85;
     color: #fff;
   }
- 
-
-  /* Sticky Column Styles */
   .sticky-col {
     position: sticky;
-    z-index: 3; /* Higher than resizer and other content */
-    background-color: #fff; /* Default for tbody cells to ensure solid background */
+    z-index: 3;
+    background-color: #fff;
   }
-
-  /* Specific left positions for sticky columns */
   .first-col {
     left: 0;
     border-right: 1px solid #dee2e6;
   }
   .second-col {
-    left: 60px; /* Width of the first column */
+    left: 60px;
     border-right: 1px solid #dee2e6;
   }
   .third-col {
-    left: calc(60px + 80px); /* Width of first + second column */
+    left: calc(60px + 80px);
     border-right: 1px solid #dee2e6;
   }
-
-  /* Adjust header and body backgrounds for sticky columns to prevent content bleed-through */
   #bookings-table thead th.sticky-col {
-      background-color: #e2e6ea; /* Light table header background */
-      position: sticky; /* Make headers sticky vertically too */
-      top: 0;
-      z-index: 4; /* Higher than side sticky cols */
+    background-color: #e2e6ea;
+    position: sticky;
+    top: 0;
+    z-index: 4;
   }
-  /* For tbody sticky cells, explicitly set background to white */
   #bookings-table tbody td.sticky-col {
-      background-color: #fff; /* Table body background for non-selected rows */
+    background-color: #fff;
   }
 </style>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-  let selectedBookingId = null;
-  const tableBody = document.getElementById('bookings-tbody');
-
-  // --- KEY CHANGE ---
-  // Use Event Delegation for row selection. This single listener on the table body
-  // will handle clicks for all radio buttons, even those added later by pagination.
-  tableBody.addEventListener('change', function(e) {
-    if (e.target.matches('.row-selector')) {
-      // First, remove 'selected-row' from any previously selected row
-      tableBody.querySelectorAll('tr').forEach(tr => tr.classList.remove('selected-row'));
-      
-      const selector = e.target;
-      if (selector.checked) {
-        selectedBookingId = selector.value;
-        selector.closest('tr').classList.add('selected-row');
-      } else {
-        selectedBookingId = null; // Should not happen with radio buttons, but good practice
-      }
-    }
-  });
-
-  // Action dropdown handler (this part remains the same)
-  document.querySelectorAll('[data-action]').forEach(item => {
-    item.addEventListener('click', function(e) {
-      e.preventDefault();
-      if (!selectedBookingId) {
-        alert('Please select a booking first');
-        return;
-      }
-      const action = this.dataset.action;
-      let url = "#";
-      if (action === "edit") {
-        url = "{% url 'edit_booking' 0 %}".replace("0", selectedBookingId);
-        window.location.href = url;
-      } else if (action === "delete") {
-        if (confirm("Are you sure you want to delete this booking?")) {
-          url = "{% url 'delete_booking' 0 %}".replace("0", selectedBookingId);
-          window.location.href = url;
-        }
-      } else if (action === "view") {
-        url = "{% url 'booking_pdf' 0 %}".replace("0", selectedBookingId);
-        window.open(url, "_blank");
-      }
-    });
-  });
-});
-
-
-document.addEventListener('DOMContentLoaded', function () {
-  const table = document.getElementById('bookings-table');
-  if (!table) return;
-  const ths = table.querySelectorAll('th');
-  ths.forEach(function (th, idx) {
-    // Skip the first three sticky columns for manual resizing
-    if (idx === 0 || idx === 1 || idx === 2) return;
-
-    const resizer = document.createElement('div');
-    resizer.classList.add('resizer');
-    th.appendChild(resizer);
-    createResizableColumn(th, resizer);
-  });
-
-  function createResizableColumn(th, resizer) {
-    let x = 0;
-    let w = 0;
-
-    const mouseDownHandler = function (e) {
-      x = e.clientX;
-      w = th.offsetWidth;
-      document.addEventListener('mousemove', mouseMoveHandler);
-      document.addEventListener('mouseup', mouseUpHandler);
-      resizer.classList.add('resizing');
-    };
-
-    const mouseMoveHandler = function (e) {
-      const dx = e.clientX - x;
-      const newWidth = Math.max(60, w + dx); // minimum 60px
-      th.style.width = `${newWidth}px`;
-    };
-
-    const mouseUpHandler = function () {
-      resizer.classList.remove('resizing');
-      document.removeEventListener('mousemove', mouseMoveHandler);
-      document.removeEventListener('mouseup', mouseUpHandler);
-    };
-
-    resizer.addEventListener('mousedown', mouseDownHandler);
-  }
-});
-
-
-  // --- CONFIG ---
   const columns = [
     { key: "radio_button", label: "", type: "none" },
     { key: "booking_id", label: "Booking ID", type: "text" },
@@ -376,273 +220,165 @@ document.addEventListener('DOMContentLoaded', function () {
     { key: "total_gst", label: "Total GST", type: "number" },
     { key: "net_profit", label: "Net Profit", type: "number" },
     { key: "status", label: "Status", type: "text" }
-];
+  ];
 
-  const PAGE_SIZE = 10;
-  let filters = {};
-  let sort = { col: "booking_id", dir: "desc" };
-  let currentPage = 1;
-  const tbody = document.getElementById("bookings-tbody");
-  let allRows = Array.from(tbody.querySelectorAll("tr"));
+  document.addEventListener('DOMContentLoaded', function() {
+    let selectedBookingId = null;
+    const tableBody = document.getElementById('bookings-tbody');
+    const rowsUrl = "{% url 'booking_rows' %}";
 
-  // Debounce utility for filter input
-  function debounce(func, timeout = 300) {
-    let timer;
-    return (...args) => {
-      clearTimeout(timer);
-      timer = setTimeout(() => {
-        func.apply(this, args);
-      }, timeout);
-    };
-  }
-
-  function getCellValue(tr, colIdx) {
-    const actualCellIndex = colIdx;
-    const td = tr.cells[actualCellIndex];
-    if (!td) return "";
-    return td.textContent.trim();
-  }
-  function parseValue(val, type) {
-    if (val === "" || val === null || val === undefined) return null;
-    if (type === "number") {
-      const num = parseFloat(val.replace(/[^\d.-]/g, ""));
-      return isNaN(num) ? null : num;
+    function getCurrentParams() {
+      return new URLSearchParams(window.location.search);
     }
-    if (type === "date") {
-      let date = new Date(val);
-      if (!isNaN(date.getTime())) return date.getTime();
-      const parts = val.split("/");
-      if (parts.length === 3) {
-        date = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
-        if (!isNaN(date.getTime())) return date.getTime();
-      }
-      return null;
-    }
-    return val.toLowerCase();
-  }
-  function compare(a, b, type, dir) {
-    if (a === null && b === null) return 0;
-    if (a === null) return dir === "asc" ? 1 : -1;
-    if (b === null) return dir === "asc" ? -1 : 1;
-    if (type === "number" || type === "date") {
-      return dir === "asc" ? a - b : b - a;
-    }
-    return dir === "asc" ? a.localeCompare(b) : b.localeCompare(a);
-  }
 
-  function applyTable() {
-    const rows = allRows.slice();
-    let filtered = rows.filter((tr) => {
-      return Object.entries(filters).every(([col, { op, val }]) => {
-        const colIdx = columns.findIndex((c) => c.key === col);
-        if (colIdx === -1 || columns[colIdx].type === "none") return true;
-        const cellValue = getCellValue(tr, colIdx);
-        const type = columns[colIdx].type;
-        const parsedCell = parseValue(cellValue, type);
-        const parsedFilter = parseValue(val, type);
-        if (val === "" || val === null || val === undefined) return true;
-        if (parsedCell === null) return false;
-        if (type === "number") {
-          if (parsedFilter === null) return true;
-          switch (op) {
-            case "eq":
-              return parsedCell === parsedFilter;
-            case "gt":
-              return parsedCell > parsedFilter;
-            case "lt":
-              return parsedCell < parsedFilter;
-            case "gte":
-              return parsedCell >= parsedFilter;
-            case "lte":
-              return parsedCell <= parsedFilter;
-            default:
-              return true;
-          }
-        } else if (type === "date") {
-          if (parsedFilter === null) return true;
-          switch (op) {
-            case "eq":
-              return parsedCell === parsedFilter;
-            case "gt":
-              return parsedCell > parsedFilter;
-            case "lt":
-              return parsedCell < parsedFilter;
-            default:
-              return true;
-          }
+    function syncUrl(params) {
+      const nextUrl = `${window.location.pathname}${params.toString() ? `?${params.toString()}` : ''}`;
+      window.history.replaceState({}, '', nextUrl);
+    }
+
+    function refreshRows(params) {
+      params.delete('page');
+      syncUrl(params);
+      selectedBookingId = null;
+      htmx.ajax('GET', `${rowsUrl}${params.toString() ? `?${params.toString()}` : ''}`, {
+        target: '#bookings-tbody',
+        swap: 'innerHTML'
+      });
+    }
+
+    function renderFilterChips() {
+      const chips = document.getElementById('filter-chips');
+      chips.innerHTML = '';
+
+      columns.forEach((col) => {
+        if (col.type === 'none') return;
+        const params = getCurrentParams();
+        const val = params.get(`f_${col.key}_val`);
+        if (!val) return;
+
+        const op = params.get(`f_${col.key}_op`) || (col.type === 'text' ? 'contains' : 'eq');
+        const opLabel = {
+          eq: '=',
+          gt: '>',
+          lt: '<',
+          gte: '>=',
+          lte: '<=',
+          contains: 'contains',
+          equals: 'equals'
+        }[op] || op;
+
+        const chip = document.createElement('span');
+        chip.className = 'filter-chip';
+        chip.innerHTML = `<b>${col.label}</b> &nbsp; ${opLabel} <span style="color:#185a85;"> &nbsp; ${val}</span><span class="close" title="Remove filter">&times;</span>`;
+        chip.querySelector('.close').addEventListener('click', function() {
+          const nextParams = getCurrentParams();
+          nextParams.delete(`f_${col.key}_op`);
+          nextParams.delete(`f_${col.key}_val`);
+          refreshRows(nextParams);
+        });
+        chips.appendChild(chip);
+      });
+    }
+
+    tableBody.addEventListener('change', function(e) {
+      if (e.target.matches('.row-selector')) {
+        tableBody.querySelectorAll('tr').forEach(tr => tr.classList.remove('selected-row'));
+
+        const selector = e.target;
+        if (selector.checked) {
+          selectedBookingId = selector.value;
+          selector.closest('tr').classList.add('selected-row');
         } else {
-          const cellText = cellValue.toLowerCase();
-          const filterText = val.toLowerCase();
-          switch (op) {
-            case "contains":
-              return cellText.includes(filterText);
-            case "equals":
-              return cellText === filterText;
-            default:
-              return true;
+          selectedBookingId = null;
+        }
+      }
+    });
+
+    document.querySelectorAll('[data-action]').forEach(item => {
+      item.addEventListener('click', function(e) {
+        e.preventDefault();
+        if (!selectedBookingId) {
+          alert('Please select a booking first');
+          return;
+        }
+        const action = this.dataset.action;
+        let url = "#";
+        if (action === "edit") {
+          url = "{% url 'edit_booking' 0 %}".replace("0", selectedBookingId);
+          window.location.href = url;
+        } else if (action === "delete") {
+          if (confirm("Are you sure you want to delete this booking?")) {
+            url = "{% url 'delete_booking' 0 %}".replace("0", selectedBookingId);
+            window.location.href = url;
           }
+        } else if (action === "view") {
+          url = "{% url 'booking_pdf' 0 %}".replace("0", selectedBookingId);
+          window.open(url, "_blank");
         }
       });
     });
-    if (sort.col) {
-      const colIdx = columns.findIndex((c) => c.key === sort.col);
-      if (colIdx !== -1 && columns[colIdx].type !== "none") {
-        const type = columns[colIdx].type;
-        filtered.sort((a, b) => {
-          const valA = parseValue(getCellValue(a, colIdx), type);
-          const valB = parseValue(getCellValue(b, colIdx), type);
-          return compare(valA, valB, type, sort.dir);
-        });
-      }
-    }
-    while (tbody.firstChild) tbody.removeChild(tbody.firstChild);
-    const total = filtered.length;
-    const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
-    currentPage = Math.min(currentPage, totalPages);
-    const start = (currentPage - 1) * PAGE_SIZE;
-    const end = start + PAGE_SIZE;
-    filtered.slice(start, end).forEach((tr) => tbody.appendChild(tr));
-    renderPagination(totalPages);
-    renderFilterChips();
-  }
 
-  function renderPagination(totalPages) {
-    const pag = document.getElementById("table-pagination");
-    pag.innerHTML = "";
-    if (totalPages <= 1) return;
-    const addBtn = (label, page, disabled = false, active = false) => {
-      const li = document.createElement("li");
-      li.className =
-        "page-item" + (disabled ? " disabled" : "") + (active ? " active" : "");
-      const a = document.createElement("a");
-      a.className = "page-link";
-      a.href = "#";
-      a.textContent = label;
-      a.onclick = (e) => {
-        e.preventDefault();
-        if (!disabled && !active) {
-          currentPage = page;
-          applyTable();
-        }
-      };
-      li.appendChild(a);
-      pag.appendChild(li);
-    };
-    addBtn("«", 1, currentPage === 1);
-    for (let i = 1; i <= totalPages; i++)
-      addBtn(i, i, false, currentPage === i);
-    addBtn("»", totalPages, currentPage === totalPages);
-  }
-
-  function renderFilterChips() {
-    const chips = document.getElementById("filter-chips");
-    chips.innerHTML = "";
-    Object.entries(filters).forEach(([col, { op, val }]) => {
-      if (!val) return;
-      const c = columns.find((c) => c.key === col);
-      if (!c || c.type === "none") return;
-      const opLabel =
-        {
-          eq: "=",
-          gt: ">",
-          lt: "<",
-          gte: "≥",
-          lte: "≤",
-          contains: "contains",
-          equals: "equals",
-        }[op] || op;
-      const chip = document.createElement("span");
-      chip.className = "filter-chip";
-      chip.innerHTML = `<b>${c.label}</b> &nbsp; ${opLabel} <span style="color:#185a85;"> &nbsp; ${val}</span>
-      <span class="close" title="Remove filter">&times;</span>`;
-      chip.querySelector(".close").onclick = () => {
-        delete filters[col];
-        if (Object.keys(filters).length === 0) {
-          sort = { col: "booking_id", dir: "desc" };
-          currentPage = 1;
-        }
-        applyTable();
-      };
-      chips.appendChild(chip);
+    document.addEventListener('click', function() {
+      document.querySelectorAll('.table-header-menu').forEach(menu => menu.remove());
     });
-  }
 
-  function closeMenus() {
-    document.querySelectorAll(".table-header-menu").forEach((m) => m.remove());
-  }
-  document.addEventListener("click", closeMenus);
-
-  document
-    .querySelectorAll("#bookings-table thead th[data-col]")
-    .forEach((th, idx) => {
-      th.addEventListener("click", function (e) {
+    document.querySelectorAll('#bookings-table thead th[data-col]').forEach((th, idx) => {
+      th.addEventListener('click', function(e) {
         e.stopPropagation();
-        closeMenus();
-        const colKey = th.getAttribute("data-col");
-        const col = columns.find((c) => c.key === colKey);
-        if (!col || col.type === "none") return;
+        document.querySelectorAll('.table-header-menu').forEach(menu => menu.remove());
 
-        const menu = document.createElement("div");
-        menu.className = "table-header-menu active";
-        menu.style.minWidth = "240px";
-        menu.style.maxWidth = "320px";
-        menu.style.padding = "0.5rem 0.5rem";
+        const colKey = th.getAttribute('data-col');
+        const col = columns.find((item) => item.key === colKey);
+        if (!col || col.type === 'none') return;
+
+        const params = getCurrentParams();
+        const existingOp = params.get(`f_${colKey}_op`) || (col.type === 'text' ? 'contains' : 'eq');
+        const existingVal = params.get(`f_${colKey}_val`) || '';
+
+        const menu = document.createElement('div');
+        menu.className = 'table-header-menu active';
+        menu.style.minWidth = '240px';
+        menu.style.maxWidth = '320px';
+        menu.style.padding = '0.5rem 0.5rem';
         menu.innerHTML = `
-      <div class="px-3 py-2 border-bottom fw-bold" style="font-size:1.08em;">${
-        col.label
-      }</div>
-      <div class="px-3 pt-2 pb-1 text-muted" style="font-size:0.97em; letter-spacing:0.03em;">Sorting</div>
-      <button class="dropdown-item sort-asc"><i class="bi bi-sort-up"></i> Sort ${
-        col.type === "date"
-          ? "Oldest-Newest"
-          : col.type === "number"
-          ? "Smallest-Largest"
-          : "A-Z"
-      }</button>
-      <button class="dropdown-item sort-desc"><i class="bi bi-sort-down"></i> Sort ${
-        col.type === "date"
-          ? "Newest-Oldest"
-          : col.type === "number"
-          ? "Largest-Smallest"
-          : "Z-A"
-      }</button>
-      <div class="dropdown-divider my-2"></div>
-      <div class="px-3 pb-2">
-        <div class="mb-1 text-muted" style="font-size:0.97em; letter-spacing:0.03em;">Filter</div>
-        <div class="input-group input-group-sm">
-          <select class="form-select filter-op" style="max-width:90px;">
-            ${
-              col.type === "number"
-                ? `
-                <option value="eq">=</option>
-                <option value="gt">&gt;</option>
-                <option value="lt">&lt;</option>
-                <option value="gte">&ge;</option>
-                <option value="lte">&le;</option>
-              `
-                : col.type === "date"
-                ? `
-                <option value="eq">=</option>
-                <option value="gt">After</option>
-                <option value="lt">Before</option>
-              `
-                : `
-                <option value="contains">Contains</option>
-                <option value="equals">Equals</option>
-              `
-            }
-          </select>
-          <input class="form-control filter-val" type="${
-            col.type === "number"
-              ? "number"
-              : col.type === "date"
-              ? "date"
-              : "text"
-          }" placeholder="Value">
-          <button class="btn btn-outline-primary btn-sm filter-apply" type="button"><i class="bi bi-funnel"></i></button>
-        </div>
-      </div>
-    `;
+          <div class="px-3 py-2 border-bottom fw-bold" style="font-size:1.08em;">${col.label}</div>
+          <div class="px-3 pt-2 pb-1 text-muted" style="font-size:0.97em; letter-spacing:0.03em;">Sorting</div>
+          <button class="dropdown-item sort-asc"><i class="bi bi-sort-up"></i> Sort ${
+            col.type === "date" ? "Oldest-Newest" : col.type === "number" ? "Smallest-Largest" : "A-Z"
+          }</button>
+          <button class="dropdown-item sort-desc"><i class="bi bi-sort-down"></i> Sort ${
+            col.type === "date" ? "Newest-Oldest" : col.type === "number" ? "Largest-Smallest" : "Z-A"
+          }</button>
+          <div class="dropdown-divider my-2"></div>
+          <div class="px-3 pb-2">
+            <div class="mb-1 text-muted" style="font-size:0.97em; letter-spacing:0.03em;">Filter</div>
+            <div class="input-group input-group-sm">
+              <select class="form-select filter-op" style="max-width:90px;">
+                ${
+                  col.type === "number" ? `
+                    <option value="eq">=</option>
+                    <option value="gt">&gt;</option>
+                    <option value="lt">&lt;</option>
+                    <option value="gte">&ge;</option>
+                    <option value="lte">&le;</option>
+                  ` : col.type === "date" ? `
+                    <option value="eq">=</option>
+                    <option value="gt">After</option>
+                    <option value="lt">Before</option>
+                  ` : `
+                    <option value="contains">Contains</option>
+                    <option value="equals">Equals</option>
+                  `
+                }
+              </select>
+              <input class="form-control filter-val" type="${
+                col.type === "number" ? "number" : col.type === "date" ? "date" : "text"
+              }" placeholder="Value" value="${existingVal}">
+              <button class="btn btn-outline-primary btn-sm filter-apply" type="button"><i class="bi bi-funnel"></i></button>
+            </div>
+          </div>
+        `;
+
         document.body.appendChild(menu);
         const rect = th.getBoundingClientRect();
         const menuWidth = menu.offsetWidth || 260;
@@ -650,56 +386,87 @@ document.addEventListener('DOMContentLoaded', function () {
         if (left + menuWidth > window.innerWidth - 8) {
           left = Math.max(8, window.innerWidth - menuWidth - 8);
         }
-        menu.style.position = "absolute";
-        menu.style.left = left + "px";
-        menu.style.top = rect.bottom + window.scrollY + "px";
+        menu.style.position = 'absolute';
+        menu.style.left = `${left}px`;
+        menu.style.top = `${rect.bottom + window.scrollY}px`;
         menu.style.zIndex = 9999;
-        menu.style.display = "block";
+        menu.style.display = 'block';
 
-        menu.querySelector(".sort-asc").onclick = function (e) {
-          e.stopPropagation();
-          sort = { col: colKey, dir: "asc" };
-          currentPage = 1;
-          applyTable();
-          closeMenus();
-        };
-        menu.querySelector(".sort-desc").onclick = function (e) {
-          e.stopPropagation();
-          sort = { col: colKey, dir: "desc" };
-          currentPage = 1;
-          applyTable();
-          closeMenus();
-        };
+        const filterOp = menu.querySelector('.filter-op');
+        const filterInput = menu.querySelector('.filter-val');
+        filterOp.value = existingOp;
 
-        // Debounced filter apply on input
-        const filterInput = menu.querySelector(".filter-val");
-        const filterOp = menu.querySelector(".filter-op");
-        const debouncedApply = debounce(function () {
-          const op = filterOp.value;
+        menu.querySelector('.sort-asc').addEventListener('click', function(evt) {
+          evt.stopPropagation();
+          const nextParams = getCurrentParams();
+          nextParams.set('sort_col', colKey);
+          nextParams.set('sort_dir', 'asc');
+          refreshRows(nextParams);
+          menu.remove();
+        });
+
+        menu.querySelector('.sort-desc').addEventListener('click', function(evt) {
+          evt.stopPropagation();
+          const nextParams = getCurrentParams();
+          nextParams.set('sort_col', colKey);
+          nextParams.set('sort_dir', 'desc');
+          refreshRows(nextParams);
+          menu.remove();
+        });
+
+        menu.querySelector('.filter-apply').addEventListener('click', function(evt) {
+          evt.stopPropagation();
+          const nextParams = getCurrentParams();
           const val = filterInput.value;
-          if (val) filters[colKey] = { op, val };
-          else delete filters[colKey];
-          currentPage = 1;
-          applyTable();
-        }, 300);
-        filterInput.addEventListener("input", debouncedApply);
+          if (val) {
+            nextParams.set(`f_${colKey}_op`, filterOp.value);
+            nextParams.set(`f_${colKey}_val`, val);
+          } else {
+            nextParams.delete(`f_${colKey}_op`);
+            nextParams.delete(`f_${colKey}_val`);
+          }
+          refreshRows(nextParams);
+          menu.remove();
+        });
 
-        // Manual apply button (for users who click the funnel)
-        menu.querySelector(".filter-apply").onclick = function (e) {
-          e.stopPropagation();
-          const op = filterOp.value;
-          const val = filterInput.value;
-          if (val) filters[colKey] = { op, val };
-          else delete filters[colKey];
-          currentPage = 1;
-          applyTable();
-          closeMenus();
-        };
+        menu.addEventListener('click', function(evt) {
+          evt.stopPropagation();
+        });
+      });
 
-        menu.onclick = (e) => e.stopPropagation();
+      if (idx === 0 || idx === 1 || idx === 2) return;
+      const resizer = document.createElement('div');
+      resizer.classList.add('resizer');
+      th.appendChild(resizer);
+
+      let x = 0;
+      let w = 0;
+      resizer.addEventListener('mousedown', function(evt) {
+        x = evt.clientX;
+        w = th.offsetWidth;
+        resizer.classList.add('resizing');
+
+        function mouseMoveHandler(moveEvt) {
+          const dx = moveEvt.clientX - x;
+          th.style.width = `${Math.max(60, w + dx)}px`;
+        }
+
+        function mouseUpHandler() {
+          resizer.classList.remove('resizing');
+          document.removeEventListener('mousemove', mouseMoveHandler);
+          document.removeEventListener('mouseup', mouseUpHandler);
+        }
+
+        document.addEventListener('mousemove', mouseMoveHandler);
+        document.addEventListener('mouseup', mouseUpHandler);
       });
     });
 
-  applyTable();
+    tableBody.addEventListener('htmx:afterSwap', function() {
+      renderFilterChips();
+    });
+
+    renderFilterChips();
+  });
 </script>
 {% endblock content %}

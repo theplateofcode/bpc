@@ -4,6 +4,7 @@ from django.contrib.auth import get_user_model
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse
 from django.template.loader import render_to_string
+from django.core.paginator import Paginator
 from xhtml2pdf import pisa
 from decimal import Decimal
 from .models import Booking, BookingService
@@ -81,24 +82,35 @@ from django.db.models import (
     Min, Max, Avg, Count
 )
 from django.db.models.functions import Coalesce, Least
+from urllib.parse import urlencode
 
 
-@login_required(login_url='/users/login/')
-def bookings(request):
-    # Role-based filtering
-    if request.user.role in ['OWNER', 'ADMIN']:
-        bookings = Booking.objects.all()
-        
+BOOKINGS_PAGE_SIZE = 20
+BOOKING_FILTERABLE_COLUMNS = {
+    "booking_id": "text",
+    "created_by": "text",
+    "booking_date": "date",
+    "client_name": "text",
+    "services": "text",
+    "total_p_cost": "number",
+    "total_s_cost": "number",
+    "total_gst": "number",
+    "net_profit": "number",
+    "status": "text",
+}
+
+
+def _booking_base_queryset(request):
+    qs = Booking.objects.select_related("client", "created_by", "status").prefetch_related("services")
+
+    if request.user.role in ["OWNER", "ADMIN"]:
+        pass
     else:
-        bookings = Booking.objects.filter(created_by=request.user).prefetch_related(
-            'tickets', 'passports', 'visas', 'insurances',
-            'hotels', 'sightseeings', 'transfers'
-        )
+        qs = qs.filter(created_by=request.user)
 
-    # Payment mode filtering
-    mode_filter = request.GET.get('mode')
+    mode_filter = request.GET.get("mode")
     if mode_filter:
-        bookings = bookings.filter(
+        qs = qs.filter(
             Q(tickets__mode=mode_filter) |
             Q(visas__mode=mode_filter) |
             Q(passports__mode=mode_filter) |
@@ -108,10 +120,202 @@ def bookings(request):
             Q(transfers__mode=mode_filter)
         ).distinct()
 
-    return render(request, 'bookings.html', {
-        'bookings': bookings,
-        'current_mode': mode_filter
-    })
+    return qs
+
+
+def _booking_services_text(booking):
+    return ", ".join(service_name for service_name, _ in booking.get_service_statuses())
+
+
+def _booking_created_by_text(booking):
+    if not booking.created_by:
+        return ""
+    return booking.created_by.get_full_name() or booking.created_by.username or str(booking.created_by)
+
+
+def _booking_client_name_text(booking):
+    return str(booking.client) if booking.client else ""
+
+
+def _booking_status_text(booking):
+    return booking.status.name if booking.status else ""
+
+
+def _booking_sort_filter_value(booking, col):
+    if col == "booking_id":
+        return booking.booking_id or ""
+    if col == "created_by":
+        return _booking_created_by_text(booking)
+    if col == "booking_date":
+        return booking.booking_date
+    if col == "client_name":
+        return _booking_client_name_text(booking)
+    if col == "services":
+        return _booking_services_text(booking)
+    if col == "total_p_cost":
+        return booking.purchase_total
+    if col == "total_s_cost":
+        return booking.sales_total
+    if col == "total_gst":
+        return booking.sales_gst
+    if col == "net_profit":
+        return booking.net_profit
+    if col == "status":
+        return _booking_status_text(booking)
+    return ""
+
+
+def _normalize_text(value):
+    if value is None:
+        return ""
+    return str(value).strip().lower()
+
+
+def _normalize_number(value):
+    if value in (None, ""):
+        return None
+    try:
+        return Decimal(str(value))
+    except Exception:
+        return None
+
+
+def _matches_filter(actual, col_type, op, expected_raw):
+    if expected_raw in (None, ""):
+        return True
+
+    if col_type == "number":
+        actual_num = _normalize_number(actual)
+        expected_num = _normalize_number(expected_raw)
+        if actual_num is None or expected_num is None:
+            return False
+        if op == "eq":
+            return actual_num == expected_num
+        if op == "gt":
+            return actual_num > expected_num
+        if op == "lt":
+            return actual_num < expected_num
+        if op == "gte":
+            return actual_num >= expected_num
+        if op == "lte":
+            return actual_num <= expected_num
+        return True
+
+    if col_type == "date":
+        actual_text = actual.isoformat() if actual else ""
+        if op == "eq":
+            return actual_text == expected_raw
+        if op == "gt":
+            return actual_text > expected_raw
+        if op == "lt":
+            return actual_text < expected_raw
+        return True
+
+    actual_text = _normalize_text(actual)
+    expected_text = _normalize_text(expected_raw)
+    if op == "equals":
+        return actual_text == expected_text
+    return expected_text in actual_text
+
+
+def _sort_key_for_booking(booking, col):
+    value = _booking_sort_filter_value(booking, col)
+    col_type = BOOKING_FILTERABLE_COLUMNS.get(col, "text")
+    if col_type == "number":
+        return (_normalize_number(value) is None, _normalize_number(value) or Decimal("0"))
+    if col_type == "date":
+        return (value is None, value)
+    return _normalize_text(value)
+
+
+def _build_rows_context(request):
+    sort_col = request.GET.get("sort_col", "booking_id")
+    sort_dir = request.GET.get("sort_dir", "desc")
+    page_number = request.GET.get("page", 1)
+
+    qs = _booking_base_queryset(request)
+    needs_python_processing = sort_col in {"created_by", "client_name", "services", "total_p_cost", "total_s_cost", "total_gst", "net_profit"}
+
+    active_filters = []
+    for col, col_type in BOOKING_FILTERABLE_COLUMNS.items():
+        op = request.GET.get(f"f_{col}_op", "contains" if col_type == "text" else "eq")
+        val = request.GET.get(f"f_{col}_val", "")
+        if val:
+            active_filters.append({"col": col, "op": op, "val": val, "type": col_type})
+            if col in {"created_by", "client_name", "services", "total_p_cost", "total_s_cost", "total_gst", "net_profit"}:
+                needs_python_processing = True
+
+    if not needs_python_processing:
+        if sort_col == "booking_date":
+            qs = qs.order_by("booking_date" if sort_dir == "asc" else "-booking_date", "id" if sort_dir == "asc" else "-id")
+        elif sort_col == "booking_id":
+            qs = qs.order_by("booking_id" if sort_dir == "asc" else "-booking_id")
+        elif sort_col == "status":
+            qs = qs.order_by("status__name" if sort_dir == "asc" else "-status__name", "id" if sort_dir == "asc" else "-id")
+
+        for item in active_filters:
+            col = item["col"]
+            op = item["op"]
+            val = item["val"]
+            if col == "booking_id":
+                if op == "equals":
+                    qs = qs.filter(booking_id__iexact=val)
+                else:
+                    qs = qs.filter(booking_id__icontains=val)
+            elif col == "booking_date":
+                lookup = {"eq": "booking_date", "gt": "booking_date__gt", "lt": "booking_date__lt"}.get(op, "booking_date")
+                qs = qs.filter(**{lookup: val})
+            elif col == "status":
+                if op == "equals":
+                    qs = qs.filter(status__name__iexact=val)
+                else:
+                    qs = qs.filter(status__name__icontains=val)
+
+        paginator = Paginator(qs, BOOKINGS_PAGE_SIZE)
+        page_obj = paginator.get_page(page_number)
+    else:
+        bookings_list = list(qs)
+        for item in active_filters:
+            bookings_list = [
+                booking for booking in bookings_list
+                if _matches_filter(
+                    _booking_sort_filter_value(booking, item["col"]),
+                    item["type"],
+                    item["op"],
+                    item["val"],
+                )
+            ]
+
+        reverse = sort_dir == "desc"
+        bookings_list.sort(key=lambda booking: _sort_key_for_booking(booking, sort_col), reverse=reverse)
+        paginator = Paginator(bookings_list, BOOKINGS_PAGE_SIZE)
+        page_obj = paginator.get_page(page_number)
+
+    query_params = request.GET.copy()
+    query_params.pop("page", None)
+    next_querystring = ""
+    if page_obj.has_next():
+        next_params = query_params.copy()
+        next_params["page"] = page_obj.next_page_number()
+        next_querystring = urlencode(next_params, doseq=True)
+
+    return {
+        "page_obj": page_obj,
+        "current_mode": request.GET.get("mode"),
+        "sort_col": sort_col,
+        "sort_dir": sort_dir,
+        "next_querystring": next_querystring,
+    }
+
+
+@login_required(login_url='/users/login/')
+def bookings(request):
+    return render(request, 'bookings.html', _build_rows_context(request))
+
+
+@login_required(login_url='/users/login/')
+def booking_rows(request):
+    return render(request, 'bookings/_booking_rows.html', _build_rows_context(request))
 
 User = get_user_model()
 

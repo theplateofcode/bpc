@@ -1,0 +1,52 @@
+{% load indian_number %}
+
+{% for booking in page_obj %}
+<tr data-booking-id="{{ booking.id }}">
+  <td class="sticky-col first-col">
+    <input type="radio" name="booking_selector"
+           class="form-check-input row-selector"
+           value="{{ booking.id }}">
+  </td>
+  <td class="sticky-col second-col">{{ booking.booking_id }}</td>
+  <td class="sticky-col third-col">{{ booking.created_by }}</td>
+  <td>{{ booking.booking_date|date:"d/m/y" }}</td>
+  <td>{{ booking.client }}</td>
+  <td>
+    {% for service_name, finished in booking.get_service_statuses %}
+      {% if finished %}
+        <span class="text-success">{{ service_name }}</span>
+      {% else %}
+        <span class="text-danger">{{ service_name }}</span>
+      {% endif %}
+      {% if not forloop.last %}, {% endif %}
+    {% endfor %}
+  </td>
+  <td>{{ booking.purchase_total|indian_number }}</td>
+  <td>{{ booking.sales_total|indian_number }}</td>
+  <td>{{ booking.sales_gst|indian_number }}</td>
+  <td>{{ booking.net_profit|indian_number }}</td>
+  <td>
+    {% if booking.status.name|lower == "closed" %}
+      <span class="badge bg-success">closed</span>
+    {% elif booking.status.name|lower == "in process" %}
+      <span class="badge bg-warning text-dark">in process</span>
+    {% elif booking.status.name|lower == "open" %}
+      <span class="badge bg-info">open</span>
+    {% else %}
+      <span class="badge bg-secondary">Unknown</span>
+    {% endif %}
+  </td>
+</tr>
+{% if forloop.last and page_obj.has_next %}
+<tr class="lazy-loader-row"
+    hx-get="{% url 'booking_rows' %}?{{ next_querystring }}"
+    hx-trigger="revealed"
+    hx-swap="outerHTML">
+  <td colspan="11" class="text-center py-3 text-muted">Loading more bookings...</td>
+</tr>
+{% endif %}
+{% empty %}
+<tr>
+  <td colspan="11" class="text-center">No bookings found.</td>
+</tr>
+{% endfor %}
