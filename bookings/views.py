@@ -3,6 +3,7 @@ from django.db.models import Q
 from django.contrib.auth import get_user_model
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse
+from django.core.exceptions import PermissionDenied
 from django.template.loader import render_to_string
 from django.core.paginator import Paginator
 from xhtml2pdf import pisa
@@ -21,6 +22,10 @@ from django.contrib.auth.decorators import login_required
 
 def is_owner_or_admin(user):
     return user.is_authenticated and (getattr(user, 'role', '') == 'OWNER' or getattr(user, 'role', '') == 'ADMIN')
+
+
+def can_modify_bookings(user):
+    return user.is_authenticated and getattr(user, 'role', '') in ['OWNER', 'ADMIN']
 
 
 
@@ -310,7 +315,9 @@ def _build_rows_context(request):
 
 @login_required(login_url='/users/login/')
 def bookings(request):
-    return render(request, 'bookings.html', _build_rows_context(request))
+    context = _build_rows_context(request)
+    context["can_modify_bookings"] = can_modify_bookings(request.user)
+    return render(request, 'bookings.html', context)
 
 
 @login_required(login_url='/users/login/')
@@ -370,6 +377,9 @@ def create_booking(request):
 
 @login_required(login_url='/users/login/')
 def edit_booking(request, pk):
+    if not can_modify_bookings(request.user):
+        raise PermissionDenied("You do not have permission to edit bookings.")
+
     booking = get_object_or_404(Booking, pk=pk)
     
     # Prepare context data (needed for both GET and POST)
@@ -430,6 +440,9 @@ from django.db import transaction
 
 @login_required(login_url='/users/login/')
 def delete_booking(request, pk):
+    if not can_modify_bookings(request.user):
+        raise PermissionDenied("You do not have permission to delete bookings.")
+
     booking = get_object_or_404(Booking, pk=pk)
     if request.method == 'POST':
         try:

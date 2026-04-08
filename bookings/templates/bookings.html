@@ -20,8 +20,10 @@
             Select Action
           </button>
           <ul class="dropdown-menu">
+            {% if can_modify_bookings %}
             <li><a class="dropdown-item" href="#" data-action="edit">Edit</a></li>
             <li><a class="dropdown-item" href="#" data-action="delete">Delete</a></li>
+            {% endif %}
             <li><a class="dropdown-item" href="#" data-action="view">View PDF</a></li>
           </ul>
         </div>
