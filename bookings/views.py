@@ -479,7 +479,7 @@ def service_summary(qs, service_type=None):
         tcs = Decimal('0')
         if service_type in ['Hotels', 'Transfers', 'Sightseeings']:
             if not is_cash and getattr(obj, 'travel_type', '').lower() == 'international':
-                tcs = obj.sales_amount * Decimal('0.05')
+                tcs = obj.sales_amount * Decimal('0.02')
 
         travel_type = getattr(obj, 'travel_type', None)
         mode_name = getattr(obj.mode, 'name', '-') if hasattr(obj, 'mode') else '-'

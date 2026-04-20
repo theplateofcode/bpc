@@ -144,7 +144,7 @@ def _svc_gst_tcs_for_booking_service(booking_id: int, service_code: str) -> Tupl
     TCS:
       - Only Hotel / Sightseeing / Transfer
       - Only if NON-CASH AND international (travel_type == 'international')
-      - TCS = sales_amount * 5%
+      - TCS = sales_amount * 2%
     """
     model = SERVICE_MODEL_MAP.get(service_code)
     if not model:
@@ -153,7 +153,7 @@ def _svc_gst_tcs_for_booking_service(booking_id: int, service_code: str) -> Tupl
     qs = model.objects.filter(booking_id=booking_id).select_related("mode")
 
     gst_rate = Decimal("0.18")
-    tcs_rate = Decimal("0.05")
+    tcs_rate = Decimal("0.02")
 
     gst_total = ZERO
     tcs_total = ZERO

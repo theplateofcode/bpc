@@ -22,7 +22,7 @@ User = get_user_model()
 # ---------------------------
 
 GST_RATE = Decimal("0.18")
-TCS_RATE = Decimal("0.05")
+TCS_RATE = Decimal("0.02")
 
 
 def to_decimal(val) -> Decimal:
@@ -137,7 +137,7 @@ def _svc_tax_totals_from_service_rows(booking_id: int, service_code: str) -> Tup
     TCS rules:
       - Only for Hotel/Transfer/Sightseeing
       - Only if NON-CASH AND travel_type == 'international'
-      - TCS = sales_amount * 5%
+      - TCS = sales_amount * 2%
 
     IMPORTANT:
       This uses service table fields (sales_amount/purchase_amount/mode/travel_type),

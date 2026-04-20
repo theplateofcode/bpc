@@ -211,7 +211,7 @@ class Booking(models.Model):
         # print("DEBUG: sightseeing_sales", sightseeing_sales)
         total = hotel_sales + transfer_sales + sightseeing_sales
         # print("DEBUG: total TCS amount", total)
-        return total * Decimal('0.05')
+        return total * Decimal('0.02')
 
     @property
     def gross_profit(self):
