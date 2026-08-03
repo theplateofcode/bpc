@@ -185,6 +185,47 @@ def report_filters_data(request):
 # ---------------------------
 # Filtered Report (cards + service summary + employee summary)
 # ---------------------------
+# The seven service tables in the exact order the reports below used to chain
+# them. The order is load-bearing: the totals are accumulated as floats, and
+# float addition is not associative, so re-ordering could shift a trailing digit.
+_SERVICE_VALUE_SOURCES = (
+    ("Hotel", Hotel),
+    ("Insurance", Insurance),
+    ("Passport", Passport),
+    ("Sightseeing", SightSeeing),
+    ("Ticket", Ticket),
+    ("Transfer", Transfer),
+    ("Visa", Visa),
+)
+
+
+def _service_value_rows_by_booking(booking_ids):
+    """Every service row for these bookings, grouped by booking id.
+
+    Replaces the seven per-booking queries the loops used to run -- the same
+    rows, the same order within each booking, fetched seven times in total
+    rather than seven times per booking.
+    """
+    booking_ids = list(booking_ids)
+    grouped = defaultdict(list)
+    if not booking_ids:
+        return grouped
+
+    for label, model in _SERVICE_VALUE_SOURCES:
+        for chunk in (booking_ids[i:i + 1000] for i in range(0, len(booking_ids), 1000)):
+            rows = (
+                model.objects
+                .filter(booking_id__in=chunk)
+                .values("sales_amount", "purchase_amount", "mode__name",
+                        "created_by_id", "booking_id")
+                .annotate(service_name=Value(label, output_field=CharField()))
+                .order_by("id")
+            )
+            for row in rows:
+                grouped[row["booking_id"]].append(row)
+    return grouped
+
+
 @user_passes_test(superuser_only)
 def filtered_report(request):
     service_filter = request.GET.get("service")
@@ -234,17 +275,10 @@ def filtered_report(request):
     results["totals"]["bookings"] = bookings.distinct().count()
 
     # --- Step 2: Walk through each booking’s services ---
-    from itertools import chain
+    bookings = list(bookings)
+    service_rows = _service_value_rows_by_booking(booking.id for booking in bookings)
     for booking in bookings:
-        all_services = chain(
-            Hotel.objects.filter(booking=booking).values("sales_amount", "purchase_amount", "mode__name", "created_by_id").annotate(service_name=Value("Hotel", output_field=CharField())),
-            Insurance.objects.filter(booking=booking).values("sales_amount", "purchase_amount", "mode__name", "created_by_id").annotate(service_name=Value("Insurance", output_field=CharField())),
-            Passport.objects.filter(booking=booking).values("sales_amount", "purchase_amount", "mode__name", "created_by_id").annotate(service_name=Value("Passport", output_field=CharField())),
-            SightSeeing.objects.filter(booking=booking).values("sales_amount", "purchase_amount", "mode__name", "created_by_id").annotate(service_name=Value("Sightseeing", output_field=CharField())),
-            Ticket.objects.filter(booking=booking).values("sales_amount", "purchase_amount", "mode__name", "created_by_id").annotate(service_name=Value("Ticket", output_field=CharField())),
-            Transfer.objects.filter(booking=booking).values("sales_amount", "purchase_amount", "mode__name", "created_by_id").annotate(service_name=Value("Transfer", output_field=CharField())),
-            Visa.objects.filter(booking=booking).values("sales_amount", "purchase_amount", "mode__name", "created_by_id").annotate(service_name=Value("Visa", output_field=CharField())),
-        )
+        all_services = service_rows.get(booking.id, [])
 
         for s in all_services:
             if service_filter and service_filter != s["service_name"]:
@@ -365,6 +399,8 @@ def bookings_report(request):
         )
 
     data = []
+    bookings = list(bookings)
+    service_rows = _service_value_rows_by_booking(booking.id for booking in bookings)
     for booking in bookings:
         booking_info = {
             "booking_id": booking.booking_id,
@@ -374,15 +410,7 @@ def bookings_report(request):
             "services": [],
         }
 
-        all_services = chain(
-            Hotel.objects.filter(booking=booking).values("sales_amount", "purchase_amount", "mode__name", "created_by_id").annotate(service_name=Value("Hotel", output_field=CharField())),
-            Insurance.objects.filter(booking=booking).values("sales_amount", "purchase_amount", "mode__name", "created_by_id").annotate(service_name=Value("Insurance", output_field=CharField())),
-            Passport.objects.filter(booking=booking).values("sales_amount", "purchase_amount", "mode__name", "created_by_id").annotate(service_name=Value("Passport", output_field=CharField())),
-            SightSeeing.objects.filter(booking=booking).values("sales_amount", "purchase_amount", "mode__name", "created_by_id").annotate(service_name=Value("Sightseeing", output_field=CharField())),
-            Ticket.objects.filter(booking=booking).values("sales_amount", "purchase_amount", "mode__name", "created_by_id").annotate(service_name=Value("Ticket", output_field=CharField())),
-            Transfer.objects.filter(booking=booking).values("sales_amount", "purchase_amount", "mode__name", "created_by_id").annotate(service_name=Value("Transfer", output_field=CharField())),
-            Visa.objects.filter(booking=booking).values("sales_amount", "purchase_amount", "mode__name", "created_by_id").annotate(service_name=Value("Visa", output_field=CharField())),
-        )
+        all_services = service_rows.get(booking.id, [])
 
         sales_cash = sales_non = purchase_cash = purchase_non = 0.0
         profit_cash = profit_non = 0.0
