@@ -1,9 +1,100 @@
 from decimal import Decimal
 from django.db import models
-from django.db.models import Sum
+from django.db.models import Prefetch, Sum
 from django.conf import settings
 
 # bookings/models.py
+
+
+# ---------------------------------------------------------------------------
+# Python-side equivalents of the aggregate/filter calls the money properties
+# used to make.
+#
+# Each property below used to run its own .aggregate(Sum(...)) per service
+# table, which meant one query per service per property -- 76 queries to render
+# a single row of the bookings table. These helpers do the identical arithmetic
+# over rows that are already in memory, so a page that prefetches its service
+# rows pays nothing extra per booking.
+#
+# They are written to be correct with or without prefetching: `self.tickets.all()`
+# returns the prefetch cache when one exists and issues a query when it does not,
+# so nothing breaks if a caller forgets to prefetch -- it just gets slower.
+# ---------------------------------------------------------------------------
+
+def _sum_amount(rows, field, keep=None):
+    """Equivalent of .aggregate(Sum(field))['..'] or Decimal('0').
+
+    Matches the ORM on both edges that matter here: an empty set totals to
+    Decimal('0') rather than None, and NULL amounts are skipped rather than
+    raising.
+    """
+    total = Decimal('0')
+    for row in rows:
+        if keep is not None and not keep(row):
+            continue
+        value = getattr(row, field)
+        if value is not None:
+            total += value
+    return total
+
+
+def _not_cash_exact(row):
+    """Mirrors .exclude(mode__name='Cash') -- note the exact, cased match."""
+    mode = row.mode
+    return not (mode is not None and mode.name == 'Cash')
+
+
+def _not_cash_iexact(row):
+    """Mirrors .exclude(mode__name__iexact='cash')."""
+    mode = row.mode
+    return not (mode is not None and (mode.name or '').lower() == 'cash')
+
+
+def _is_international(row):
+    """Mirrors .filter(travel_type__iexact='international')."""
+    travel_type = row.travel_type
+    return travel_type is not None and travel_type.lower() == 'international'
+
+
+# The seven service relations every money property walks, with the related name
+# each one hangs off Booking by.
+SERVICE_RELATIONS = (
+    'tickets', 'visas', 'passports', 'insurances',
+    'hotels', 'sightseeings', 'transfers',
+)
+
+
+class BookingQuerySet(models.QuerySet):
+    """Queryset helpers that make the money properties cheap to render."""
+
+    def with_service_rows(self, *also_select_related):
+        """Prefetch everything the money properties touch.
+
+        Each service row's `mode` is select_related in the same pass, because
+        the cash/non-cash tests read `row.mode.name` -- without it, dodging the
+        aggregate queries would just trade them for one query per row.
+
+        Pass extra relation names to join them in the same pass, e.g.
+        with_service_rows('supplier') for a view that also renders suppliers.
+        """
+        from services.models import (
+            Hotel, Insurance, Passport, SightSeeing, Ticket, Transfer, Visa,
+        )
+
+        models_by_relation = {
+            'tickets': Ticket,
+            'visas': Visa,
+            'passports': Passport,
+            'insurances': Insurance,
+            'hotels': Hotel,
+            'sightseeings': SightSeeing,
+            'transfers': Transfer,
+        }
+        related = ('mode',) + tuple(also_select_related)
+        return self.prefetch_related(*(
+            Prefetch(relation, queryset=model.objects.select_related(*related))
+            for relation, model in models_by_relation.items()
+        ))
 
 
 class Status(models.Model):
@@ -47,6 +138,8 @@ class Booking(models.Model):
             if finished_flag and not getattr(self, finished_flag, False):
                 return False
         return True
+
+    objects = BookingQuerySet.as_manager()
 
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -134,61 +227,62 @@ class Booking(models.Model):
     def __str__(self):
         return self.booking_id
 
-    @property
-    def purchase_total(self):
+    def _service_rows(self, relation):
+        """Rows of one service relation, with `mode` already loaded.
+
+        When the caller went through with_service_rows() this returns the
+        prefetch cache and costs nothing. Otherwise it falls back to a single
+        query per relation with `mode` joined -- the join matters, because the
+        cash tests read `row.mode.name`, and without it an un-prefetched caller
+        would pay one extra query per service row.
+        """
+        manager = getattr(self, relation)
+        if relation in getattr(self, '_prefetched_objects_cache', {}):
+            return manager.all()
+        return manager.select_related('mode')
+
+    def _amount_total(self, field):
+        """Shared shape of purchase_total and sales_total.
+
+        The two differed only in which column they summed, so the inclusion
+        rules now live in one place: tickets always count, everything else
+        counts only when it is not cash.
+        """
         total = Decimal('0')
         # Tickets (always included)
-        total += self.tickets.aggregate(total=Sum('purchase_amount')
-                                        )['total'] or Decimal('0')
+        total += _sum_amount(self._service_rows('tickets'), field)
 
         # Visa/Passport/Insurance (exclude cash)
-        total += self.visas.exclude(mode__name='Cash').aggregate(
-            total=Sum('purchase_amount'))['total'] or Decimal('0')
-        total += self.passports.exclude(mode__name='Cash').aggregate(
-            total=Sum('purchase_amount'))['total'] or Decimal('0')
-        total += self.insurances.exclude(mode__name='Cash').aggregate(
-            total=Sum('purchase_amount'))['total'] or Decimal('0')
+        total += _sum_amount(self._service_rows('visas'), field, _not_cash_exact)
+        total += _sum_amount(self._service_rows('passports'), field, _not_cash_exact)
+        total += _sum_amount(self._service_rows('insurances'), field, _not_cash_exact)
 
         # Package services (exclude cash)
-        total += self._package_purchase_total
+        total += self._package_total(field)
         return total
+
+    def _package_total(self, field):
+        return (
+            _sum_amount(self._service_rows('hotels'), field, _not_cash_exact) +
+            _sum_amount(self._service_rows('sightseeings'), field, _not_cash_exact) +
+            _sum_amount(self._service_rows('transfers'), field, _not_cash_exact)
+        )
+
+    @property
+    def purchase_total(self):
+        return self._amount_total('purchase_amount')
 
     @property
     def _package_purchase_total(self):
-        return (
-            (self.hotels.exclude(mode__name='Cash').aggregate(total=Sum('purchase_amount'))['total'] or Decimal('0')) +
-            (self.sightseeings.exclude(mode__name='Cash').aggregate(total=Sum('purchase_amount'))['total'] or Decimal('0')) +
-            (self.transfers.exclude(mode__name='Cash').aggregate(
-                total=Sum('purchase_amount'))['total'] or Decimal('0'))
-        )
+        return self._package_total('purchase_amount')
 
     @property
     def sales_total(self):
-        total = Decimal('0')
-        # Tickets (always included)
-        total += self.tickets.aggregate(total=Sum('sales_amount')
-                                        )['total'] or Decimal('0')
-
-        # Visa/Passport/Insurance (exclude cash)
-        total += self.visas.exclude(mode__name='Cash').aggregate(
-            total=Sum('sales_amount'))['total'] or Decimal('0')
-        total += self.passports.exclude(mode__name='Cash').aggregate(
-            total=Sum('sales_amount'))['total'] or Decimal('0')
-        total += self.insurances.exclude(mode__name='Cash').aggregate(
-            total=Sum('sales_amount'))['total'] or Decimal('0')
-
-        # Package services (exclude cash)
-        total += self._package_sales_total
-        return total
+        return self._amount_total('sales_amount')
 
     @property
     def _package_sales_total(self):
-        return (
-            (self.hotels.exclude(mode__name='Cash').aggregate(total=Sum('sales_amount'))['total'] or Decimal('0')) +
-            (self.sightseeings.exclude(mode__name='Cash').aggregate(total=Sum('sales_amount'))['total'] or Decimal('0')) +
-            (self.transfers.exclude(mode__name='Cash').aggregate(
-                total=Sum('sales_amount'))['total'] or Decimal('0'))
-        )
+        return self._package_total('sales_amount')
 
     # bookings/models.py
     @property
@@ -197,20 +291,22 @@ class Booking(models.Model):
 
     @property
     def tcs_amount(self):
-        hotel_sales = self.hotels.exclude(mode__name__iexact='cash').filter(
-            travel_type__iexact='international'
-        ).aggregate(total=Sum('sales_amount'))['total'] or Decimal('0')
-        # print("DEBUG: hotel_sales", hotel_sales)
-        transfer_sales = self.transfers.exclude(mode__name__iexact='cash').filter(
-            travel_type__iexact='international'
-        ).aggregate(total=Sum('sales_amount'))['total'] or Decimal('0')
-        # print("DEBUG: transfer_sales", transfer_sales)
-        sightseeing_sales = self.sightseeings.exclude(mode__name__iexact='cash').filter(
-            travel_type__iexact='international'
-        ).aggregate(total=Sum('sales_amount'))['total'] or Decimal('0')
-        # print("DEBUG: sightseeing_sales", sightseeing_sales)
-        total = hotel_sales + transfer_sales + sightseeing_sales
-        # print("DEBUG: total TCS amount", total)
+        # TCS applies only to international, non-cash package services.
+        # Note this uses a case-insensitive cash test, where purchase_total and
+        # sales_total above use a case-sensitive one. That difference is carried
+        # over from the original queries deliberately -- see the note in
+        # tests/README.md before unifying them.
+        def qualifying(rows):
+            return _sum_amount(
+                rows, 'sales_amount',
+                lambda row: _not_cash_iexact(row) and _is_international(row),
+            )
+
+        total = (
+            qualifying(self._service_rows('hotels')) +
+            qualifying(self._service_rows('transfers')) +
+            qualifying(self._service_rows('sightseeings'))
+        )
         return total * Decimal('0.02')
 
     @property

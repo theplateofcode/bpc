@@ -9,11 +9,20 @@ class BookingAdmin(admin.ModelAdmin):
     ]
     
     list_display = [
-        'booking_id', 'client', 'booking_date', 
-        'status', 'tcs_amount', 'gross_profit', 
+        'booking_id', 'client', 'booking_date',
+        'status', 'tcs_amount', 'gross_profit',
         'sales_gst', 'net_profit'
     ]
-    
+
+    def get_queryset(self, request):
+        # Four money columns in list_display, each walking every service table.
+        # Without the prefetch the changelist costs ~76 queries per row.
+        return (
+            super().get_queryset(request)
+            .select_related('client', 'created_by', 'status')
+            .with_service_rows()
+        )
+
     @admin.display(description='TCS Amount')
     def tcs_amount(self, obj):
         return obj.tcs_amount

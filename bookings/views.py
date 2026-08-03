@@ -106,7 +106,15 @@ BOOKING_FILTERABLE_COLUMNS = {
 
 
 def _booking_base_queryset(request):
-    qs = Booking.objects.select_related("client", "created_by", "status").prefetch_related("services")
+    # with_service_rows() prefetches the seven service tables (and their modes)
+    # that the money properties read. Without it each rendered row costs 76
+    # queries; with it the whole page costs a fixed handful.
+    qs = (
+        Booking.objects
+        .select_related("client", "created_by", "status")
+        .prefetch_related("services")
+        .with_service_rows()
+    )
 
     if request.user.role in ["OWNER", "ADMIN"]:
         pass
@@ -500,15 +508,12 @@ def service_summary(qs, service_type=None):
     return summary
 
 def booking_pdf(request, booking_id):
-    booking = get_object_or_404(Booking.objects.prefetch_related(
-        'tickets__supplier',
-        'visas__supplier',
-        'hotels__supplier',
-        'insurances__supplier',
-        'transfers__supplier',
-        'sightseeings__supplier',
-        'passports__supplier'
-    ), id=booking_id)
+    # Joins supplier (rendered per row) and mode (read by service_summary and by
+    # booking.tcs_amount) in the same pass as the service rows themselves.
+    booking = get_object_or_404(
+        Booking.objects.select_related('client').with_service_rows('supplier'),
+        id=booking_id,
+    )
     client = booking.client
     #get me the supplier details iterable from each supplier in each service
     if not client:

@@ -28,6 +28,9 @@ def base_queryset_closed(mode: str):
         Booking.objects
         .filter(status__name__iexact="closed")
         .select_related("client", "created_by", "status")
+        # get_tax_value() below reads the tcs_amount / sales_gst properties for
+        # every row, so pull their service rows in one pass rather than per row.
+        .with_service_rows()
         .distinct()
     )
 
