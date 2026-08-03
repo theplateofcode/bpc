@@ -94,6 +94,19 @@ BOOKING_LIST_CASES = [
         "f_status_op": "equals", "f_status_val": "closed",
         "sort_col": "net_profit", "sort_dir": "desc",
     }),
+    # Mixed path: `services` can only be sorted in Python, but the money filter
+    # alongside it still has to agree with the SQL-side answer.
+    ("combo_services_sort_money_filter", {
+        "sort_col": "services", "sort_dir": "asc",
+        "f_net_profit_op": "gt", "f_net_profit_val": "0",
+    }),
+    ("combo_created_by_sort_client_filter", {
+        "sort_col": "created_by", "sort_dir": "desc",
+        "f_client_name_op": "contains", "f_client_name_val": "last",
+    }),
+    ("filter_net_profit_not_a_number", {"f_net_profit_op": "gt", "f_net_profit_val": "abc"}),
+    ("sort_created_by_desc", {"sort_col": "created_by", "sort_dir": "desc"}),
+    ("sort_client_name_desc", {"sort_col": "client_name", "sort_dir": "desc"}),
 ]
 
 MONEY_PROPERTIES = [

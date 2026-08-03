@@ -1,6 +1,10 @@
 from decimal import Decimal
 from django.db import models
-from django.db.models import Prefetch, Sum
+from django.db.models import (
+    Case, CharField, DecimalField, ExpressionWrapper, F, OuterRef, Prefetch, Q,
+    Subquery, Sum, Value, When,
+)
+from django.db.models.functions import Cast, Coalesce, Concat, Least, Lower, Trim
 from django.conf import settings
 
 # bookings/models.py
@@ -64,6 +68,34 @@ SERVICE_RELATIONS = (
 )
 
 
+# Output type for the SQL-side money expressions below. Wide enough that the
+# intermediate products (a 2dp amount times a 2dp rate gives 4dp) never
+# overflow before the comparison happens.
+_MONEY = DecimalField(max_digits=20, decimal_places=4)
+_ZERO = Value(Decimal('0'), output_field=_MONEY)
+
+
+def _relation_sum(model, field, exclude=None, keep=None):
+    """SUM(field) over one service table for the booking being annotated.
+
+    A correlated subquery rather than a JOIN on purpose: Booking has seven
+    multi-valued service relations, and joining more than one of them in a
+    single aggregate query multiplies the rows, silently inflating every total.
+    Subqueries each stand alone, so the arithmetic stays correct.
+    """
+    rows = model.objects.filter(booking=OuterRef('pk'))
+    if exclude is not None:
+        rows = rows.exclude(exclude)
+    if keep is not None:
+        rows = rows.filter(keep)
+    totals = rows.values('booking').annotate(total=Sum(field)).values('total')
+    return Coalesce(Subquery(totals, output_field=_MONEY), _ZERO, output_field=_MONEY)
+
+
+def _money(expression):
+    return ExpressionWrapper(expression, output_field=_MONEY)
+
+
 class BookingQuerySet(models.QuerySet):
     """Queryset helpers that make the money properties cheap to render."""
 
@@ -95,6 +127,121 @@ class BookingQuerySet(models.QuerySet):
             Prefetch(relation, queryset=model.objects.select_related(*related))
             for relation, model in models_by_relation.items()
         ))
+
+    def with_money_totals(self):
+        """Annotate the money figures so the database can sort and filter on them.
+
+        These mirror the properties of the same name. They exist so a request
+        that sorts or filters by Net Profit does not have to load every booking
+        into Python to find out which twenty belong on the page.
+
+        Displayed values still come from the properties, which do exact Python
+        Decimal arithmetic. These annotations decide *which rows and in what
+        order*; the properties decide *what the user sees*. Keeping the split
+        means the figures on screen are bit-for-bit what they were before.
+
+        Annotation names are prefixed `db_` because Django assigns annotations
+        onto the instance, and a name matching a property would collide with it.
+        """
+        from services.models import (
+            Hotel, Insurance, Passport, SightSeeing, Ticket, Transfer, Visa,
+        )
+
+        not_cash = Q(mode__name='Cash')                       # matches the properties
+        not_cash_i = Q(mode__name__iexact='cash')             # tcs uses the looser test
+        international = Q(travel_type__iexact='international')
+
+        def totals(field):
+            return _money(
+                _relation_sum(Ticket, field) +
+                _relation_sum(Visa, field, exclude=not_cash) +
+                _relation_sum(Passport, field, exclude=not_cash) +
+                _relation_sum(Insurance, field, exclude=not_cash) +
+                _relation_sum(Hotel, field, exclude=not_cash) +
+                _relation_sum(SightSeeing, field, exclude=not_cash) +
+                _relation_sum(Transfer, field, exclude=not_cash)
+            )
+
+        tcs_base = (
+            _relation_sum(Hotel, 'sales_amount', exclude=not_cash_i, keep=international) +
+            _relation_sum(Transfer, 'sales_amount', exclude=not_cash_i, keep=international) +
+            _relation_sum(SightSeeing, 'sales_amount', exclude=not_cash_i, keep=international)
+        )
+
+        qs = self.annotate(
+            db_purchase_total=totals('purchase_amount'),
+            db_sales_total=totals('sales_amount'),
+            db_tcs_amount=_money(tcs_base * Value(Decimal('0.02'), output_field=_MONEY)),
+        )
+        qs = qs.annotate(
+            db_gross_profit=_money(F('db_sales_total') - F('db_purchase_total')),
+            db_invoice_amount=_money(F('db_sales_total') + F('db_tcs_amount')),
+        )
+        # sales_gst is min(5% of invoice, 18% of gross profit) -- including when
+        # gross profit is negative, which makes the GST negative too. Least()
+        # reproduces that rather than clamping it.
+        qs = qs.annotate(
+            db_sales_gst=_money(Least(
+                _money(F('db_invoice_amount') * Value(Decimal('0.05'), output_field=_MONEY)),
+                _money(F('db_gross_profit') * Value(Decimal('0.18'), output_field=_MONEY)),
+            )),
+        )
+        return qs.annotate(
+            db_net_profit=_money(F('db_gross_profit') - F('db_sales_gst')),
+        )
+
+    def with_sort_text(self):
+        """Annotate the text columns the list can sort and filter on.
+
+        Each one reproduces the string the Python path built, lower-cased to
+        match `_normalize_text`. Doing the lower-casing explicitly rather than
+        leaning on collation keeps the ordering identical on MySQL and SQLite.
+        """
+        # `_booking_created_by_text`: full name, falling back to username,
+        # falling back to empty when the booking has no creator.
+        full_name = Trim(Concat(
+            Coalesce(F('created_by__first_name'), Value('')),
+            Value(' '),
+            Coalesce(F('created_by__last_name'), Value('')),
+            output_field=CharField(),
+        ))
+        qs = self.annotate(_full_name=full_name)
+        qs = qs.annotate(
+            created_by_text=Case(
+                When(created_by__isnull=True, then=Value('')),
+                When(_full_name='', then=F('created_by__username')),
+                default=F('_full_name'),
+                output_field=CharField(),
+            ),
+        )
+
+        # `_booking_client_name_text` is str(Client), i.e. "C-0007 - First Last".
+        # The id is zero-padded to four digits and left alone beyond that, which
+        # is what f"{id:04d}" does -- LPAD would truncate a five-digit id.
+        client_pk = Cast(F('client_id'), output_field=CharField())
+        padded_id = Case(
+            When(client_id__lt=10, then=Concat(Value('000'), client_pk)),
+            When(client_id__lt=100, then=Concat(Value('00'), client_pk)),
+            When(client_id__lt=1000, then=Concat(Value('0'), client_pk)),
+            default=client_pk,
+            output_field=CharField(),
+        )
+        qs = qs.annotate(
+            client_name_text=Concat(
+                Value('C-'), padded_id, Value(' - '),
+                Coalesce(F('client__first_name'), Value('')),
+                Value(' '),
+                Coalesce(F('client__last_name'), Value('')),
+                output_field=CharField(),
+            ),
+        )
+
+        return qs.annotate(
+            created_by_sort=Lower('created_by_text'),
+            client_name_sort=Lower('client_name_text'),
+            status_sort=Lower(Coalesce(F('status__name'), Value(''))),
+            booking_id_sort=Lower(Coalesce(F('booking_id'), Value(''))),
+        )
 
 
 class Status(models.Model):

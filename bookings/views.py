@@ -105,16 +105,52 @@ BOOKING_FILTERABLE_COLUMNS = {
 }
 
 
-def _booking_base_queryset(request):
-    # with_service_rows() prefetches the seven service tables (and their modes)
-    # that the money properties read. Without it each rendered row costs 76
-    # queries; with it the whole page costs a fixed handful.
-    qs = (
-        Booking.objects
-        .select_related("client", "created_by", "status")
-        .prefetch_related("services")
-        .with_service_rows()
-    )
+# Which columns the database can sort and filter on directly. Everything here
+# is either a real column or an annotation from with_money_totals() /
+# with_sort_text(), so the page can be narrowed to twenty rows in SQL before any
+# of them is read.
+BOOKING_MONEY_ANNOTATION = {
+    "total_p_cost": "db_purchase_total",
+    "total_s_cost": "db_sales_total",
+    "total_gst": "db_sales_gst",
+    "net_profit": "db_net_profit",
+}
+BOOKING_TEXT_ANNOTATION = {
+    "created_by": "created_by_sort",
+    "client_name": "client_name_sort",
+}
+# `services` is the one column still sorted and filtered in Python: it is the
+# comma-joined display names from get_service_statuses(), whose ordering follows
+# the m2m rows, and reproducing that in SQL would need a backend-specific
+# GROUP_CONCAT whose row order is not guaranteed to match.
+BOOKING_PYTHON_ONLY_COLUMNS = {"services"}
+
+
+def _booking_base_queryset(request, *, for_display, columns_used=frozenset()):
+    """Base queryset for the bookings list.
+
+    `for_display=True` attaches the prefetches the template needs. Pass False
+    when the queryset is only being used to work out *which* bookings belong on
+    the page -- prefetching seven service tables across the whole table just to
+    sort it is exactly the cost this is trying to avoid.
+
+    `columns_used` is the set of columns this request sorts or filters by. Only
+    the annotations those columns need get added: the money annotations are
+    seven correlated subqueries each, and leaving them in the SELECT when
+    nothing sorts on them makes the database compute them for every scanned row
+    rather than just the twenty on the page.
+    """
+    qs = Booking.objects.select_related("client", "created_by", "status")
+
+    if for_display:
+        # Bounded to the page: Paginator slices the queryset before it is
+        # iterated, so these prefetches only ever fetch the rows on screen.
+        qs = qs.prefetch_related("services").with_service_rows()
+
+    if columns_used & set(BOOKING_MONEY_ANNOTATION):
+        qs = qs.with_money_totals()
+    if columns_used & set(BOOKING_TEXT_ANNOTATION):
+        qs = qs.with_sort_text()
 
     if request.user.role in ["OWNER", "ADMIN"]:
         pass
@@ -241,13 +277,96 @@ def _sort_key_for_booking(booking, col):
     return _normalize_text(value)
 
 
+def _apply_sql_ordering(qs, sort_col, sort_dir):
+    """Order in SQL, matching what the Python sort produced.
+
+    The Python path used list.sort(), which is stable, so rows with equal values
+    kept the base queryset's order -- ascending id -- in *both* directions. The
+    `id` tiebreak below reproduces that. The three columns that were already
+    ordered in SQL keep their original clauses untouched.
+    """
+    ascending = sort_dir == "asc"
+
+    if sort_col == "booking_date":
+        return qs.order_by(*(("booking_date", "id") if ascending else ("-booking_date", "-id")))
+    if sort_col == "booking_id":
+        return qs.order_by("booking_id" if ascending else "-booking_id")
+    if sort_col == "status":
+        return qs.order_by(*(("status__name", "id") if ascending else ("-status__name", "-id")))
+
+    field = BOOKING_MONEY_ANNOTATION.get(sort_col) or BOOKING_TEXT_ANNOTATION.get(sort_col)
+    if not field:
+        return qs
+    expression = F(field).asc() if ascending else F(field).desc()
+    return qs.order_by(expression, "id")
+
+
+def _apply_sql_filters(qs, active_filters):
+    """Translate the active filters into WHERE clauses.
+
+    Returns None if a filter cannot be expressed in SQL, so the caller can fall
+    back to the Python path rather than silently returning the wrong rows.
+    """
+    for item in active_filters:
+        col, op, val = item["col"], item["op"], item["val"]
+
+        if col in BOOKING_MONEY_ANNOTATION:
+            number = _normalize_number(val)
+            if number is None:
+                # _matches_filter() rejected every row when the value would not
+                # parse as a number, so an empty result is the faithful answer.
+                return qs.none()
+            lookup = {"eq": "", "gt": "__gt", "lt": "__lt", "gte": "__gte", "lte": "__lte"}.get(op)
+            if lookup is None:
+                continue  # unrecognised operator matched everything before
+            qs = qs.filter(**{f"{BOOKING_MONEY_ANNOTATION[col]}{lookup}": number})
+
+        elif col in BOOKING_TEXT_ANNOTATION:
+            # The *_sort annotations are already lower-cased and trimmed, so
+            # comparing against the normalised needle reproduces _matches_filter
+            # exactly, without depending on the database's collation.
+            field = BOOKING_TEXT_ANNOTATION[col]
+            needle = _normalize_text(val)
+            suffix = "__exact" if op == "equals" else "__contains"
+            qs = qs.filter(**{f"{field}{suffix}": needle})
+
+        elif col == "booking_id":
+            qs = qs.filter(**{"booking_id__iexact" if op == "equals" else "booking_id__icontains": val})
+
+        elif col == "booking_date":
+            lookup = {"eq": "booking_date", "gt": "booking_date__gt", "lt": "booking_date__lt"}.get(op, "booking_date")
+            qs = qs.filter(**{lookup: val})
+
+        elif col == "status":
+            qs = qs.filter(**{"status__name__iexact" if op == "equals" else "status__name__icontains": val})
+
+        else:
+            return None
+
+    return qs
+
+
+def _attach_display_rows(request, page_obj):
+    """Load the page's bookings again, this time with the display prefetches.
+
+    Only used by the Python fallback path, where the queryset had to be
+    materialised without prefetching. Re-fetching the twenty rows that survived
+    costs one small query set instead of prefetching the entire table.
+    """
+    ids = [booking.id for booking in page_obj.object_list]
+    if not ids:
+        return
+    by_id = {
+        booking.id: booking
+        for booking in _booking_base_queryset(request, for_display=True).filter(id__in=ids)
+    }
+    page_obj.object_list = [by_id[i] for i in ids if i in by_id]
+
+
 def _build_rows_context(request):
     sort_col = request.GET.get("sort_col", "booking_id")
     sort_dir = request.GET.get("sort_dir", "desc")
     page_number = request.GET.get("page", 1)
-
-    qs = _booking_base_queryset(request)
-    needs_python_processing = sort_col in {"created_by", "client_name", "services", "total_p_cost", "total_s_cost", "total_gst", "net_profit"}
 
     active_filters = []
     for col, col_type in BOOKING_FILTERABLE_COLUMNS.items():
@@ -255,55 +374,58 @@ def _build_rows_context(request):
         val = request.GET.get(f"f_{col}_val", "")
         if val:
             active_filters.append({"col": col, "op": op, "val": val, "type": col_type})
-            if col in {"created_by", "client_name", "services", "total_p_cost", "total_s_cost", "total_gst", "net_profit"}:
-                needs_python_processing = True
+
+    columns_used = {item["col"] for item in active_filters} | {sort_col}
+    needs_python_processing = bool(BOOKING_PYTHON_ONLY_COLUMNS & columns_used)
 
     if not needs_python_processing:
-        if sort_col == "booking_date":
-            qs = qs.order_by("booking_date" if sort_dir == "asc" else "-booking_date", "id" if sort_dir == "asc" else "-id")
-        elif sort_col == "booking_id":
-            qs = qs.order_by("booking_id" if sort_dir == "asc" else "-booking_id")
-        elif sort_col == "status":
-            qs = qs.order_by("status__name" if sort_dir == "asc" else "-status__name", "id" if sort_dir == "asc" else "-id")
+        qs = _apply_sql_filters(
+            _booking_base_queryset(
+                request, for_display=True, columns_used=columns_used
+            ),
+            active_filters,
+        )
+        if qs is not None:
+            qs = _apply_sql_ordering(qs, sort_col, sort_dir)
+            page_obj = Paginator(qs, BOOKINGS_PAGE_SIZE).get_page(page_number)
+            return _rows_context(request, page_obj, sort_col, sort_dir)
+        needs_python_processing = True
 
-        for item in active_filters:
-            col = item["col"]
-            op = item["op"]
-            val = item["val"]
-            if col == "booking_id":
-                if op == "equals":
-                    qs = qs.filter(booking_id__iexact=val)
-                else:
-                    qs = qs.filter(booking_id__icontains=val)
-            elif col == "booking_date":
-                lookup = {"eq": "booking_date", "gt": "booking_date__gt", "lt": "booking_date__lt"}.get(op, "booking_date")
-                qs = qs.filter(**{lookup: val})
-            elif col == "status":
-                if op == "equals":
-                    qs = qs.filter(status__name__iexact=val)
-                else:
-                    qs = qs.filter(status__name__icontains=val)
+    # Fallback: sorting or filtering by `services`. Materialise without the
+    # service-row prefetches -- only the m2m names are needed to build the sort
+    # key -- then re-fetch just the page.
+    fallback_qs = (
+        _booking_base_queryset(request, for_display=False)
+        .prefetch_related("services")
+    )
+    if columns_used & set(BOOKING_MONEY_ANNOTATION):
+        # A request can sort by `services` while also filtering on a money
+        # column. That filter runs in Python here and reads the money
+        # properties on every row, so the service rows have to come with it --
+        # otherwise each row costs 76 queries.
+        fallback_qs = fallback_qs.with_service_rows()
+    bookings_list = list(fallback_qs)
+    for item in active_filters:
+        bookings_list = [
+            booking for booking in bookings_list
+            if _matches_filter(
+                _booking_sort_filter_value(booking, item["col"]),
+                item["type"],
+                item["op"],
+                item["val"],
+            )
+        ]
 
-        paginator = Paginator(qs, BOOKINGS_PAGE_SIZE)
-        page_obj = paginator.get_page(page_number)
-    else:
-        bookings_list = list(qs)
-        for item in active_filters:
-            bookings_list = [
-                booking for booking in bookings_list
-                if _matches_filter(
-                    _booking_sort_filter_value(booking, item["col"]),
-                    item["type"],
-                    item["op"],
-                    item["val"],
-                )
-            ]
+    bookings_list.sort(
+        key=lambda booking: _sort_key_for_booking(booking, sort_col),
+        reverse=sort_dir == "desc",
+    )
+    page_obj = Paginator(bookings_list, BOOKINGS_PAGE_SIZE).get_page(page_number)
+    _attach_display_rows(request, page_obj)
+    return _rows_context(request, page_obj, sort_col, sort_dir)
 
-        reverse = sort_dir == "desc"
-        bookings_list.sort(key=lambda booking: _sort_key_for_booking(booking, sort_col), reverse=reverse)
-        paginator = Paginator(bookings_list, BOOKINGS_PAGE_SIZE)
-        page_obj = paginator.get_page(page_number)
 
+def _rows_context(request, page_obj, sort_col, sort_dir):
     query_params = request.GET.copy()
     query_params.pop("page", None)
     next_querystring = ""
