@@ -40,18 +40,35 @@ The snapshot has three sections:
 | `booking_list` | Row ordering and the four rendered money cells across 24 sort/filter permutations of the bookings list |
 | `endpoints` | 19 read-only report endpoints × 7 filter permutations = 133 responses |
 
-## Known-failing endpoints (pre-existing, pinned as-is)
+## Test files
 
-The snapshot records what the app does **today**, bugs included. A baseline that
-quietly fixes things is not a baseline.
+| File | Covers |
+|---|---|
+| `test_golden_master.py` | Money properties, bookings list, 19 report endpoints |
+| `test_service_forms.py` | Rendered HTML of the 14 service create/edit forms |
+| `test_legacy_filters.py` | Regression tests for the two legacy filter endpoints |
 
-- `/reports/api/report-filters-legacy/` — returns **HTTP 500 on every call**.
-  `reports/views_legacy.py:154` calls `.dates("booking_date", "year")`, which
-  yields `date` objects, then calls `.values_list("year", flat=True)` on the
-  result. `year` is not a field, so it raises `FieldError`. Line 160
-  (`[d.year for d in years]`) shows the `.values_list()` was never intended.
-  Recorded as status 500 in the snapshot. Fixing it is a behaviour change and
-  needs the snapshot regenerated.
+## Fixed since the baseline was first taken
+
+Both were pinned as bugs originally, then fixed deliberately. The snapshots were
+regenerated afterwards, and in each case the diff was checked to confirm nothing
+else moved.
+
+- **Legacy filter endpoints returned HTTP 500 on every call.**
+  `reports/views_legacy.py` and `core/views_legacy.py` both chained
+  `.values_list("year", flat=True)` onto `.dates("booking_date", "year")`, which
+  already yields `date` objects — `FieldError`. The following line
+  (`[d.year for d in years]`) was always the intended conversion. Now covered by
+  `test_legacy_filters.py`, which seeds real legacy bookings so an empty
+  response cannot pass. Regenerating changed exactly seven snapshot entries
+  from 500 to 200 and nothing else.
+
+- **Every service edit page opened with its date blank.** All seven form
+  widgets rendered `<input type="date">` with `format='%d-%m-%Y'` (Hotel had
+  `'%d-%m-%y'`). A date input only accepts `YYYY-MM-DD`, so browsers rejected
+  the value and showed an empty box. Saving still worked, because a date input
+  always posts `YYYY-MM-DD` regardless — which is why this went unnoticed.
+  Fixed in `services/forms.py` via the shared `ServiceDateInput`.
 
 ## One deliberate blind spot: Decimal scale
 

@@ -204,3 +204,25 @@ label.required::after {
     content: " *";
     color: red;
 }
+
+/* ============================================================
+   Service entry forms
+   ------------------------------------------------------------
+   Shared by every create/edit page under services/. These rules
+   replace inline style="" attributes that were repeated -- and
+   drifted -- across the fourteen form templates: one form was
+   640px wide where the rest were 600px, and the autocomplete
+   dropdowns carried the same three declarations in every file.
+   ============================================================ */
+
+.service-form {
+    max-width: 600px;
+}
+
+/* Autocomplete dropdown under the supplier / mode / carrier inputs.
+   Positioned by .position-absolute .w-100 in the markup; hidden until
+   the script fills it in. */
+.autocomplete-suggestions {
+    z-index: 10;
+    display: none;
+}

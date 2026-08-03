@@ -207,10 +207,12 @@ def staff_legacy_filters_data(request):
     base = base.filter(id__in=legacy_ids).exclude(id__in=new_ids)
 
     # years from booking_date
+    # Same defect as reports/views_legacy.py: .dates() yields date objects, so
+    # chaining .values_list("year") raised FieldError and this endpoint
+    # returned HTTP 500 on every call.
     years = list(
         base.exclude(booking_date__isnull=True)
         .dates("booking_date", "year")
-        .values_list("year", flat=True)
     )
     years = [d.year for d in years]
 

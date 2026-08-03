@@ -17,6 +17,30 @@ class CustomDateInput(forms.DateInput):
         self.attrs.update({'placeholder': 'dd/mm/yy', 'class': 'form-control datepicker'})
 
 
+class ServiceDateInput(forms.DateTimeInput):
+    """The date widget every service form shares.
+
+    All seven forms declared their own <input type="date"> with
+    format='%d-%m-%Y' (Hotel had '%d-%m-%y'). An input of type="date" only
+    accepts a value in YYYY-MM-DD; given "15-03-2025" the browser rejects it
+    and renders an empty box, so every edit page opened with its date blank
+    and silently re-saved whatever the user picked instead.
+
+    Rendering as %Y-%m-%d fixes that. Submission is unaffected: a date input
+    always posts YYYY-MM-DD regardless of what it was rendered with, which is
+    why saving worked even while the field looked empty.
+
+    The bogus format="date" attribute the old widgets emitted is dropped -- it
+    is not an HTML attribute and did nothing.
+    """
+
+    def __init__(self, **kwargs):
+        kwargs.setdefault('format', '%Y-%m-%d')
+        attrs = {'type': 'date', 'class': 'form-control'}
+        attrs.update(kwargs.pop('attrs', None) or {})
+        super().__init__(attrs=attrs, **kwargs)
+
+
 
 class CarrierForm(forms.ModelForm):
     class Meta:
@@ -37,7 +61,7 @@ class TicketForm(forms.ModelForm):
             'attachment',]
         widgets = {
             'booking': forms.HiddenInput(),
-            'date': forms.DateTimeInput(attrs={'type': 'date', 'class': 'form-control','format': 'date'},format='%d-%m-%Y'),
+            'date': ServiceDateInput(),
             # The rest will be handled by autocomplete in the template
             'purchase_amount': forms.NumberInput(attrs={'class': 'form-control'}),
             'sales_amount': forms.NumberInput(attrs={'class': 'form-control'}),
@@ -53,7 +77,7 @@ class VisaForm(forms.ModelForm):
         fields = ['booking', 'date', 'supplier', 'mode', 'purchase_amount', 'sales_amount','notes','attachment']
         widgets = {
             'booking': forms.HiddenInput(),
-            'date': forms.DateTimeInput(attrs={'type': 'date', 'class': 'form-control','format': 'date'},format='%d-%m-%Y'),
+            'date': ServiceDateInput(),
             # The rest will be handled by autocomplete in the template
             'purchase_amount': forms.NumberInput(attrs={'class': 'form-control'}),
             'sales_amount': forms.NumberInput(attrs={'class': 'form-control'}),
@@ -69,7 +93,7 @@ class PassportForm(forms.ModelForm):
         fields = ['booking', 'date',  'supplier', 'mode', 'purchase_amount', 'sales_amount', 'notes','attachment']
         widgets = {
             'booking': forms.HiddenInput(),
-            'date': forms.DateTimeInput(attrs={'type': 'date', 'class': 'form-control','format': 'date'},format='%d-%m-%Y'),
+            'date': ServiceDateInput(),
             # The rest will be handled by autocomplete in the template
             'purchase_amount': forms.NumberInput(attrs={'class': 'form-control'}),
             'sales_amount': forms.NumberInput(attrs={'class': 'form-control'}),
@@ -87,11 +111,7 @@ class InsuranceForm(forms.ModelForm):
             'attachment',]
         widgets = {
             'booking': forms.HiddenInput(),
-            'date': forms.DateTimeInput(attrs={
-                'type': 'date', 
-                'class': 'form-control',
-                'format': 'date'
-            }, format='%d-%m-%Y'),
+            'date': ServiceDateInput(),
             'purchase_amount': forms.NumberInput(attrs={'class': 'form-control'}),
             'sales_amount': forms.NumberInput(attrs={'class': 'form-control'}),
             'notes': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
@@ -105,11 +125,7 @@ class HotelForm(forms.ModelForm):
         fields = ['booking', 'date', 'supplier', 'mode', 'travel_type', 'purchase_amount', 'sales_amount','notes','attachment']
         widgets = {
             'booking': forms.HiddenInput(),
-            'date': forms.DateTimeInput(attrs={
-                'type': 'date', 
-                'class': 'form-control',
-                'format': 'date'
-            }, format='%d-%m-%y'),
+            'date': ServiceDateInput(),
             'travel_type': forms.Select(attrs={'class': 'form-select'}),
             'purchase_amount': forms.NumberInput(attrs={'class': 'form-control'}),
             'sales_amount': forms.NumberInput(attrs={'class': 'form-control'}),
@@ -124,11 +140,7 @@ class SightSeeingForm(forms.ModelForm):
         fields = ['booking', 'date', 'supplier', 'mode', 'travel_type', 'purchase_amount', 'sales_amount','notes','attachment']
         widgets = {
             'booking': forms.HiddenInput(),
-            'date': forms.DateTimeInput(attrs={
-                'type': 'date', 
-                'class': 'form-control',
-                'format': 'date'
-            }, format='%d-%m-%Y'),
+            'date': ServiceDateInput(),
             'travel_type': forms.Select(attrs={'class': 'form-select'}),
             'purchase_amount': forms.NumberInput(attrs={'class': 'form-control'}),
             'sales_amount': forms.NumberInput(attrs={'class': 'form-control'}),
@@ -143,11 +155,7 @@ class TransferForm(forms.ModelForm):
         fields = ['booking', 'date', 'supplier', 'mode', 'travel_type', 'purchase_amount', 'sales_amount','notes','attachment']
         widgets = {
             'booking': forms.HiddenInput(),
-            'date': forms.DateTimeInput(attrs={
-                'type': 'date', 
-                'class': 'form-control',
-                'format': 'date'
-            }, format='%d-%m-%Y'),
+            'date': ServiceDateInput(),
             'travel_type': forms.Select(attrs={'class': 'form-select'}),
             'purchase_amount': forms.NumberInput(attrs={'class': 'form-control'}),
             'sales_amount': forms.NumberInput(attrs={'class': 'form-control'}),

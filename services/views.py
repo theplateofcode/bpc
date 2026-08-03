@@ -311,8 +311,11 @@ def edit_passport(request, passport_id):
 
 @login_required(login_url='/users/login/')
 @group_required('Passport_Dept')
-def delete_passport(request, ticket_id):
-    passport = get_object_or_404(Passport, pk=ticket_id)
+def delete_passport(request, passport_id):
+    # The URL passes passport_id; this signature said ticket_id, so every call
+    # raised TypeError and the page returned HTTP 500. Deleting a passport
+    # entry has never worked. Copy-paste from delete_ticket.
+    passport = get_object_or_404(Passport, pk=passport_id)
     booking_id = passport.booking.id
     if request.method == 'POST':
         passport.delete()

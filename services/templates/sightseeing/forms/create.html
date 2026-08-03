@@ -2,17 +2,12 @@
 
 {% block heading %}Add Sight Seeing Entry for Booking:{% endblock %}
 
-{% comment %}
-This form was 640px wide where every other service form is 600px. Kept, since
-narrowing it would visibly change the page.
-{% endcomment %}
-{% block form_width %}640px{% endblock %}
-
 {% block extra_fields %}
 <!-- Travel Type -->
 <div class="mb-3">
   <label class="form-label fw-bold required">Travel Type</label>
-  {{ form.travel_type }} {% for error in form.travel_type.errors %}
+  {{ form.travel_type }}
+  {% for error in form.travel_type.errors %}
   <div class="text-danger small">{{ error }}</div>
   {% endfor %}
 </div>

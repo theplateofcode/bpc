@@ -151,11 +151,14 @@ def report_filters_data_legacy(request):
     employees_qs = User.objects.filter(id__in=employee_ids).order_by("first_name", "username")
     employees = [{"id": u.id, "name": (u.get_full_name() or u.username)} for u in employees_qs]
 
+    # .dates() already yields date objects, so the .values_list("year") that
+    # used to be chained here raised FieldError -- "year" is not a field --
+    # and this endpoint returned HTTP 500 on every call. The line below was
+    # always the intended conversion.
     years = list(
         legacy_bookings
         .exclude(booking_date__isnull=True)
         .dates("booking_date", "year")
-        .values_list("year", flat=True)
     )
     years = [d.year for d in years]
 

@@ -6822,25 +6822,396 @@
       "status": 200
     },
     "legacy.filters[all]": {
-      "status": 500
+      "body": {
+        "clients": [],
+        "employees": [],
+        "months": [
+          "January",
+          "February",
+          "March",
+          "April",
+          "May",
+          "June",
+          "July",
+          "August",
+          "September",
+          "October",
+          "November",
+          "December"
+        ],
+        "suppliers": [
+          {
+            "id": 3,
+            "name": "Supplier Hotel"
+          },
+          {
+            "id": 8,
+            "name": "Supplier Hotel Alt"
+          },
+          {
+            "id": 4,
+            "name": "Supplier Insurance"
+          },
+          {
+            "id": 7,
+            "name": "Supplier Passport"
+          },
+          {
+            "id": 6,
+            "name": "Supplier Sightseeing"
+          },
+          {
+            "id": 1,
+            "name": "Supplier Ticket"
+          },
+          {
+            "id": 5,
+            "name": "Supplier Transfer"
+          },
+          {
+            "id": 2,
+            "name": "Supplier Visa"
+          }
+        ],
+        "years": []
+      },
+      "status": 200
     },
     "legacy.filters[month_bad]": {
-      "status": 500
+      "body": {
+        "clients": [],
+        "employees": [],
+        "months": [
+          "January",
+          "February",
+          "March",
+          "April",
+          "May",
+          "June",
+          "July",
+          "August",
+          "September",
+          "October",
+          "November",
+          "December"
+        ],
+        "suppliers": [
+          {
+            "id": 3,
+            "name": "Supplier Hotel"
+          },
+          {
+            "id": 8,
+            "name": "Supplier Hotel Alt"
+          },
+          {
+            "id": 4,
+            "name": "Supplier Insurance"
+          },
+          {
+            "id": 7,
+            "name": "Supplier Passport"
+          },
+          {
+            "id": 6,
+            "name": "Supplier Sightseeing"
+          },
+          {
+            "id": 1,
+            "name": "Supplier Ticket"
+          },
+          {
+            "id": 5,
+            "name": "Supplier Transfer"
+          },
+          {
+            "id": 2,
+            "name": "Supplier Visa"
+          }
+        ],
+        "years": []
+      },
+      "status": 200
     },
     "legacy.filters[month_january]": {
-      "status": 500
+      "body": {
+        "clients": [],
+        "employees": [],
+        "months": [
+          "January",
+          "February",
+          "March",
+          "April",
+          "May",
+          "June",
+          "July",
+          "August",
+          "September",
+          "October",
+          "November",
+          "December"
+        ],
+        "suppliers": [
+          {
+            "id": 3,
+            "name": "Supplier Hotel"
+          },
+          {
+            "id": 8,
+            "name": "Supplier Hotel Alt"
+          },
+          {
+            "id": 4,
+            "name": "Supplier Insurance"
+          },
+          {
+            "id": 7,
+            "name": "Supplier Passport"
+          },
+          {
+            "id": 6,
+            "name": "Supplier Sightseeing"
+          },
+          {
+            "id": 1,
+            "name": "Supplier Ticket"
+          },
+          {
+            "id": 5,
+            "name": "Supplier Transfer"
+          },
+          {
+            "id": 2,
+            "name": "Supplier Visa"
+          }
+        ],
+        "years": []
+      },
+      "status": 200
     },
     "legacy.filters[service_hotel]": {
-      "status": 500
+      "body": {
+        "clients": [],
+        "employees": [],
+        "months": [
+          "January",
+          "February",
+          "March",
+          "April",
+          "May",
+          "June",
+          "July",
+          "August",
+          "September",
+          "October",
+          "November",
+          "December"
+        ],
+        "suppliers": [
+          {
+            "id": 3,
+            "name": "Supplier Hotel"
+          },
+          {
+            "id": 8,
+            "name": "Supplier Hotel Alt"
+          },
+          {
+            "id": 4,
+            "name": "Supplier Insurance"
+          },
+          {
+            "id": 7,
+            "name": "Supplier Passport"
+          },
+          {
+            "id": 6,
+            "name": "Supplier Sightseeing"
+          },
+          {
+            "id": 1,
+            "name": "Supplier Ticket"
+          },
+          {
+            "id": 5,
+            "name": "Supplier Transfer"
+          },
+          {
+            "id": 2,
+            "name": "Supplier Visa"
+          }
+        ],
+        "years": []
+      },
+      "status": 200
     },
     "legacy.filters[service_ticket]": {
-      "status": 500
+      "body": {
+        "clients": [],
+        "employees": [],
+        "months": [
+          "January",
+          "February",
+          "March",
+          "April",
+          "May",
+          "June",
+          "July",
+          "August",
+          "September",
+          "October",
+          "November",
+          "December"
+        ],
+        "suppliers": [
+          {
+            "id": 3,
+            "name": "Supplier Hotel"
+          },
+          {
+            "id": 8,
+            "name": "Supplier Hotel Alt"
+          },
+          {
+            "id": 4,
+            "name": "Supplier Insurance"
+          },
+          {
+            "id": 7,
+            "name": "Supplier Passport"
+          },
+          {
+            "id": 6,
+            "name": "Supplier Sightseeing"
+          },
+          {
+            "id": 1,
+            "name": "Supplier Ticket"
+          },
+          {
+            "id": 5,
+            "name": "Supplier Transfer"
+          },
+          {
+            "id": 2,
+            "name": "Supplier Visa"
+          }
+        ],
+        "years": []
+      },
+      "status": 200
     },
     "legacy.filters[year_2024]": {
-      "status": 500
+      "body": {
+        "clients": [],
+        "employees": [],
+        "months": [
+          "January",
+          "February",
+          "March",
+          "April",
+          "May",
+          "June",
+          "July",
+          "August",
+          "September",
+          "October",
+          "November",
+          "December"
+        ],
+        "suppliers": [
+          {
+            "id": 3,
+            "name": "Supplier Hotel"
+          },
+          {
+            "id": 8,
+            "name": "Supplier Hotel Alt"
+          },
+          {
+            "id": 4,
+            "name": "Supplier Insurance"
+          },
+          {
+            "id": 7,
+            "name": "Supplier Passport"
+          },
+          {
+            "id": 6,
+            "name": "Supplier Sightseeing"
+          },
+          {
+            "id": 1,
+            "name": "Supplier Ticket"
+          },
+          {
+            "id": 5,
+            "name": "Supplier Transfer"
+          },
+          {
+            "id": 2,
+            "name": "Supplier Visa"
+          }
+        ],
+        "years": []
+      },
+      "status": 200
     },
     "legacy.filters[year_2025]": {
-      "status": 500
+      "body": {
+        "clients": [],
+        "employees": [],
+        "months": [
+          "January",
+          "February",
+          "March",
+          "April",
+          "May",
+          "June",
+          "July",
+          "August",
+          "September",
+          "October",
+          "November",
+          "December"
+        ],
+        "suppliers": [
+          {
+            "id": 3,
+            "name": "Supplier Hotel"
+          },
+          {
+            "id": 8,
+            "name": "Supplier Hotel Alt"
+          },
+          {
+            "id": 4,
+            "name": "Supplier Insurance"
+          },
+          {
+            "id": 7,
+            "name": "Supplier Passport"
+          },
+          {
+            "id": 6,
+            "name": "Supplier Sightseeing"
+          },
+          {
+            "id": 1,
+            "name": "Supplier Ticket"
+          },
+          {
+            "id": 5,
+            "name": "Supplier Transfer"
+          },
+          {
+            "id": 2,
+            "name": "Supplier Visa"
+          }
+        ],
+        "years": []
+      },
+      "status": 200
     },
     "reports.bookings_report[all]": {
       "body": {
