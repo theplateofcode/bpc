@@ -279,6 +279,16 @@ class Booking(models.Model):
         "passport": "passports_finished",
     }
 
+    class Meta:
+        indexes = [
+            # Sorted by on the list, and filtered by year/month across every
+            # report. Nothing indexed it before.
+            models.Index(fields=["booking_date"], name="booking_date_idx"),
+            # Staff see only their own bookings, most often ordered by date.
+            models.Index(fields=["created_by", "booking_date"],
+                         name="booking_creator_date_idx"),
+        ]
+
     def all_services_finished(self):
         for service in self.services.all():
             finished_flag = self.SERVICE_FLAG_MAP.get(service.code.lower())

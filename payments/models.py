@@ -51,6 +51,17 @@ class PaymentReceived(models.Model):
 
     class Meta:
         ordering = ["-created_at"]
+        indexes = [
+            # The reports ask "is this booking+service approved yet" once per
+            # service per booking -- by far the most repeated query in the app.
+            models.Index(fields=["booking", "service", "approved"],
+                         name="payment_bk_svc_appr_idx"),
+            # filter(approved=True).values_list("booking_id") feeds the
+            # id__in subquery at the top of every actuals report.
+            models.Index(fields=["approved", "booking"], name="payment_appr_bk_idx"),
+            # Meta.ordering above sorts every unfiltered fetch by this column.
+            models.Index(fields=["-created_at"], name="payment_created_idx"),
+        ]
 
     def approve(self, user):
         self.approved = True

@@ -59,7 +59,17 @@ class Ticket(models.Model):
     attachment = models.FileField(upload_to='service_attachments/', blank=True, null=True)
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, null=True, blank=True)
     finished = models.BooleanField(default=False)          # Set by operational team
-    accounts_processed = models.BooleanField(default=False)  # Set by accounts team  
+    accounts_processed = models.BooleanField(default=False)  # Set by accounts team
+
+    class Meta:
+        # The accounts screens scan the whole table on these two flags:
+        # filter(accounts_processed=True) and
+        # filter(finished=True, accounts_processed=False). Both are equality
+        # tests, so one composite led by accounts_processed serves each.
+        indexes = [
+            models.Index(fields=["accounts_processed", "finished"],
+                         name="ticket_acct_finished_idx"),
+        ]
 
     def save(self, *args, **kwargs):
         if not self.ticket_booking_id:
@@ -105,6 +115,13 @@ class Passport(models.Model):
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, null=True, blank=True)
     finished = models.BooleanField(default=False)          # Set by operational team
     accounts_processed = models.BooleanField(default=False)  # Set by accounts team
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["accounts_processed", "finished"],
+                         name="passport_acct_fin_idx"),
+        ]
+
     def save(self, *args, **kwargs):
         if not self.passport_booking_id:
             last = Passport.objects.all().order_by('id').last()
@@ -148,6 +165,13 @@ class Visa(models.Model):
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, null=True, blank=True)
     finished = models.BooleanField(default=False)          # Set by operational team
     accounts_processed = models.BooleanField(default=False)  # Set by accounts team
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["accounts_processed", "finished"],
+                         name="visa_acct_fin_idx"),
+        ]
+
     def save(self, *args, **kwargs):
         if not self.visa_booking_id:
             last = Visa.objects.all().order_by('id').last()
@@ -192,6 +216,13 @@ class Insurance(models.Model):
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, null=True, blank=True)
     finished = models.BooleanField(default=False)          # Set by operational team
     accounts_processed = models.BooleanField(default=False)  # Set by accounts team
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["accounts_processed", "finished"],
+                         name="insurance_acct_fin_idx"),
+        ]
+
     def save(self, *args, **kwargs):
         if not self.insurance_booking_id:
             last = Insurance.objects.all().order_by('id').last()
@@ -241,6 +272,16 @@ class Hotel(models.Model):
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, null=True, blank=True)
     finished = models.BooleanField(default=False)          # Set by operational team
     accounts_processed = models.BooleanField(default=False)  # Set by accounts team
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["accounts_processed", "finished"],
+                         name="hotel_acct_fin_idx"),
+            # TCS sums international, non-cash rows for one booking.
+            models.Index(fields=["booking", "travel_type"],
+                         name="hotel_bk_travel_idx"),
+        ]
+
     def save(self, *args, **kwargs):
         if not self.hotel_booking_id:
             last = Hotel.objects.all().order_by('id').last()
@@ -290,6 +331,15 @@ class SightSeeing(models.Model):
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, null=True, blank=True)
     finished = models.BooleanField(default=False)          # Set by operational team
     accounts_processed = models.BooleanField(default=False)  # Set by accounts team
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["accounts_processed", "finished"],
+                         name="sightsee_acct_fin_idx"),
+            models.Index(fields=["booking", "travel_type"],
+                         name="sightsee_bk_travel_idx"),
+        ]
+
     def save(self, *args, **kwargs):
         if not self.sightseeing_booking_id:
             last = SightSeeing.objects.all().order_by('id').last()
@@ -339,6 +389,15 @@ class Transfer(models.Model):
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, null=True, blank=True)
     finished = models.BooleanField(default=False)          # Set by operational team
     accounts_processed = models.BooleanField(default=False)  # Set by accounts team
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["accounts_processed", "finished"],
+                         name="transfer_acct_fin_idx"),
+            models.Index(fields=["booking", "travel_type"],
+                         name="transfer_bk_travel_idx"),
+        ]
+
     def save(self, *args, **kwargs):
         if not self.transfer_booking_id:
             last = Transfer.objects.all().order_by('id').last()
