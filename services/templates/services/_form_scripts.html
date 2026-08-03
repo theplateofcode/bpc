@@ -1,0 +1,164 @@
+{% comment %}
+Autocomplete wiring for the supplier and mode fields, plus the two "add new"
+dialog submissions. Identical in all fourteen service form templates.
+
+setupAutocomplete() is left defined globally so a template that needs a third
+field -- ticket, with its carrier -- can call it again from extra_scripts.
+{% endcomment %}
+
+<script>
+  function debounce(func, timeout = 300) {
+    let timer;
+    return (...args) => {
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        func.apply(this, args);
+      }, timeout);
+    };
+  }
+
+  function setupAutocomplete(inputId, suggestionsId, hiddenId, endpoint, addModalId) {
+    const input = document.getElementById(inputId);
+    const suggestions = document.getElementById(suggestionsId);
+    const hidden = document.getElementById(hiddenId);
+
+    function fetchAndShowSuggestions(query = "") {
+      fetch(endpoint + "?q=" + encodeURIComponent(query))
+        .then((res) => res.json())
+        .then((data) => {
+          suggestions.innerHTML = "";
+          data.results.forEach((item) => {
+            const btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "list-group-item list-group-item-action";
+            btn.textContent = item.name;
+            btn.onclick = () => {
+              input.value = item.name;
+              hidden.value = item.id;
+              suggestions.style.display = "none";
+            };
+            suggestions.appendChild(btn);
+          });
+          // Add "Add New" at the end
+          const addBtn = document.createElement("button");
+          addBtn.type = "button";
+          addBtn.className = "list-group-item list-group-item-action text-center";
+          addBtn.innerHTML = `<i class="bi bi-plus-lg"></i> Add New`;
+          addBtn.onclick = () => {
+            suggestions.style.display = "none";
+            if (addModalId)
+              new bootstrap.Modal(document.getElementById(addModalId)).show();
+          };
+          suggestions.appendChild(addBtn);
+          suggestions.style.display = "block";
+        });
+    }
+
+    // Show all options on focus if input is empty
+    input.addEventListener("focus", function () {
+      if (!input.value.trim()) {
+        fetchAndShowSuggestions("");
+      }
+    });
+
+    // Autocomplete on input
+    input.addEventListener(
+      "input",
+      debounce(function () {
+        const query = input.value.trim();
+        if (!query) {
+          suggestions.style.display = "none";
+          return;
+        }
+        fetchAndShowSuggestions(query);
+      }, 300)
+    );
+
+    document.addEventListener("click", function (e) {
+      if (!suggestions.contains(e.target) && e.target !== input) {
+        suggestions.style.display = "none";
+      }
+    });
+  }
+
+  setupAutocomplete(
+    "supplier-autocomplete",
+    "supplier-suggestions",
+    "supplier-id-hidden",
+    "/services/suppliers/autocomplete/",
+    "addSupplierModal"
+  );
+  setupAutocomplete(
+    "mode-autocomplete",
+    "mode-suggestions",
+    "mode-id-hidden",
+    "/services/modes/autocomplete/",
+    "addModeModal"
+  );
+
+  // Modal submission for Supplier
+  document
+    .getElementById("add-supplier-form")
+    .addEventListener("submit", function (e) {
+      e.preventDefault();
+      const formData = new FormData(this);
+      fetch("/services/suppliers/create-ajax/", {
+        method: "POST",
+        headers: {
+          "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value,
+        },
+        body: formData,
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.success) {
+            document.getElementById("supplier-autocomplete").value = data.name;
+            document.getElementById("supplier-id-hidden").value = data.id;
+            bootstrap.Modal.getInstance(
+              document.getElementById("addSupplierModal")
+            ).hide();
+            this.reset();
+            document.getElementById("add-supplier-error").textContent = "";
+            document
+              .getElementById("supplier-autocomplete")
+              .dispatchEvent(new Event("input"));
+          } else {
+            document.getElementById("add-supplier-error").textContent =
+              data.error || "Could not save supplier.";
+          }
+        });
+    });
+
+  // Modal submission for Mode
+  document
+    .getElementById("add-mode-form")
+    .addEventListener("submit", function (e) {
+      e.preventDefault();
+      const formData = new FormData(this);
+      fetch("/services/modes/create-ajax/", {
+        method: "POST",
+        headers: {
+          "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value,
+        },
+        body: formData,
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.success) {
+            document.getElementById("mode-autocomplete").value = data.name;
+            document.getElementById("mode-id-hidden").value = data.id;
+            bootstrap.Modal.getInstance(
+              document.getElementById("addModeModal")
+            ).hide();
+            this.reset();
+            document.getElementById("add-mode-error").textContent = "";
+            document
+              .getElementById("mode-autocomplete")
+              .dispatchEvent(new Event("input"));
+          } else {
+            document.getElementById("add-mode-error").textContent =
+              data.error || "Could not save mode.";
+          }
+        });
+    });
+</script>

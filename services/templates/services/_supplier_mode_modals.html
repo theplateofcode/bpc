@@ -1,0 +1,71 @@
+{% comment %}
+"Add new supplier" and "Add new mode" dialogs. These were copy-pasted
+identically into all fourteen service form templates.
+{% endcomment %}
+
+<!-- Supplier Modal -->
+<div class="modal fade" id="addSupplierModal" tabindex="-1" aria-labelledby="addSupplierModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <form id="add-supplier-form" class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="addSupplierModalLabel">Add New Supplier</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label class="form-label">Supplier Name</label>
+          <input type="text" class="form-control" name="name" required>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Service Category</label>
+          <select class="form-select" name="category" required>
+            <option value="" disabled selected>Select Category</option>
+            {% for cat in supplier_categories %}
+              <option value="{{ cat.id }}">{{ cat.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Contact Person</label>
+          <input type="text" class="form-control" name="contact_person">
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Phone</label>
+          <input type="text" class="form-control" name="phone">
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Email</label>
+          <input type="email" class="form-control" name="email">
+        </div>
+        <div id="add-supplier-error" class="text-danger small"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="submit" class="btn btn-danger">Save</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Mode Modal -->
+<div class="modal fade" id="addModeModal" tabindex="-1" aria-labelledby="addModeModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <form id="add-mode-form" class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="addModeModalLabel">Add New Mode</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label class="form-label">Mode Name</label>
+          <input type="text" class="form-control" name="name" required />
+        </div>
+        <div id="add-mode-error" class="text-danger small"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="submit" class="btn btn-danger">Save</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>

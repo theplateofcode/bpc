@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+
+{% comment %}
+One body for all fourteen service create/edit pages.
+
+Each concrete template supplied its own copy of this -- roughly 12KB apiece,
+95% identical. They are now thin children that fill in four blocks:
+
+  heading       "Add Hotel Entry for Booking:" and so on
+  extra_fields  travel_type for the package services, carrier for tickets
+  cancel_href   the {% templatetag openblock %} url {% templatetag closeblock %} back to that service's entry list
+  date_field    defaults to the Django widget; hotel's edit page renders a
+                raw date input instead, and that difference is real -- see below
+  extra_modals / extra_scripts   for ticket's carrier autocomplete
+
+Note on date_field: the edit pages did NOT agree with each other. hotel/edit
+rendered a hand-written <input type="date"> with the value formatted Y-m-d,
+while sightseeing/edit and transfer/edit rendered {{ form.date }}, whose widget
+emits value="15-03-2025". A date input requires Y-m-d, so those two show an
+empty date box where hotel shows the real one. That looks like a bug, but
+fixing it is a behaviour change, so each template keeps whatever it does today
+via this block.
+
+Create and edit share this file. They differed only in prefilled values, so the
+`form.instance.pk` tests below emit the value attributes on edit and leave them
+off on create, exactly as the separate templates did. `form.instance` is the
+object being edited on an edit page and an empty unsaved one on create, where
+attribute lookups through it fail silently and render nothing.
+{% endcomment %}
+
+{% block content %}
+
+<div class="container my-5" style="max-width: {% block form_width %}600px{% endblock %}">
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <h3 class="fw-bold mb-4">
+        {% block heading %}{% endblock %}
+        <span class="text-primary">{{ booking.booking_id }}</span>
+      </h3>
+      <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="hidden" name="booking" value="{{ booking.id }}" />
+
+        <!-- Supplier Autocomplete -->
+        <div class="mb-3 position-relative">
+          <label class="form-label fw-bold required">Supplier</label>
+          <input
+            type="text"
+            class="form-control"
+            id="supplier-autocomplete"
+            placeholder="Search suppliers..."
+            autocomplete="off"
+            {% if form.instance.pk %}value="{{ form.instance.supplier.name }}"{% endif %}
+            required
+          />
+          <input type="hidden" name="supplier" id="supplier-id-hidden"
+            {% if form.instance.pk %}value="{{ form.instance.supplier.id }}"{% endif %} />
+          <div
+            id="supplier-suggestions"
+            class="list-group position-absolute w-100"
+            style="z-index: 10; display: none"
+          ></div>
+        </div>
+
+        <!-- Mode Autocomplete -->
+        <div class="mb-3 position-relative">
+          <label class="form-label fw-bold required">Mode</label>
+          <input
+            type="text"
+            class="form-control"
+            id="mode-autocomplete"
+            placeholder="Search modes..."
+            autocomplete="off"
+            {% if form.instance.pk %}value="{{ form.instance.mode.name }}"{% endif %}
+            required
+          />
+          <input type="hidden" name="mode" id="mode-id-hidden"
+            {% if form.instance.pk %}value="{{ form.instance.mode.id }}"{% endif %} />
+          <div
+            id="mode-suggestions"
+            class="list-group position-absolute w-100"
+            style="z-index: 10; display: none"
+          ></div>
+        </div>
+
+        <!-- Date -->
+        <div class="mb-3">
+          <label class="form-label fw-bold required">Date</label>
+          {% block date_field %}
+          {{ form.date }} {% for error in form.date.errors %}
+          <div class="text-danger small">{{ error }}</div>
+          {% endfor %}
+          {% endblock %}
+        </div>
+
+        {% block extra_fields %}{% endblock %}
+
+        <!-- Purchase Amount -->
+        <div class="mb-3">
+          <label class="form-label fw-bold required">Purchase Amount (₹)</label>
+          <input
+            type="number"
+            name="purchase_amount"
+            class="form-control"
+            step="0.01"
+            {% if form.instance.pk %}value="{{ form.instance.purchase_amount }}"{% endif %}
+            required
+          />
+          {% for error in form.purchase_amount.errors %}
+          <div class="text-danger small">{{ error }}</div>
+          {% endfor %}
+        </div>
+
+        <!-- Sales Amount -->
+        <div class="mb-3">
+          <label class="form-label fw-bold required">Sales Amount (₹)</label>
+          <input
+            type="number"
+            name="sales_amount"
+            class="form-control"
+            step="0.01"
+            {% if form.instance.pk %}value="{{ form.instance.sales_amount }}"{% endif %}
+            required
+          />
+          {% for error in form.sales_amount.errors %}
+          <div class="text-danger small">{{ error }}</div>
+          {% endfor %}
+        </div>
+        <div class="mb-3">
+          <label class="form-label fw-bold">Notes</label>
+          {{ form.notes }}
+        </div>
+        <div class="mb-3">
+          <label class="form-label fw-bold">Attachment</label>
+          {{ form.attachment }} {% if form.instance.attachment %}
+          <div>
+            <a href="{{ form.instance.attachment.url }}" target="_blank"
+              >View current attachment</a
+            >
+          </div>
+          {% endif %}
+        </div>
+
+        <div class="d-flex justify-content-end gap-2 mt-4">
+          <button type="submit" class="btn btn-danger px-4">Save</button>
+          <a
+            href="{% block cancel_href %}{% endblock %}"
+            class="btn btn-secondary"
+            >Cancel</a
+          >
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+{% include "services/_supplier_mode_modals.html" %}
+{% block extra_modals %}{% endblock %}
+
+{% include "services/_form_scripts.html" %}
+{% block extra_scripts %}{% endblock %}
+
+{% endblock %}

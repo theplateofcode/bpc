@@ -28,15 +28,117 @@ class Carrier(models.Model):
         return self.name
 
 
-# TICKET
-class Ticket(models.Model):
+class ServiceEntry(models.Model):
+    """The shape every service table shares.
+
+    Ticket, Passport, Visa, Insurance, Hotel, SightSeeing and Transfer were
+    seven near-identical copies of the same eleven fields, the same reference-id
+    generator and the same profit property. They stay seven separate tables --
+    this is an abstract base, so no schema changes and no data moves -- but the
+    definition now lives in one place.
+
+    The `%(class)s` placeholders expand to the concrete model name, which
+    reproduces every existing related_name exactly: `%(class)ss` gives
+    booking.tickets / .visas / .hotels / .sightseeings and so on, and
+    `%(class)s_suppliers` gives supplier.ticket_suppliers and its siblings.
+    `mode` and `created_by` have no related_name here, matching the originals,
+    so each child keeps its default `<model>_set` accessor.
+
+    Subclasses set `booking_id_field` and `booking_id_prefix`; everything else
+    is inherited.
+    """
+
+    #: Name of the concrete model's unique reference column, e.g.
+    #: "ticket_booking_id". Each table names it differently, so it cannot move
+    #: into the base without renaming columns.
+    booking_id_field = None
+    #: Two-letter prefix for generated references, e.g. "TI" -> "TI-0001".
+    booking_id_prefix = None
+
     booking = models.ForeignKey(
         'bookings.Booking',
         on_delete=models.RESTRICT,
-        related_name='tickets'
+        related_name='%(class)ss'
     )
+    date = models.DateTimeField()
+    supplier = models.ForeignKey(
+        'suppliers.Supplier',
+        on_delete=models.PROTECT,  # Required
+        related_name='%(class)s_suppliers'
+    )
+    mode = models.ForeignKey(
+        'payments.Mode',
+        on_delete=models.PROTECT,  # Required
+    )
+    purchase_amount = models.DecimalField(max_digits=12, decimal_places=2)
+    sales_amount = models.DecimalField(max_digits=12, decimal_places=2)
+    notes = models.TextField(blank=True, null=True)
+    attachment = models.FileField(upload_to='service_attachments/', blank=True, null=True)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, null=True, blank=True)
+    finished = models.BooleanField(default=False)          # Set by operational team
+    accounts_processed = models.BooleanField(default=False)  # Set by accounts team
+
+    class Meta:
+        abstract = True
+
+    @property
+    def reference(self):
+        """The generated id, whatever this table happens to call its column."""
+        return getattr(self, self.booking_id_field)
+
+    def save(self, *args, **kwargs):
+        # Unchanged from the seven copies this replaces, including the race:
+        # two concurrent saves read the same last row and generate the same
+        # reference, and one of them fails on the unique constraint. Fixing
+        # that changes behaviour, so it is left alone here.
+        if not getattr(self, self.booking_id_field):
+            last = type(self).objects.all().order_by('id').last()
+            last_reference = getattr(last, self.booking_id_field, None) if last else None
+            if last and last_reference:
+                new_num = int(last_reference.split('-')[-1]) + 1
+            else:
+                new_num = 1
+            setattr(self, self.booking_id_field,
+                    f"{self.booking_id_prefix}-{new_num:04d}")
+        super().save(*args, **kwargs)
+
+    @property
+    def profit(self):
+        return (self.sales_amount or 0) - (self.purchase_amount or 0)
+
+    def __str__(self):
+        return f"{self.reference} ({self.booking})"
+
+
+class PackageServiceEntry(ServiceEntry):
+    """Service entries that are domestic or international.
+
+    Only these three carry travel_type, and only these three attract TCS.
+    """
+
+    TRAVEL_TYPE_CHOICES = [
+        ('domestic', 'Domestic'),
+        ('international', 'International'),
+    ]
+
+    travel_type = models.CharField(max_length=20, choices=TRAVEL_TYPE_CHOICES)
+
+    class Meta:
+        abstract = True
+
+
+# The accounts screens scan on these two flags:
+# filter(accounts_processed=True) and filter(finished=True,
+# accounts_processed=False). Both are equality tests, so one composite led by
+# accounts_processed serves each. Index names must be unique per table, so the
+# Meta stays on the concrete models.
+
+# TICKET
+class Ticket(ServiceEntry):
+    booking_id_field = 'ticket_booking_id'
+    booking_id_prefix = 'TI'
+
     ticket_booking_id = models.CharField(max_length=10, unique=True, blank=True)
-    date = models.DateTimeField(blank=False, null=False)
     carrier = models.ForeignKey(
         Carrier,
         on_delete=models.SET_NULL,
@@ -44,77 +146,20 @@ class Ticket(models.Model):
         blank=True,
         related_name='tickets'
     )
-    supplier = models.ForeignKey(
-        'suppliers.Supplier',
-        on_delete=models.PROTECT,  # Required field
-        related_name='ticket_suppliers'
-    )
-    mode = models.ForeignKey(
-        'payments.Mode',
-        on_delete=models.PROTECT,  # Required field
-    )
-    purchase_amount = models.DecimalField(max_digits=12, decimal_places=2, blank=False, null=False)
-    sales_amount = models.DecimalField(max_digits=12, decimal_places=2, blank=False, null=False)
-    notes = models.TextField(blank=True, null=True)
-    attachment = models.FileField(upload_to='service_attachments/', blank=True, null=True)
-    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, null=True, blank=True)
-    finished = models.BooleanField(default=False)          # Set by operational team
-    accounts_processed = models.BooleanField(default=False)  # Set by accounts team
 
     class Meta:
-        # The accounts screens scan the whole table on these two flags:
-        # filter(accounts_processed=True) and
-        # filter(finished=True, accounts_processed=False). Both are equality
-        # tests, so one composite led by accounts_processed serves each.
         indexes = [
             models.Index(fields=["accounts_processed", "finished"],
                          name="ticket_acct_finished_idx"),
         ]
 
-    def save(self, *args, **kwargs):
-        if not self.ticket_booking_id:
-            last = Ticket.objects.all().order_by('id').last()
-            if last and last.ticket_booking_id:
-                last_num = int(last.ticket_booking_id.split('-')[-1])
-                new_num = last_num + 1
-            else:
-                new_num = 1
-            self.ticket_booking_id = f"TI-{new_num:04d}"
-        super().save(*args, **kwargs)
-
-    @property
-    def profit(self):
-        return (self.sales_amount or 0) - (self.purchase_amount or 0)
-
-    def __str__(self):
-        return f"{self.ticket_booking_id} ({self.booking})"
 
 # PASSPORT
-class Passport(models.Model):
-    booking = models.ForeignKey(
-        'bookings.Booking',
-        on_delete=models.RESTRICT,
-        related_name='passports'
-    )
+class Passport(ServiceEntry):
+    booking_id_field = 'passport_booking_id'
+    booking_id_prefix = 'PA'
+
     passport_booking_id = models.CharField(max_length=10, unique=True, blank=True)
-    date = models.DateTimeField()
-    supplier = models.ForeignKey(
-        'suppliers.Supplier',
-        on_delete=models.PROTECT,  # Required
-        related_name='passport_suppliers'
-    )
-    mode = models.ForeignKey(
-        'payments.Mode',
-        on_delete=models.PROTECT,  # Required
-    )
-    purchase_amount = models.DecimalField(max_digits=12, decimal_places=2)
-    sales_amount = models.DecimalField(max_digits=12, decimal_places=2)
-    notes = models.TextField(blank=True, null=True)
-    attachment = models.FileField(upload_to='service_attachments/', blank=True, null=True)
-    
-    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, null=True, blank=True)
-    finished = models.BooleanField(default=False)          # Set by operational team
-    accounts_processed = models.BooleanField(default=False)  # Set by accounts team
 
     class Meta:
         indexes = [
@@ -122,49 +167,13 @@ class Passport(models.Model):
                          name="passport_acct_fin_idx"),
         ]
 
-    def save(self, *args, **kwargs):
-        if not self.passport_booking_id:
-            last = Passport.objects.all().order_by('id').last()
-            if last and last.passport_booking_id:
-                last_num = int(last.passport_booking_id.split('-')[-1])
-                new_num = last_num + 1
-            else:
-                new_num = 1
-            self.passport_booking_id = f"PA-{new_num:04d}"
-        super().save(*args, **kwargs)
-
-    @property
-    def profit(self):
-        return (self.sales_amount or 0) - (self.purchase_amount or 0)
-
-    def __str__(self):
-        return f"{self.passport_booking_id} ({self.booking})"
 
 # VISA
-class Visa(models.Model):
-    booking = models.ForeignKey(
-        'bookings.Booking',
-        on_delete=models.RESTRICT,
-        related_name='visas'
-    )
+class Visa(ServiceEntry):
+    booking_id_field = 'visa_booking_id'
+    booking_id_prefix = 'VI'
+
     visa_booking_id = models.CharField(max_length=10, unique=True, blank=True)
-    date = models.DateTimeField()
-    supplier = models.ForeignKey(
-        'suppliers.Supplier',
-        on_delete=models.PROTECT,  # Required
-        related_name='visa_suppliers'
-    )
-    mode = models.ForeignKey(
-        'payments.Mode',
-        on_delete=models.PROTECT,  # Required
-    )
-    purchase_amount = models.DecimalField(max_digits=12, decimal_places=2, blank=False, null=False)
-    sales_amount = models.DecimalField(max_digits=12, decimal_places=2, blank=False, null=False)
-    notes = models.TextField(blank=True, null=True)
-    attachment = models.FileField(upload_to='service_attachments/', blank=True, null=True)
-    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, null=True, blank=True)
-    finished = models.BooleanField(default=False)          # Set by operational team
-    accounts_processed = models.BooleanField(default=False)  # Set by accounts team
 
     class Meta:
         indexes = [
@@ -172,50 +181,13 @@ class Visa(models.Model):
                          name="visa_acct_fin_idx"),
         ]
 
-    def save(self, *args, **kwargs):
-        if not self.visa_booking_id:
-            last = Visa.objects.all().order_by('id').last()
-            if last and last.visa_booking_id:
-                last_num = int(last.visa_booking_id.split('-')[-1])
-                new_num = last_num + 1
-            else:
-                new_num = 1
-            self.visa_booking_id = f"VI-{new_num:04d}"
-        super().save(*args, **kwargs)
-
-    @property
-    def profit(self):
-        return (self.sales_amount or 0) - (self.purchase_amount or 0)
-
-    def __str__(self):
-        return f"{self.visa_booking_id} ({self.booking})"
 
 # INSURANCE
-class Insurance(models.Model):
-    booking = models.ForeignKey(
-        'bookings.Booking',
-        on_delete=models.RESTRICT,
-        related_name='insurances'
-    )
+class Insurance(ServiceEntry):
+    booking_id_field = 'insurance_booking_id'
+    booking_id_prefix = 'IN'
+
     insurance_booking_id = models.CharField(max_length=10, unique=True, blank=True)
-    date = models.DateTimeField()
-    supplier = models.ForeignKey(
-        'suppliers.Supplier',
-        on_delete=models.PROTECT,  # Required
-        related_name='insurance_suppliers'
-    )
-    mode = models.ForeignKey(
-        'payments.Mode',
-        on_delete=models.PROTECT,  # Required
-    )
-    purchase_amount = models.DecimalField(max_digits=12, decimal_places=2, blank=False, null=False)
-    sales_amount = models.DecimalField(max_digits=12, decimal_places=2, blank=False, null=False)
-    notes = models.TextField(blank=True, null=True)
-    attachment = models.FileField(upload_to='service_attachments/', blank=True, null=True)
-    
-    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, null=True, blank=True)
-    finished = models.BooleanField(default=False)          # Set by operational team
-    accounts_processed = models.BooleanField(default=False)  # Set by accounts team
 
     class Meta:
         indexes = [
@@ -223,55 +195,13 @@ class Insurance(models.Model):
                          name="insurance_acct_fin_idx"),
         ]
 
-    def save(self, *args, **kwargs):
-        if not self.insurance_booking_id:
-            last = Insurance.objects.all().order_by('id').last()
-            if last and last.insurance_booking_id:
-                last_num = int(last.insurance_booking_id.split('-')[-1])
-                new_num = last_num + 1
-            else:
-                new_num = 1
-            self.insurance_booking_id = f"IN-{new_num:04d}"
-        super().save(*args, **kwargs)
-
-    @property
-    def profit(self):
-        return (self.sales_amount or 0) - (self.purchase_amount or 0)
-
-    def __str__(self):
-        return f"{self.insurance_booking_id} ({self.booking})"
 
 # HOTEL
-class Hotel(models.Model):
-    TRAVEL_TYPE_CHOICES = [
-        ('domestic', 'Domestic'),
-        ('international', 'International'),
-    ]
-    booking = models.ForeignKey(
-        'bookings.Booking',
-        on_delete=models.RESTRICT,
-        related_name='hotels'
-    )
+class Hotel(PackageServiceEntry):
+    booking_id_field = 'hotel_booking_id'
+    booking_id_prefix = 'HO'
+
     hotel_booking_id = models.CharField(max_length=10, unique=True, blank=True)
-    date = models.DateTimeField()
-    supplier = models.ForeignKey(
-        'suppliers.Supplier',
-        on_delete=models.PROTECT,  # Required
-        related_name='hotel_suppliers'
-    )
-    mode = models.ForeignKey(
-        'payments.Mode',
-        on_delete=models.PROTECT,  # Required
-    )
-    purchase_amount = models.DecimalField(max_digits=12, decimal_places=2)
-    sales_amount = models.DecimalField(max_digits=12, decimal_places=2)
-    travel_type = models.CharField(max_length=20, choices=TRAVEL_TYPE_CHOICES)
-    notes = models.TextField(blank=True, null=True)
-    attachment = models.FileField(upload_to='service_attachments/', blank=True, null=True)
-    
-    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, null=True, blank=True)
-    finished = models.BooleanField(default=False)          # Set by operational team
-    accounts_processed = models.BooleanField(default=False)  # Set by accounts team
 
     class Meta:
         indexes = [
@@ -282,55 +212,13 @@ class Hotel(models.Model):
                          name="hotel_bk_travel_idx"),
         ]
 
-    def save(self, *args, **kwargs):
-        if not self.hotel_booking_id:
-            last = Hotel.objects.all().order_by('id').last()
-            if last and last.hotel_booking_id:
-                last_num = int(last.hotel_booking_id.split('-')[-1])
-                new_num = last_num + 1
-            else:
-                new_num = 1
-            self.hotel_booking_id = f"HO-{new_num:04d}"
-        super().save(*args, **kwargs)
-
-    @property
-    def profit(self):
-        return (self.sales_amount or 0) - (self.purchase_amount or 0)
-
-    def __str__(self):
-        return f"{self.hotel_booking_id} ({self.booking})"
 
 # SIGHTSEEING
-class SightSeeing(models.Model):
-    TRAVEL_TYPE_CHOICES = [
-        ('domestic', 'Domestic'),
-        ('international', 'International'),
-    ]
-    booking = models.ForeignKey(
-        'bookings.Booking',
-        on_delete=models.RESTRICT,
-        related_name='sightseeings'
-    )
+class SightSeeing(PackageServiceEntry):
+    booking_id_field = 'sightseeing_booking_id'
+    booking_id_prefix = 'SS'
+
     sightseeing_booking_id = models.CharField(max_length=10, unique=True, blank=True)
-    date = models.DateTimeField()
-    supplier = models.ForeignKey(
-        'suppliers.Supplier',
-        on_delete=models.PROTECT,  # Required
-        related_name='sightseeing_suppliers'
-    )
-    mode = models.ForeignKey(
-        'payments.Mode',
-        on_delete=models.PROTECT,  # Required
-    )
-    purchase_amount = models.DecimalField(max_digits=12, decimal_places=2)
-    sales_amount = models.DecimalField(max_digits=12, decimal_places=2)
-    travel_type = models.CharField(max_length=20, choices=TRAVEL_TYPE_CHOICES)
-    notes = models.TextField(blank=True, null=True)
-    attachment = models.FileField(upload_to='service_attachments/', blank=True, null=True)
-    
-    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, null=True, blank=True)
-    finished = models.BooleanField(default=False)          # Set by operational team
-    accounts_processed = models.BooleanField(default=False)  # Set by accounts team
 
     class Meta:
         indexes = [
@@ -340,55 +228,13 @@ class SightSeeing(models.Model):
                          name="sightsee_bk_travel_idx"),
         ]
 
-    def save(self, *args, **kwargs):
-        if not self.sightseeing_booking_id:
-            last = SightSeeing.objects.all().order_by('id').last()
-            if last and last.sightseeing_booking_id:
-                last_num = int(last.sightseeing_booking_id.split('-')[-1])
-                new_num = last_num + 1
-            else:
-                new_num = 1
-            self.sightseeing_booking_id = f"SS-{new_num:04d}"
-        super().save(*args, **kwargs)
-
-    @property
-    def profit(self):
-        return (self.sales_amount or 0) - (self.purchase_amount or 0)
-
-    def __str__(self):
-        return f"{self.sightseeing_booking_id} ({self.booking})"
 
 # TRANSFER
-class Transfer(models.Model):
-    TRAVEL_TYPE_CHOICES = [
-        ('domestic', 'Domestic'),
-        ('international', 'International'),
-    ]
-    booking = models.ForeignKey(
-        'bookings.Booking',
-        on_delete=models.RESTRICT,
-        related_name='transfers'
-    )
+class Transfer(PackageServiceEntry):
+    booking_id_field = 'transfer_booking_id'
+    booking_id_prefix = 'TR'
+
     transfer_booking_id = models.CharField(max_length=10, unique=True, blank=True)
-    date = models.DateTimeField()
-    supplier = models.ForeignKey(
-        'suppliers.Supplier',
-        on_delete=models.PROTECT,  # Required
-        related_name='transfer_suppliers'
-    )
-    mode = models.ForeignKey(
-        'payments.Mode',
-        on_delete=models.PROTECT,  # Required
-    )
-    purchase_amount = models.DecimalField(max_digits=12, decimal_places=2)
-    sales_amount = models.DecimalField(max_digits=12, decimal_places=2)
-    travel_type = models.CharField(max_length=20, choices=TRAVEL_TYPE_CHOICES)
-    notes = models.TextField(blank=True, null=True)
-    attachment = models.FileField(upload_to='service_attachments/', blank=True, null=True)
-    
-    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, null=True, blank=True)
-    finished = models.BooleanField(default=False)          # Set by operational team
-    accounts_processed = models.BooleanField(default=False)  # Set by accounts team
 
     class Meta:
         indexes = [
@@ -397,26 +243,3 @@ class Transfer(models.Model):
             models.Index(fields=["booking", "travel_type"],
                          name="transfer_bk_travel_idx"),
         ]
-
-    def save(self, *args, **kwargs):
-        if not self.transfer_booking_id:
-            last = Transfer.objects.all().order_by('id').last()
-            if last and last.transfer_booking_id:
-                last_num = int(last.transfer_booking_id.split('-')[-1])
-                new_num = last_num + 1
-            else:
-                new_num = 1
-            self.transfer_booking_id = f"TR-{new_num:04d}"
-        super().save(*args, **kwargs)
-
-    @property
-    def profit(self):
-        return (self.sales_amount or 0) - (self.purchase_amount or 0)
-
-    def __str__(self):
-        return f"{self.transfer_booking_id} ({self.booking})"
-
-
-# Create your models here.
-
-
