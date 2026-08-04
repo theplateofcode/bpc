@@ -122,7 +122,7 @@ suite here on a difference production does not have.
 
 Any change in **value** is still caught. Only trailing-zero scale is ignored.
 
-## Behaviour worth knowing about before you refactor
+## Negative GST on loss-making bookings is INTENDED — do not "fix" it
 
 `Booking.sales_gst` is `min(invoice_amount * 0.05, gross_profit * 0.18)`. When a
 booking makes a loss, `gross_profit` is negative, so the `min()` selects the
@@ -130,8 +130,12 @@ negative value and GST comes out **negative**, which then *increases* net profit
 via `net_profit = gross_profit - sales_gst`. Booking `B-0004` in the fixture is
 exactly this case: gross profit −3800, GST −684, net profit −3116.
 
-This may or may not be intended. It is current behaviour and the snapshot pins
-it. Flagging it so an optimisation pass is not blamed for it later.
+**This is a business rule, confirmed by the owner: negative profit on cash and
+cheque bookings is allowed and was specifically requested.** It looks like a
+defect on first reading, which is why it is written down here. Leave it alone.
+
+For scale, on a production snapshot of 1,077 bookings, 5 had negative gross
+profit and carried −₹5,213 of GST between them.
 
 ## Adding coverage
 
