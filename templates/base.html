@@ -93,13 +93,13 @@
         </a>
       </div>
 
-      <div class="nav-item mb-1">
-        <a href="{% url 'staff_legacy_reports' %}"
-           class="nav-link d-flex align-items-center gap-2 rounded px-3 py-2{% if '/staff/legacy/' in request.path %} active{% endif %}">
-          <i class="bi bi-stopwatch"></i>
-          <span>Staff Legacy Reports</span>
-        </a>
-      </div>
+      {% comment %}
+      Staff Legacy Reports removed. The legacy routes are commented out in
+      core/urls.py -- see the note there. Note this must be a {% templatetag openblock %} comment {% templatetag closeblock %}
+      block and not an HTML comment: Django still executes {% templatetag openblock %} url {% templatetag closeblock %} tags
+      inside <!-- --> , so an HTML-commented link to a removed route still
+      raises NoReverseMatch and takes down every page that extends this file.
+      {% endcomment %}
       {% endif %}
       
 
@@ -196,14 +196,12 @@
       <!-- REPORT MODULE URL -->
 
       {% if user.is_owner_or_admin or user.is_superuser%}
-        <!-- <div class="nav-item mb-1">
-  <a href="{% url 'owner_reports' %}"
-     class="nav-link d-flex align-items-center gap-2 rounded px-3 py-2
-            {% if request.resolver_match.url_name == 'owner_reports' %} active{% endif %}">
-    <i class="bi bi-bar-chart"></i>
-    <span>Pre Reports</span>
-  </a>
-</div> -->
+        {% comment %}
+        "Pre Reports" (the before-payments owner report) removed. It was already
+        hidden behind an HTML comment, which did NOT stop Django reversing the
+        url tag inside it -- so it had to become a {% templatetag openblock %} comment {% templatetag closeblock %} block
+        once the route was commented out in reports/urls.py.
+        {% endcomment %}
         <div class="nav-item mb-1">
           <a href="{% url 'owner_actual_reports' %}"
              class="nav-link d-flex align-items-center gap-2 rounded px-3 py-2{% if '/owner/actual/' in request.path %} active{% endif %}">
@@ -211,14 +209,9 @@
             <span>Post Reports</span>
           </a>
         </div>
-        <div class="nav-item mb-1">
-  <a href="{% url 'owner_legacy_reports' %}"
-     class="nav-link d-flex align-items-center gap-2 rounded px-3 py-2{% if '/owner-reports-legacy' in request.path %} active{% endif %}">
-    <i class="bi bi-stopwatch"></i>
-    <span>Post Reports (Legacy)</span>
-  </a>
-</div>
-
+        {% comment %}
+        "Post Reports (Legacy)" removed; routes commented out in reports/urls.py.
+        {% endcomment %}
       {% endif %}
 
             <!-- Settings Heading -->

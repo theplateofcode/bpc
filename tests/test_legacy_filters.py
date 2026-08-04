@@ -9,13 +9,16 @@ fix, and -- unlike the golden master fixture, which has no legacy payments --
 they create one so the year list is actually populated. An endpoint that
 returns [] would pass even if the conversion were still wrong.
 """
+import json
 from datetime import date
 from decimal import Decimal
 
-from django.test import Client as HttpClient, TestCase
+from django.test import RequestFactory, TestCase
 
 from bookings.models import Booking
+from core.views_legacy import staff_legacy_filters_data
 from payments.models import PaymentReceived
+from reports.views_legacy import report_filters_data_legacy
 
 from . import seed
 
@@ -59,14 +62,23 @@ class LegacyFilterEndpointTests(TestCase):
         cls.expected_years = {2023, 2025}
 
     def setUp(self):
-        self.http = HttpClient()
-        self.http.force_login(self.fixture.users["owner"])
+        pass  # views are called directly; no HTTP client needed
+
+    def _call(self, view):
+        """Call the view directly.
+
+        The legacy routes are commented out, so these cannot be reached by URL
+        any more. The views themselves are still in the codebase, and the fix
+        should stay correct in case they are ever re-enabled -- so the test
+        calls them directly instead of deleting the coverage.
+        """
+        request = RequestFactory().get("/")
+        request.user = self.fixture.users["owner"]
+        return json.loads(view(request).content)
 
     def test_reports_legacy_filters_returns_years(self):
-        response = self.http.get("/reports/api/report-filters-legacy/")
+        payload = self._call(report_filters_data_legacy)
 
-        self.assertEqual(response.status_code, 200)
-        payload = response.json()
         self.assertEqual(set(payload["years"]), self.expected_years)
         # Plain ints, not dates -- that conversion is the part that was broken.
         for year in payload["years"]:
@@ -74,10 +86,8 @@ class LegacyFilterEndpointTests(TestCase):
         self.assertEqual(len(payload["months"]), 12)
 
     def test_core_staff_legacy_filters_returns_years(self):
-        response = self.http.get("/staff/legacy/filters/")
+        payload = self._call(staff_legacy_filters_data)
 
-        self.assertEqual(response.status_code, 200)
-        payload = response.json()
         for year in payload["years"]:
             self.assertIsInstance(year, int)
         self.assertEqual(len(payload["months"]), 12)

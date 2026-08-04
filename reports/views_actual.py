@@ -316,10 +316,15 @@ def filtered_actual_report(request):
         # Apply TCS impact to NON-CASH SALES (same meaning you used before: reduce "net" non-cash)
         sales_non_cash_net = sales_non_cash - tcs_amt
 
-        # Profit from actual sales - purchase, then subtract GST (since GST is your cost/outflow)
+        # GST comes off NON-CASH profit only -- cash profit is left whole.
+        # This matches core/views_actual.py, which the owner has confirmed is the
+        # correct treatment. Previously this module kept GST out of the profit
+        # columns and reported it separately, so the same booking showed a higher
+        # profit_non_cash here than on the staff report. The totals agreed; the
+        # columns did not.
         profit_cash = sales_cash - purch_cash
-        profit_non_cash = sales_non_cash_net - purch_non_cash
-        profit_total = (profit_cash + profit_non_cash) - gst_amt
+        profit_non_cash = (sales_non_cash_net - purch_non_cash) - gst_amt
+        profit_total = profit_cash + profit_non_cash
 
         # Cards totals
         results["totals"]["sales_cash"] += float(sales_cash)
@@ -481,10 +486,11 @@ def bookings_report(request):
             # net non-cash sales after TCS
             sales_non_cash_net = sales_non_cash - tcs_amt
 
-            # profit then subtract GST
+            # GST off non-cash profit only -- see the note in
+            # filtered_actual_report above.
             profit_cash = sales_cash - purch_cash
-            profit_non_cash = sales_non_cash_net - purch_non_cash
-            profit_total = (profit_cash + profit_non_cash) - gst_amt
+            profit_non_cash = (sales_non_cash_net - purch_non_cash) - gst_amt
+            profit_total = profit_cash + profit_non_cash
             def get_service_creator_name(booking_id, service_code, fallback_user):
                 if service_code not in SERVICE_MODEL_MAP:
                     return fallback_user
@@ -539,7 +545,9 @@ def bookings_report(request):
         if not services_data:
             continue
 
-        book_profit_total = (book_profit_cash + book_profit_non_cash) - book_gst
+        # GST is already inside book_profit_non_cash, so it must not be
+        # subtracted a second time here.
+        book_profit_total = book_profit_cash + book_profit_non_cash
 
         data.append({
             "booking_id": booking.booking_id,

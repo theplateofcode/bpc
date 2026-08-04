@@ -2116,7 +2116,7 @@
                 "gst": 90.0,
                 "mode": "Mixed",
                 "profit_cash": 0.0,
-                "profit_non_cash": 500.0,
+                "profit_non_cash": 410.0,
                 "profit_total": 410.0,
                 "purchase_cash": 0.0,
                 "purchase_non_cash": 1000.0,
@@ -2133,7 +2133,7 @@
                 "gst": 90.0,
                 "mode": "Mixed",
                 "profit_cash": 0.0,
-                "profit_non_cash": 500.0,
+                "profit_non_cash": 410.0,
                 "profit_total": 410.0,
                 "purchase_cash": 0.0,
                 "purchase_non_cash": 1000.0,
@@ -2150,7 +2150,7 @@
                 "gst": 90.0,
                 "mode": "Mixed",
                 "profit_cash": 0.0,
-                "profit_non_cash": 470.0,
+                "profit_non_cash": 380.0,
                 "profit_total": 380.0,
                 "purchase_cash": 0.0,
                 "purchase_non_cash": 1000.0,
@@ -2167,7 +2167,7 @@
                 "gst": 90.0,
                 "mode": "Mixed",
                 "profit_cash": 0.0,
-                "profit_non_cash": 500.0,
+                "profit_non_cash": 410.0,
                 "profit_total": 410.0,
                 "purchase_cash": 0.0,
                 "purchase_non_cash": 1000.0,
@@ -2184,7 +2184,7 @@
                 "gst": 90.0,
                 "mode": "Mixed",
                 "profit_cash": 0.0,
-                "profit_non_cash": 470.0,
+                "profit_non_cash": 380.0,
                 "profit_total": 380.0,
                 "purchase_cash": 0.0,
                 "purchase_non_cash": 1000.0,
@@ -2201,7 +2201,7 @@
                 "gst": 90.0,
                 "mode": "Mixed",
                 "profit_cash": 0.0,
-                "profit_non_cash": 470.0,
+                "profit_non_cash": 380.0,
                 "profit_total": 380.0,
                 "purchase_cash": 0.0,
                 "purchase_non_cash": 1000.0,
@@ -2218,7 +2218,7 @@
                 "gst": 90.0,
                 "mode": "Mixed",
                 "profit_cash": 0.0,
-                "profit_non_cash": 500.0,
+                "profit_non_cash": 410.0,
                 "profit_total": 410.0,
                 "purchase_cash": 0.0,
                 "purchase_non_cash": 1000.0,
@@ -2234,7 +2234,7 @@
               "discount": 0.0,
               "gst": 630.0,
               "profit_cash": 0.0,
-              "profit_non_cash": 3410.0,
+              "profit_non_cash": 2780.0,
               "purchase_cash": 0.0,
               "purchase_non_cash": 7000.0,
               "sales_cash": 0.0,
@@ -2255,7 +2255,7 @@
                 "gst": 72.0,
                 "mode": "Mixed",
                 "profit_cash": 200.0,
-                "profit_non_cash": 0.0,
+                "profit_non_cash": -72.0,
                 "profit_total": 128.0,
                 "purchase_cash": 800.0,
                 "purchase_non_cash": 0.0,
@@ -2373,7 +2373,7 @@
               "discount": 1400.0,
               "gst": 72.0,
               "profit_cash": 1400.0,
-              "profit_non_cash": 0.0,
+              "profit_non_cash": -72.0,
               "purchase_cash": 5600.0,
               "purchase_non_cash": 0.0,
               "sales_cash": 7000.0,
@@ -2394,7 +2394,7 @@
                 "gst": 216.0,
                 "mode": "Mixed",
                 "profit_cash": -100.0,
-                "profit_non_cash": -240.0,
+                "profit_non_cash": -456.0,
                 "profit_total": -556.0,
                 "purchase_cash": 900.0,
                 "purchase_non_cash": 1900.0,
@@ -2411,7 +2411,7 @@
                 "gst": 90.0,
                 "mode": "Mixed",
                 "profit_cash": -300.0,
-                "profit_non_cash": 800.0,
+                "profit_non_cash": 710.0,
                 "profit_total": 410.0,
                 "purchase_cash": 300.0,
                 "purchase_non_cash": 600.0,
@@ -2427,7 +2427,7 @@
               "discount": 150.0,
               "gst": 306.0,
               "profit_cash": -400.0,
-              "profit_non_cash": 560.0,
+              "profit_non_cash": 254.0,
               "purchase_cash": 1200.0,
               "purchase_non_cash": 2500.0,
               "sales_cash": 800.0,
@@ -2448,7 +2448,7 @@
                 "gst": 63.0,
                 "mode": "Mixed",
                 "profit_cash": 0.0,
-                "profit_non_cash": 350.0,
+                "profit_non_cash": 287.0,
                 "profit_total": 287.0,
                 "purchase_cash": 0.0,
                 "purchase_non_cash": 250.0,
@@ -2465,7 +2465,7 @@
                 "gst": 63.0,
                 "mode": "Mixed",
                 "profit_cash": 0.0,
-                "profit_non_cash": 350.0,
+                "profit_non_cash": 287.0,
                 "profit_total": 287.0,
                 "purchase_cash": 0.0,
                 "purchase_non_cash": 250.0,
@@ -2482,7 +2482,7 @@
                 "gst": 63.0,
                 "mode": "Mixed",
                 "profit_cash": 0.0,
-                "profit_non_cash": 350.0,
+                "profit_non_cash": 287.0,
                 "profit_total": 287.0,
                 "purchase_cash": 0.0,
                 "purchase_non_cash": 250.0,
@@ -2498,7 +2498,7 @@
               "discount": 0.0,
               "gst": 189.0,
               "profit_cash": 0.0,
-              "profit_non_cash": 1050.0,
+              "profit_non_cash": 861.0,
               "purchase_cash": 0.0,
               "purchase_non_cash": 750.0,
               "sales_cash": 0.0,
@@ -2519,7 +2519,7 @@
                 "gst": 79.9992,
                 "mode": "Mixed",
                 "profit_cash": 0.0,
-                "profit_non_cash": 428.8846,
+                "profit_non_cash": 348.8854,
                 "profit_total": 348.8854,
                 "purchase_cash": 0.0,
                 "purchase_non_cash": 333.33,
@@ -2536,7 +2536,7 @@
                 "gst": 199.9998,
                 "mode": "Mixed",
                 "profit_cash": 0.0,
-                "profit_non_cash": 1066.6656,
+                "profit_non_cash": 866.6658,
                 "profit_total": 866.6658,
                 "purchase_cash": 0.0,
                 "purchase_non_cash": 1111.11,
@@ -2552,7 +2552,7 @@
               "discount": 0.0,
               "gst": 279.999,
               "profit_cash": 0.0,
-              "profit_non_cash": 1495.5502,
+              "profit_non_cash": 1215.5512,
               "purchase_cash": 0.0,
               "purchase_non_cash": 1444.44,
               "sales_cash": 0.0,
@@ -2580,7 +2580,7 @@
                 "gst": 90.0,
                 "mode": "Mixed",
                 "profit_cash": 0.0,
-                "profit_non_cash": 500.0,
+                "profit_non_cash": 410.0,
                 "profit_total": 410.0,
                 "purchase_cash": 0.0,
                 "purchase_non_cash": 1000.0,
@@ -2597,7 +2597,7 @@
                 "gst": 90.0,
                 "mode": "Mixed",
                 "profit_cash": 0.0,
-                "profit_non_cash": 500.0,
+                "profit_non_cash": 410.0,
                 "profit_total": 410.0,
                 "purchase_cash": 0.0,
                 "purchase_non_cash": 1000.0,
@@ -2614,7 +2614,7 @@
                 "gst": 90.0,
                 "mode": "Mixed",
                 "profit_cash": 0.0,
-                "profit_non_cash": 470.0,
+                "profit_non_cash": 380.0,
                 "profit_total": 380.0,
                 "purchase_cash": 0.0,
                 "purchase_non_cash": 1000.0,
@@ -2631,7 +2631,7 @@
                 "gst": 90.0,
                 "mode": "Mixed",
                 "profit_cash": 0.0,
-                "profit_non_cash": 500.0,
+                "profit_non_cash": 410.0,
                 "profit_total": 410.0,
                 "purchase_cash": 0.0,
                 "purchase_non_cash": 1000.0,
@@ -2648,7 +2648,7 @@
                 "gst": 90.0,
                 "mode": "Mixed",
                 "profit_cash": 0.0,
-                "profit_non_cash": 470.0,
+                "profit_non_cash": 380.0,
                 "profit_total": 380.0,
                 "purchase_cash": 0.0,
                 "purchase_non_cash": 1000.0,
@@ -2665,7 +2665,7 @@
                 "gst": 90.0,
                 "mode": "Mixed",
                 "profit_cash": 0.0,
-                "profit_non_cash": 470.0,
+                "profit_non_cash": 380.0,
                 "profit_total": 380.0,
                 "purchase_cash": 0.0,
                 "purchase_non_cash": 1000.0,
@@ -2682,7 +2682,7 @@
                 "gst": 90.0,
                 "mode": "Mixed",
                 "profit_cash": 0.0,
-                "profit_non_cash": 500.0,
+                "profit_non_cash": 410.0,
                 "profit_total": 410.0,
                 "purchase_cash": 0.0,
                 "purchase_non_cash": 1000.0,
@@ -2698,7 +2698,7 @@
               "discount": 0.0,
               "gst": 630.0,
               "profit_cash": 0.0,
-              "profit_non_cash": 3410.0,
+              "profit_non_cash": 2780.0,
               "purchase_cash": 0.0,
               "purchase_non_cash": 7000.0,
               "sales_cash": 0.0,
@@ -2719,7 +2719,7 @@
                 "gst": 72.0,
                 "mode": "Mixed",
                 "profit_cash": 200.0,
-                "profit_non_cash": 0.0,
+                "profit_non_cash": -72.0,
                 "profit_total": 128.0,
                 "purchase_cash": 800.0,
                 "purchase_non_cash": 0.0,
@@ -2837,7 +2837,7 @@
               "discount": 1400.0,
               "gst": 72.0,
               "profit_cash": 1400.0,
-              "profit_non_cash": 0.0,
+              "profit_non_cash": -72.0,
               "purchase_cash": 5600.0,
               "purchase_non_cash": 0.0,
               "sales_cash": 7000.0,
@@ -2858,7 +2858,7 @@
                 "gst": 216.0,
                 "mode": "Mixed",
                 "profit_cash": -100.0,
-                "profit_non_cash": -240.0,
+                "profit_non_cash": -456.0,
                 "profit_total": -556.0,
                 "purchase_cash": 900.0,
                 "purchase_non_cash": 1900.0,
@@ -2875,7 +2875,7 @@
                 "gst": 90.0,
                 "mode": "Mixed",
                 "profit_cash": -300.0,
-                "profit_non_cash": 800.0,
+                "profit_non_cash": 710.0,
                 "profit_total": 410.0,
                 "purchase_cash": 300.0,
                 "purchase_non_cash": 600.0,
@@ -2891,7 +2891,7 @@
               "discount": 150.0,
               "gst": 306.0,
               "profit_cash": -400.0,
-              "profit_non_cash": 560.0,
+              "profit_non_cash": 254.0,
               "purchase_cash": 1200.0,
               "purchase_non_cash": 2500.0,
               "sales_cash": 800.0,
@@ -2912,7 +2912,7 @@
                 "gst": 63.0,
                 "mode": "Mixed",
                 "profit_cash": 0.0,
-                "profit_non_cash": 350.0,
+                "profit_non_cash": 287.0,
                 "profit_total": 287.0,
                 "purchase_cash": 0.0,
                 "purchase_non_cash": 250.0,
@@ -2929,7 +2929,7 @@
                 "gst": 63.0,
                 "mode": "Mixed",
                 "profit_cash": 0.0,
-                "profit_non_cash": 350.0,
+                "profit_non_cash": 287.0,
                 "profit_total": 287.0,
                 "purchase_cash": 0.0,
                 "purchase_non_cash": 250.0,
@@ -2946,7 +2946,7 @@
                 "gst": 63.0,
                 "mode": "Mixed",
                 "profit_cash": 0.0,
-                "profit_non_cash": 350.0,
+                "profit_non_cash": 287.0,
                 "profit_total": 287.0,
                 "purchase_cash": 0.0,
                 "purchase_non_cash": 250.0,
@@ -2962,7 +2962,7 @@
               "discount": 0.0,
               "gst": 189.0,
               "profit_cash": 0.0,
-              "profit_non_cash": 1050.0,
+              "profit_non_cash": 861.0,
               "purchase_cash": 0.0,
               "purchase_non_cash": 750.0,
               "sales_cash": 0.0,
@@ -2983,7 +2983,7 @@
                 "gst": 79.9992,
                 "mode": "Mixed",
                 "profit_cash": 0.0,
-                "profit_non_cash": 428.8846,
+                "profit_non_cash": 348.8854,
                 "profit_total": 348.8854,
                 "purchase_cash": 0.0,
                 "purchase_non_cash": 333.33,
@@ -3000,7 +3000,7 @@
                 "gst": 199.9998,
                 "mode": "Mixed",
                 "profit_cash": 0.0,
-                "profit_non_cash": 1066.6656,
+                "profit_non_cash": 866.6658,
                 "profit_total": 866.6658,
                 "purchase_cash": 0.0,
                 "purchase_non_cash": 1111.11,
@@ -3016,7 +3016,7 @@
               "discount": 0.0,
               "gst": 279.999,
               "profit_cash": 0.0,
-              "profit_non_cash": 1495.5502,
+              "profit_non_cash": 1215.5512,
               "purchase_cash": 0.0,
               "purchase_non_cash": 1444.44,
               "sales_cash": 0.0,
@@ -3044,7 +3044,7 @@
                 "gst": 90.0,
                 "mode": "Mixed",
                 "profit_cash": 0.0,
-                "profit_non_cash": 500.0,
+                "profit_non_cash": 410.0,
                 "profit_total": 410.0,
                 "purchase_cash": 0.0,
                 "purchase_non_cash": 1000.0,
@@ -3061,7 +3061,7 @@
                 "gst": 90.0,
                 "mode": "Mixed",
                 "profit_cash": 0.0,
-                "profit_non_cash": 500.0,
+                "profit_non_cash": 410.0,
                 "profit_total": 410.0,
                 "purchase_cash": 0.0,
                 "purchase_non_cash": 1000.0,
@@ -3078,7 +3078,7 @@
                 "gst": 90.0,
                 "mode": "Mixed",
                 "profit_cash": 0.0,
-                "profit_non_cash": 470.0,
+                "profit_non_cash": 380.0,
                 "profit_total": 380.0,
                 "purchase_cash": 0.0,
                 "purchase_non_cash": 1000.0,
@@ -3095,7 +3095,7 @@
                 "gst": 90.0,
                 "mode": "Mixed",
                 "profit_cash": 0.0,
-                "profit_non_cash": 500.0,
+                "profit_non_cash": 410.0,
                 "profit_total": 410.0,
                 "purchase_cash": 0.0,
                 "purchase_non_cash": 1000.0,
@@ -3112,7 +3112,7 @@
                 "gst": 90.0,
                 "mode": "Mixed",
                 "profit_cash": 0.0,
-                "profit_non_cash": 470.0,
+                "profit_non_cash": 380.0,
                 "profit_total": 380.0,
                 "purchase_cash": 0.0,
                 "purchase_non_cash": 1000.0,
@@ -3129,7 +3129,7 @@
                 "gst": 90.0,
                 "mode": "Mixed",
                 "profit_cash": 0.0,
-                "profit_non_cash": 470.0,
+                "profit_non_cash": 380.0,
                 "profit_total": 380.0,
                 "purchase_cash": 0.0,
                 "purchase_non_cash": 1000.0,
@@ -3146,7 +3146,7 @@
                 "gst": 90.0,
                 "mode": "Mixed",
                 "profit_cash": 0.0,
-                "profit_non_cash": 500.0,
+                "profit_non_cash": 410.0,
                 "profit_total": 410.0,
                 "purchase_cash": 0.0,
                 "purchase_non_cash": 1000.0,
@@ -3162,7 +3162,7 @@
               "discount": 0.0,
               "gst": 630.0,
               "profit_cash": 0.0,
-              "profit_non_cash": 3410.0,
+              "profit_non_cash": 2780.0,
               "purchase_cash": 0.0,
               "purchase_non_cash": 7000.0,
               "sales_cash": 0.0,
@@ -3183,7 +3183,7 @@
                 "gst": 72.0,
                 "mode": "Mixed",
                 "profit_cash": 200.0,
-                "profit_non_cash": 0.0,
+                "profit_non_cash": -72.0,
                 "profit_total": 128.0,
                 "purchase_cash": 800.0,
                 "purchase_non_cash": 0.0,
@@ -3301,7 +3301,7 @@
               "discount": 1400.0,
               "gst": 72.0,
               "profit_cash": 1400.0,
-              "profit_non_cash": 0.0,
+              "profit_non_cash": -72.0,
               "purchase_cash": 5600.0,
               "purchase_non_cash": 0.0,
               "sales_cash": 7000.0,
@@ -3329,7 +3329,7 @@
                 "gst": 90.0,
                 "mode": "Mixed",
                 "profit_cash": 0.0,
-                "profit_non_cash": 500.0,
+                "profit_non_cash": 410.0,
                 "profit_total": 410.0,
                 "purchase_cash": 0.0,
                 "purchase_non_cash": 1000.0,
@@ -3346,7 +3346,7 @@
                 "gst": 90.0,
                 "mode": "Mixed",
                 "profit_cash": 0.0,
-                "profit_non_cash": 500.0,
+                "profit_non_cash": 410.0,
                 "profit_total": 410.0,
                 "purchase_cash": 0.0,
                 "purchase_non_cash": 1000.0,
@@ -3363,7 +3363,7 @@
                 "gst": 90.0,
                 "mode": "Mixed",
                 "profit_cash": 0.0,
-                "profit_non_cash": 470.0,
+                "profit_non_cash": 380.0,
                 "profit_total": 380.0,
                 "purchase_cash": 0.0,
                 "purchase_non_cash": 1000.0,
@@ -3380,7 +3380,7 @@
                 "gst": 90.0,
                 "mode": "Mixed",
                 "profit_cash": 0.0,
-                "profit_non_cash": 500.0,
+                "profit_non_cash": 410.0,
                 "profit_total": 410.0,
                 "purchase_cash": 0.0,
                 "purchase_non_cash": 1000.0,
@@ -3397,7 +3397,7 @@
                 "gst": 90.0,
                 "mode": "Mixed",
                 "profit_cash": 0.0,
-                "profit_non_cash": 470.0,
+                "profit_non_cash": 380.0,
                 "profit_total": 380.0,
                 "purchase_cash": 0.0,
                 "purchase_non_cash": 1000.0,
@@ -3414,7 +3414,7 @@
                 "gst": 90.0,
                 "mode": "Mixed",
                 "profit_cash": 0.0,
-                "profit_non_cash": 470.0,
+                "profit_non_cash": 380.0,
                 "profit_total": 380.0,
                 "purchase_cash": 0.0,
                 "purchase_non_cash": 1000.0,
@@ -3431,7 +3431,7 @@
                 "gst": 90.0,
                 "mode": "Mixed",
                 "profit_cash": 0.0,
-                "profit_non_cash": 500.0,
+                "profit_non_cash": 410.0,
                 "profit_total": 410.0,
                 "purchase_cash": 0.0,
                 "purchase_non_cash": 1000.0,
@@ -3447,7 +3447,7 @@
               "discount": 0.0,
               "gst": 630.0,
               "profit_cash": 0.0,
-              "profit_non_cash": 3410.0,
+              "profit_non_cash": 2780.0,
               "purchase_cash": 0.0,
               "purchase_non_cash": 7000.0,
               "sales_cash": 0.0,
@@ -3468,7 +3468,7 @@
                 "gst": 72.0,
                 "mode": "Mixed",
                 "profit_cash": 200.0,
-                "profit_non_cash": 0.0,
+                "profit_non_cash": -72.0,
                 "profit_total": 128.0,
                 "purchase_cash": 800.0,
                 "purchase_non_cash": 0.0,
@@ -3586,7 +3586,7 @@
               "discount": 1400.0,
               "gst": 72.0,
               "profit_cash": 1400.0,
-              "profit_non_cash": 0.0,
+              "profit_non_cash": -72.0,
               "purchase_cash": 5600.0,
               "purchase_non_cash": 0.0,
               "sales_cash": 7000.0,
@@ -3607,7 +3607,7 @@
                 "gst": 216.0,
                 "mode": "Mixed",
                 "profit_cash": -100.0,
-                "profit_non_cash": -240.0,
+                "profit_non_cash": -456.0,
                 "profit_total": -556.0,
                 "purchase_cash": 900.0,
                 "purchase_non_cash": 1900.0,
@@ -3624,7 +3624,7 @@
                 "gst": 90.0,
                 "mode": "Mixed",
                 "profit_cash": -300.0,
-                "profit_non_cash": 800.0,
+                "profit_non_cash": 710.0,
                 "profit_total": 410.0,
                 "purchase_cash": 300.0,
                 "purchase_non_cash": 600.0,
@@ -3640,7 +3640,7 @@
               "discount": 150.0,
               "gst": 306.0,
               "profit_cash": -400.0,
-              "profit_non_cash": 560.0,
+              "profit_non_cash": 254.0,
               "purchase_cash": 1200.0,
               "purchase_non_cash": 2500.0,
               "sales_cash": 800.0,
@@ -3661,7 +3661,7 @@
                 "gst": 63.0,
                 "mode": "Mixed",
                 "profit_cash": 0.0,
-                "profit_non_cash": 350.0,
+                "profit_non_cash": 287.0,
                 "profit_total": 287.0,
                 "purchase_cash": 0.0,
                 "purchase_non_cash": 250.0,
@@ -3678,7 +3678,7 @@
                 "gst": 63.0,
                 "mode": "Mixed",
                 "profit_cash": 0.0,
-                "profit_non_cash": 350.0,
+                "profit_non_cash": 287.0,
                 "profit_total": 287.0,
                 "purchase_cash": 0.0,
                 "purchase_non_cash": 250.0,
@@ -3695,7 +3695,7 @@
                 "gst": 63.0,
                 "mode": "Mixed",
                 "profit_cash": 0.0,
-                "profit_non_cash": 350.0,
+                "profit_non_cash": 287.0,
                 "profit_total": 287.0,
                 "purchase_cash": 0.0,
                 "purchase_non_cash": 250.0,
@@ -3711,7 +3711,7 @@
               "discount": 0.0,
               "gst": 189.0,
               "profit_cash": 0.0,
-              "profit_non_cash": 1050.0,
+              "profit_non_cash": 861.0,
               "purchase_cash": 0.0,
               "purchase_non_cash": 750.0,
               "sales_cash": 0.0,
@@ -3732,7 +3732,7 @@
                 "gst": 79.9992,
                 "mode": "Mixed",
                 "profit_cash": 0.0,
-                "profit_non_cash": 428.8846,
+                "profit_non_cash": 348.8854,
                 "profit_total": 348.8854,
                 "purchase_cash": 0.0,
                 "purchase_non_cash": 333.33,
@@ -3749,7 +3749,7 @@
                 "gst": 199.9998,
                 "mode": "Mixed",
                 "profit_cash": 0.0,
-                "profit_non_cash": 1066.6656,
+                "profit_non_cash": 866.6658,
                 "profit_total": 866.6658,
                 "purchase_cash": 0.0,
                 "purchase_non_cash": 1111.11,
@@ -3765,7 +3765,7 @@
               "discount": 0.0,
               "gst": 279.999,
               "profit_cash": 0.0,
-              "profit_non_cash": 1495.5502,
+              "profit_non_cash": 1215.5512,
               "purchase_cash": 0.0,
               "purchase_non_cash": 1444.44,
               "sales_cash": 0.0,
@@ -3793,7 +3793,7 @@
                 "gst": 90.0,
                 "mode": "Mixed",
                 "profit_cash": 0.0,
-                "profit_non_cash": 500.0,
+                "profit_non_cash": 410.0,
                 "profit_total": 410.0,
                 "purchase_cash": 0.0,
                 "purchase_non_cash": 1000.0,
@@ -3810,7 +3810,7 @@
                 "gst": 90.0,
                 "mode": "Mixed",
                 "profit_cash": 0.0,
-                "profit_non_cash": 500.0,
+                "profit_non_cash": 410.0,
                 "profit_total": 410.0,
                 "purchase_cash": 0.0,
                 "purchase_non_cash": 1000.0,
@@ -3827,7 +3827,7 @@
                 "gst": 90.0,
                 "mode": "Mixed",
                 "profit_cash": 0.0,
-                "profit_non_cash": 470.0,
+                "profit_non_cash": 380.0,
                 "profit_total": 380.0,
                 "purchase_cash": 0.0,
                 "purchase_non_cash": 1000.0,
@@ -3844,7 +3844,7 @@
                 "gst": 90.0,
                 "mode": "Mixed",
                 "profit_cash": 0.0,
-                "profit_non_cash": 500.0,
+                "profit_non_cash": 410.0,
                 "profit_total": 410.0,
                 "purchase_cash": 0.0,
                 "purchase_non_cash": 1000.0,
@@ -3861,7 +3861,7 @@
                 "gst": 90.0,
                 "mode": "Mixed",
                 "profit_cash": 0.0,
-                "profit_non_cash": 470.0,
+                "profit_non_cash": 380.0,
                 "profit_total": 380.0,
                 "purchase_cash": 0.0,
                 "purchase_non_cash": 1000.0,
@@ -3878,7 +3878,7 @@
                 "gst": 90.0,
                 "mode": "Mixed",
                 "profit_cash": 0.0,
-                "profit_non_cash": 470.0,
+                "profit_non_cash": 380.0,
                 "profit_total": 380.0,
                 "purchase_cash": 0.0,
                 "purchase_non_cash": 1000.0,
@@ -3895,7 +3895,7 @@
                 "gst": 90.0,
                 "mode": "Mixed",
                 "profit_cash": 0.0,
-                "profit_non_cash": 500.0,
+                "profit_non_cash": 410.0,
                 "profit_total": 410.0,
                 "purchase_cash": 0.0,
                 "purchase_non_cash": 1000.0,
@@ -3911,7 +3911,7 @@
               "discount": 0.0,
               "gst": 630.0,
               "profit_cash": 0.0,
-              "profit_non_cash": 3410.0,
+              "profit_non_cash": 2780.0,
               "purchase_cash": 0.0,
               "purchase_non_cash": 7000.0,
               "sales_cash": 0.0,
@@ -3932,7 +3932,7 @@
                 "gst": 72.0,
                 "mode": "Mixed",
                 "profit_cash": 200.0,
-                "profit_non_cash": 0.0,
+                "profit_non_cash": -72.0,
                 "profit_total": 128.0,
                 "purchase_cash": 800.0,
                 "purchase_non_cash": 0.0,
@@ -4050,7 +4050,7 @@
               "discount": 1400.0,
               "gst": 72.0,
               "profit_cash": 1400.0,
-              "profit_non_cash": 0.0,
+              "profit_non_cash": -72.0,
               "purchase_cash": 5600.0,
               "purchase_non_cash": 0.0,
               "sales_cash": 7000.0,
@@ -4071,7 +4071,7 @@
                 "gst": 216.0,
                 "mode": "Mixed",
                 "profit_cash": -100.0,
-                "profit_non_cash": -240.0,
+                "profit_non_cash": -456.0,
                 "profit_total": -556.0,
                 "purchase_cash": 900.0,
                 "purchase_non_cash": 1900.0,
@@ -4088,7 +4088,7 @@
                 "gst": 90.0,
                 "mode": "Mixed",
                 "profit_cash": -300.0,
-                "profit_non_cash": 800.0,
+                "profit_non_cash": 710.0,
                 "profit_total": 410.0,
                 "purchase_cash": 300.0,
                 "purchase_non_cash": 600.0,
@@ -4104,7 +4104,7 @@
               "discount": 150.0,
               "gst": 306.0,
               "profit_cash": -400.0,
-              "profit_non_cash": 560.0,
+              "profit_non_cash": 254.0,
               "purchase_cash": 1200.0,
               "purchase_non_cash": 2500.0,
               "sales_cash": 800.0,
@@ -4125,7 +4125,7 @@
                 "gst": 63.0,
                 "mode": "Mixed",
                 "profit_cash": 0.0,
-                "profit_non_cash": 350.0,
+                "profit_non_cash": 287.0,
                 "profit_total": 287.0,
                 "purchase_cash": 0.0,
                 "purchase_non_cash": 250.0,
@@ -4142,7 +4142,7 @@
                 "gst": 63.0,
                 "mode": "Mixed",
                 "profit_cash": 0.0,
-                "profit_non_cash": 350.0,
+                "profit_non_cash": 287.0,
                 "profit_total": 287.0,
                 "purchase_cash": 0.0,
                 "purchase_non_cash": 250.0,
@@ -4159,7 +4159,7 @@
                 "gst": 63.0,
                 "mode": "Mixed",
                 "profit_cash": 0.0,
-                "profit_non_cash": 350.0,
+                "profit_non_cash": 287.0,
                 "profit_total": 287.0,
                 "purchase_cash": 0.0,
                 "purchase_non_cash": 250.0,
@@ -4175,7 +4175,7 @@
               "discount": 0.0,
               "gst": 189.0,
               "profit_cash": 0.0,
-              "profit_non_cash": 1050.0,
+              "profit_non_cash": 861.0,
               "purchase_cash": 0.0,
               "purchase_non_cash": 750.0,
               "sales_cash": 0.0,
@@ -4196,7 +4196,7 @@
                 "gst": 79.9992,
                 "mode": "Mixed",
                 "profit_cash": 0.0,
-                "profit_non_cash": 428.8846,
+                "profit_non_cash": 348.8854,
                 "profit_total": 348.8854,
                 "purchase_cash": 0.0,
                 "purchase_non_cash": 333.33,
@@ -4213,7 +4213,7 @@
                 "gst": 199.9998,
                 "mode": "Mixed",
                 "profit_cash": 0.0,
-                "profit_non_cash": 1066.6656,
+                "profit_non_cash": 866.6658,
                 "profit_total": 866.6658,
                 "purchase_cash": 0.0,
                 "purchase_non_cash": 1111.11,
@@ -4229,7 +4229,7 @@
               "discount": 0.0,
               "gst": 279.999,
               "profit_cash": 0.0,
-              "profit_non_cash": 1495.5502,
+              "profit_non_cash": 1215.5512,
               "purchase_cash": 0.0,
               "purchase_non_cash": 1444.44,
               "sales_cash": 0.0,
@@ -4257,7 +4257,7 @@
                 "gst": 63.0,
                 "mode": "Mixed",
                 "profit_cash": 0.0,
-                "profit_non_cash": 350.0,
+                "profit_non_cash": 287.0,
                 "profit_total": 287.0,
                 "purchase_cash": 0.0,
                 "purchase_non_cash": 250.0,
@@ -4274,7 +4274,7 @@
                 "gst": 63.0,
                 "mode": "Mixed",
                 "profit_cash": 0.0,
-                "profit_non_cash": 350.0,
+                "profit_non_cash": 287.0,
                 "profit_total": 287.0,
                 "purchase_cash": 0.0,
                 "purchase_non_cash": 250.0,
@@ -4291,7 +4291,7 @@
                 "gst": 63.0,
                 "mode": "Mixed",
                 "profit_cash": 0.0,
-                "profit_non_cash": 350.0,
+                "profit_non_cash": 287.0,
                 "profit_total": 287.0,
                 "purchase_cash": 0.0,
                 "purchase_non_cash": 250.0,
@@ -4307,7 +4307,7 @@
               "discount": 0.0,
               "gst": 189.0,
               "profit_cash": 0.0,
-              "profit_non_cash": 1050.0,
+              "profit_non_cash": 861.0,
               "purchase_cash": 0.0,
               "purchase_non_cash": 750.0,
               "sales_cash": 0.0,
@@ -4335,7 +4335,7 @@
                 "gst": 90.0,
                 "mode": "Mixed",
                 "profit_cash": 0.0,
-                "profit_non_cash": 500.0,
+                "profit_non_cash": 410.0,
                 "profit_total": 410.0,
                 "purchase_cash": 0.0,
                 "purchase_non_cash": 1000.0,
@@ -4352,7 +4352,7 @@
                 "gst": 90.0,
                 "mode": "Mixed",
                 "profit_cash": 0.0,
-                "profit_non_cash": 500.0,
+                "profit_non_cash": 410.0,
                 "profit_total": 410.0,
                 "purchase_cash": 0.0,
                 "purchase_non_cash": 1000.0,
@@ -4369,7 +4369,7 @@
                 "gst": 90.0,
                 "mode": "Mixed",
                 "profit_cash": 0.0,
-                "profit_non_cash": 470.0,
+                "profit_non_cash": 380.0,
                 "profit_total": 380.0,
                 "purchase_cash": 0.0,
                 "purchase_non_cash": 1000.0,
@@ -4386,7 +4386,7 @@
                 "gst": 90.0,
                 "mode": "Mixed",
                 "profit_cash": 0.0,
-                "profit_non_cash": 500.0,
+                "profit_non_cash": 410.0,
                 "profit_total": 410.0,
                 "purchase_cash": 0.0,
                 "purchase_non_cash": 1000.0,
@@ -4403,7 +4403,7 @@
                 "gst": 90.0,
                 "mode": "Mixed",
                 "profit_cash": 0.0,
-                "profit_non_cash": 470.0,
+                "profit_non_cash": 380.0,
                 "profit_total": 380.0,
                 "purchase_cash": 0.0,
                 "purchase_non_cash": 1000.0,
@@ -4420,7 +4420,7 @@
                 "gst": 90.0,
                 "mode": "Mixed",
                 "profit_cash": 0.0,
-                "profit_non_cash": 470.0,
+                "profit_non_cash": 380.0,
                 "profit_total": 380.0,
                 "purchase_cash": 0.0,
                 "purchase_non_cash": 1000.0,
@@ -4437,7 +4437,7 @@
                 "gst": 90.0,
                 "mode": "Mixed",
                 "profit_cash": 0.0,
-                "profit_non_cash": 500.0,
+                "profit_non_cash": 410.0,
                 "profit_total": 410.0,
                 "purchase_cash": 0.0,
                 "purchase_non_cash": 1000.0,
@@ -4453,7 +4453,7 @@
               "discount": 0.0,
               "gst": 630.0,
               "profit_cash": 0.0,
-              "profit_non_cash": 3410.0,
+              "profit_non_cash": 2780.0,
               "purchase_cash": 0.0,
               "purchase_non_cash": 7000.0,
               "sales_cash": 0.0,
@@ -4474,7 +4474,7 @@
                 "gst": 72.0,
                 "mode": "Mixed",
                 "profit_cash": 200.0,
-                "profit_non_cash": 0.0,
+                "profit_non_cash": -72.0,
                 "profit_total": 128.0,
                 "purchase_cash": 800.0,
                 "purchase_non_cash": 0.0,
@@ -4592,7 +4592,7 @@
               "discount": 1400.0,
               "gst": 72.0,
               "profit_cash": 1400.0,
-              "profit_non_cash": 0.0,
+              "profit_non_cash": -72.0,
               "purchase_cash": 5600.0,
               "purchase_non_cash": 0.0,
               "sales_cash": 7000.0,
@@ -4613,7 +4613,7 @@
                 "gst": 216.0,
                 "mode": "Mixed",
                 "profit_cash": -100.0,
-                "profit_non_cash": -240.0,
+                "profit_non_cash": -456.0,
                 "profit_total": -556.0,
                 "purchase_cash": 900.0,
                 "purchase_non_cash": 1900.0,
@@ -4630,7 +4630,7 @@
                 "gst": 90.0,
                 "mode": "Mixed",
                 "profit_cash": -300.0,
-                "profit_non_cash": 800.0,
+                "profit_non_cash": 710.0,
                 "profit_total": 410.0,
                 "purchase_cash": 300.0,
                 "purchase_non_cash": 600.0,
@@ -4646,7 +4646,7 @@
               "discount": 150.0,
               "gst": 306.0,
               "profit_cash": -400.0,
-              "profit_non_cash": 560.0,
+              "profit_non_cash": 254.0,
               "purchase_cash": 1200.0,
               "purchase_non_cash": 2500.0,
               "sales_cash": 800.0,
@@ -4667,7 +4667,7 @@
                 "gst": 79.9992,
                 "mode": "Mixed",
                 "profit_cash": 0.0,
-                "profit_non_cash": 428.8846,
+                "profit_non_cash": 348.8854,
                 "profit_total": 348.8854,
                 "purchase_cash": 0.0,
                 "purchase_non_cash": 333.33,
@@ -4684,7 +4684,7 @@
                 "gst": 199.9998,
                 "mode": "Mixed",
                 "profit_cash": 0.0,
-                "profit_non_cash": 1066.6656,
+                "profit_non_cash": 866.6658,
                 "profit_total": 866.6658,
                 "purchase_cash": 0.0,
                 "purchase_non_cash": 1111.11,
@@ -4700,7 +4700,7 @@
               "discount": 0.0,
               "gst": 279.999,
               "profit_cash": 0.0,
-              "profit_non_cash": 1495.5502,
+              "profit_non_cash": 1215.5512,
               "purchase_cash": 0.0,
               "purchase_non_cash": 1444.44,
               "sales_cash": 0.0,
@@ -4720,7 +4720,7 @@
             "discount": 1550.0,
             "gst": 1512.999,
             "profit_cash": 1000.0,
-            "profit_non_cash": 6715.5502,
+            "profit_non_cash": 5202.5512,
             "purchase_cash": 6800.0,
             "purchase_non_cash": 12194.44,
             "sales_cash": 7800.0,
@@ -4731,7 +4731,7 @@
             "discount": 1550.0,
             "gst": 1287.999,
             "profit_cash": 1000.0,
-            "profit_non_cash": 5465.5502,
+            "profit_non_cash": 4177.5512,
             "purchase_cash": 6800.0,
             "purchase_non_cash": 10944.44,
             "sales_cash": 7800.0,
@@ -4742,7 +4742,7 @@
             "discount": 0.0,
             "gst": 225.0,
             "profit_cash": 0.0,
-            "profit_non_cash": 1250.0,
+            "profit_non_cash": 1025.0,
             "purchase_cash": 0.0,
             "purchase_non_cash": 1250.0,
             "sales_cash": 0.0,
@@ -4755,7 +4755,7 @@
             "discount": 350.0,
             "gst": 306.0,
             "profit_cash": 100.0,
-            "profit_non_cash": 230.0,
+            "profit_non_cash": -76.0,
             "purchase_cash": 1700.0,
             "purchase_non_cash": 2900.0,
             "sales_cash": 1800.0,
@@ -4766,7 +4766,7 @@
             "discount": 200.0,
             "gst": 153.0,
             "profit_cash": 200.0,
-            "profit_non_cash": 850.0,
+            "profit_non_cash": 697.0,
             "purchase_cash": 800.0,
             "purchase_non_cash": 1250.0,
             "sales_cash": 1000.0,
@@ -4777,7 +4777,7 @@
             "discount": 200.0,
             "gst": 153.0,
             "profit_cash": 200.0,
-            "profit_non_cash": 850.0,
+            "profit_non_cash": 697.0,
             "purchase_cash": 800.0,
             "purchase_non_cash": 1250.0,
             "sales_cash": 1000.0,
@@ -4788,7 +4788,7 @@
             "discount": 200.0,
             "gst": 289.9998,
             "profit_cash": 200.0,
-            "profit_non_cash": 1536.6656,
+            "profit_non_cash": 1246.6658,
             "purchase_cash": 800.0,
             "purchase_non_cash": 2111.11,
             "sales_cash": 1000.0,
@@ -4799,7 +4799,7 @@
             "discount": 1550.0,
             "gst": 1512.999,
             "profit_cash": 1000.0,
-            "profit_non_cash": 6715.5502,
+            "profit_non_cash": 5202.5512,
             "purchase_cash": 6800.0,
             "purchase_non_cash": 12194.44,
             "sales_cash": 7800.0,
@@ -4810,7 +4810,7 @@
             "discount": 200.0,
             "gst": 288.0,
             "profit_cash": -100.0,
-            "profit_non_cash": 1500.0,
+            "profit_non_cash": 1212.0,
             "purchase_cash": 1100.0,
             "purchase_non_cash": 2100.0,
             "sales_cash": 1000.0,
@@ -4821,7 +4821,7 @@
             "discount": 200.0,
             "gst": 169.9992,
             "profit_cash": 200.0,
-            "profit_non_cash": 898.8846,
+            "profit_non_cash": 728.8854,
             "purchase_cash": 800.0,
             "purchase_non_cash": 1333.33,
             "sales_cash": 1000.0,
@@ -4832,7 +4832,7 @@
             "discount": 200.0,
             "gst": 153.0,
             "profit_cash": 200.0,
-            "profit_non_cash": 850.0,
+            "profit_non_cash": 697.0,
             "purchase_cash": 800.0,
             "purchase_non_cash": 1250.0,
             "sales_cash": 1000.0,
@@ -4845,7 +4845,7 @@
           "discount": 1550.0,
           "gst": 1512.999,
           "profit_cash": 1000.0,
-          "profit_non_cash": 6715.5502,
+          "profit_non_cash": 5202.5512,
           "purchase_cash": 6800.0,
           "purchase_non_cash": 12194.44,
           "sales_cash": 7800.0,
@@ -4862,7 +4862,7 @@
             "discount": 1550.0,
             "gst": 1512.999,
             "profit_cash": 1000.0,
-            "profit_non_cash": 6715.5502,
+            "profit_non_cash": 5202.5512,
             "purchase_cash": 6800.0,
             "purchase_non_cash": 12194.44,
             "sales_cash": 7800.0,
@@ -4873,7 +4873,7 @@
             "discount": 1550.0,
             "gst": 1287.999,
             "profit_cash": 1000.0,
-            "profit_non_cash": 5465.5502,
+            "profit_non_cash": 4177.5512,
             "purchase_cash": 6800.0,
             "purchase_non_cash": 10944.44,
             "sales_cash": 7800.0,
@@ -4884,7 +4884,7 @@
             "discount": 0.0,
             "gst": 225.0,
             "profit_cash": 0.0,
-            "profit_non_cash": 1250.0,
+            "profit_non_cash": 1025.0,
             "purchase_cash": 0.0,
             "purchase_non_cash": 1250.0,
             "sales_cash": 0.0,
@@ -4897,7 +4897,7 @@
             "discount": 350.0,
             "gst": 306.0,
             "profit_cash": 100.0,
-            "profit_non_cash": 230.0,
+            "profit_non_cash": -76.0,
             "purchase_cash": 1700.0,
             "purchase_non_cash": 2900.0,
             "sales_cash": 1800.0,
@@ -4908,7 +4908,7 @@
             "discount": 200.0,
             "gst": 153.0,
             "profit_cash": 200.0,
-            "profit_non_cash": 850.0,
+            "profit_non_cash": 697.0,
             "purchase_cash": 800.0,
             "purchase_non_cash": 1250.0,
             "sales_cash": 1000.0,
@@ -4919,7 +4919,7 @@
             "discount": 200.0,
             "gst": 153.0,
             "profit_cash": 200.0,
-            "profit_non_cash": 850.0,
+            "profit_non_cash": 697.0,
             "purchase_cash": 800.0,
             "purchase_non_cash": 1250.0,
             "sales_cash": 1000.0,
@@ -4930,7 +4930,7 @@
             "discount": 200.0,
             "gst": 289.9998,
             "profit_cash": 200.0,
-            "profit_non_cash": 1536.6656,
+            "profit_non_cash": 1246.6658,
             "purchase_cash": 800.0,
             "purchase_non_cash": 2111.11,
             "sales_cash": 1000.0,
@@ -4941,7 +4941,7 @@
             "discount": 1550.0,
             "gst": 1512.999,
             "profit_cash": 1000.0,
-            "profit_non_cash": 6715.5502,
+            "profit_non_cash": 5202.5512,
             "purchase_cash": 6800.0,
             "purchase_non_cash": 12194.44,
             "sales_cash": 7800.0,
@@ -4952,7 +4952,7 @@
             "discount": 200.0,
             "gst": 288.0,
             "profit_cash": -100.0,
-            "profit_non_cash": 1500.0,
+            "profit_non_cash": 1212.0,
             "purchase_cash": 1100.0,
             "purchase_non_cash": 2100.0,
             "sales_cash": 1000.0,
@@ -4963,7 +4963,7 @@
             "discount": 200.0,
             "gst": 169.9992,
             "profit_cash": 200.0,
-            "profit_non_cash": 898.8846,
+            "profit_non_cash": 728.8854,
             "purchase_cash": 800.0,
             "purchase_non_cash": 1333.33,
             "sales_cash": 1000.0,
@@ -4974,7 +4974,7 @@
             "discount": 200.0,
             "gst": 153.0,
             "profit_cash": 200.0,
-            "profit_non_cash": 850.0,
+            "profit_non_cash": 697.0,
             "purchase_cash": 800.0,
             "purchase_non_cash": 1250.0,
             "sales_cash": 1000.0,
@@ -4987,7 +4987,7 @@
           "discount": 1550.0,
           "gst": 1512.999,
           "profit_cash": 1000.0,
-          "profit_non_cash": 6715.5502,
+          "profit_non_cash": 5202.5512,
           "purchase_cash": 6800.0,
           "purchase_non_cash": 12194.44,
           "sales_cash": 7800.0,
@@ -5004,7 +5004,7 @@
             "discount": 1400.0,
             "gst": 702.0,
             "profit_cash": 1400.0,
-            "profit_non_cash": 3410.0,
+            "profit_non_cash": 2708.0,
             "purchase_cash": 5600.0,
             "purchase_non_cash": 7000.0,
             "sales_cash": 7000.0,
@@ -5015,7 +5015,7 @@
             "discount": 1400.0,
             "gst": 702.0,
             "profit_cash": 1400.0,
-            "profit_non_cash": 3410.0,
+            "profit_non_cash": 2708.0,
             "purchase_cash": 5600.0,
             "purchase_non_cash": 7000.0,
             "sales_cash": 7000.0,
@@ -5028,7 +5028,7 @@
             "discount": 200.0,
             "gst": 90.0,
             "profit_cash": 200.0,
-            "profit_non_cash": 470.0,
+            "profit_non_cash": 380.0,
             "purchase_cash": 800.0,
             "purchase_non_cash": 1000.0,
             "sales_cash": 1000.0,
@@ -5039,7 +5039,7 @@
             "discount": 200.0,
             "gst": 90.0,
             "profit_cash": 200.0,
-            "profit_non_cash": 500.0,
+            "profit_non_cash": 410.0,
             "purchase_cash": 800.0,
             "purchase_non_cash": 1000.0,
             "sales_cash": 1000.0,
@@ -5050,7 +5050,7 @@
             "discount": 200.0,
             "gst": 90.0,
             "profit_cash": 200.0,
-            "profit_non_cash": 500.0,
+            "profit_non_cash": 410.0,
             "purchase_cash": 800.0,
             "purchase_non_cash": 1000.0,
             "sales_cash": 1000.0,
@@ -5061,7 +5061,7 @@
             "discount": 200.0,
             "gst": 90.0,
             "profit_cash": 200.0,
-            "profit_non_cash": 470.0,
+            "profit_non_cash": 380.0,
             "purchase_cash": 800.0,
             "purchase_non_cash": 1000.0,
             "sales_cash": 1000.0,
@@ -5072,7 +5072,7 @@
             "discount": 1400.0,
             "gst": 702.0,
             "profit_cash": 1400.0,
-            "profit_non_cash": 3410.0,
+            "profit_non_cash": 2708.0,
             "purchase_cash": 5600.0,
             "purchase_non_cash": 7000.0,
             "sales_cash": 7000.0,
@@ -5083,7 +5083,7 @@
             "discount": 200.0,
             "gst": 162.0,
             "profit_cash": 200.0,
-            "profit_non_cash": 500.0,
+            "profit_non_cash": 338.0,
             "purchase_cash": 800.0,
             "purchase_non_cash": 1000.0,
             "sales_cash": 1000.0,
@@ -5094,7 +5094,7 @@
             "discount": 200.0,
             "gst": 90.0,
             "profit_cash": 200.0,
-            "profit_non_cash": 470.0,
+            "profit_non_cash": 380.0,
             "purchase_cash": 800.0,
             "purchase_non_cash": 1000.0,
             "sales_cash": 1000.0,
@@ -5105,7 +5105,7 @@
             "discount": 200.0,
             "gst": 90.0,
             "profit_cash": 200.0,
-            "profit_non_cash": 500.0,
+            "profit_non_cash": 410.0,
             "purchase_cash": 800.0,
             "purchase_non_cash": 1000.0,
             "sales_cash": 1000.0,
@@ -5118,7 +5118,7 @@
           "discount": 1400.0,
           "gst": 702.0,
           "profit_cash": 1400.0,
-          "profit_non_cash": 3410.0,
+          "profit_non_cash": 2708.0,
           "purchase_cash": 5600.0,
           "purchase_non_cash": 7000.0,
           "sales_cash": 7000.0,
@@ -5135,7 +5135,7 @@
             "discount": 350.0,
             "gst": 306.0,
             "profit_cash": 100.0,
-            "profit_non_cash": 230.0,
+            "profit_non_cash": -76.0,
             "purchase_cash": 1700.0,
             "purchase_non_cash": 2900.0,
             "sales_cash": 1800.0,
@@ -5146,7 +5146,7 @@
             "discount": 350.0,
             "gst": 306.0,
             "profit_cash": 100.0,
-            "profit_non_cash": 230.0,
+            "profit_non_cash": -76.0,
             "purchase_cash": 1700.0,
             "purchase_non_cash": 2900.0,
             "sales_cash": 1800.0,
@@ -5159,7 +5159,7 @@
             "discount": 350.0,
             "gst": 306.0,
             "profit_cash": 100.0,
-            "profit_non_cash": 230.0,
+            "profit_non_cash": -76.0,
             "purchase_cash": 1700.0,
             "purchase_non_cash": 2900.0,
             "sales_cash": 1800.0,
@@ -5170,7 +5170,7 @@
             "discount": 350.0,
             "gst": 306.0,
             "profit_cash": 100.0,
-            "profit_non_cash": 230.0,
+            "profit_non_cash": -76.0,
             "purchase_cash": 1700.0,
             "purchase_non_cash": 2900.0,
             "sales_cash": 1800.0,
@@ -5183,7 +5183,7 @@
           "discount": 350.0,
           "gst": 306.0,
           "profit_cash": 100.0,
-          "profit_non_cash": 230.0,
+          "profit_non_cash": -76.0,
           "purchase_cash": 1700.0,
           "purchase_non_cash": 2900.0,
           "sales_cash": 1800.0,
@@ -5200,7 +5200,7 @@
             "discount": 200.0,
             "gst": 288.0,
             "profit_cash": -100.0,
-            "profit_non_cash": 1500.0,
+            "profit_non_cash": 1212.0,
             "purchase_cash": 1100.0,
             "purchase_non_cash": 2100.0,
             "sales_cash": 1000.0,
@@ -5211,7 +5211,7 @@
             "discount": 200.0,
             "gst": 252.0,
             "profit_cash": -100.0,
-            "profit_non_cash": 1300.0,
+            "profit_non_cash": 1048.0,
             "purchase_cash": 1100.0,
             "purchase_non_cash": 1600.0,
             "sales_cash": 1000.0,
@@ -5222,7 +5222,7 @@
             "discount": 0.0,
             "gst": 36.0,
             "profit_cash": 0.0,
-            "profit_non_cash": 200.0,
+            "profit_non_cash": 164.0,
             "purchase_cash": 0.0,
             "purchase_non_cash": 500.0,
             "sales_cash": 0.0,
@@ -5235,7 +5235,7 @@
             "discount": 200.0,
             "gst": 288.0,
             "profit_cash": -100.0,
-            "profit_non_cash": 1500.0,
+            "profit_non_cash": 1212.0,
             "purchase_cash": 1100.0,
             "purchase_non_cash": 2100.0,
             "sales_cash": 1000.0,
@@ -5246,7 +5246,7 @@
             "discount": 200.0,
             "gst": 288.0,
             "profit_cash": -100.0,
-            "profit_non_cash": 1500.0,
+            "profit_non_cash": 1212.0,
             "purchase_cash": 1100.0,
             "purchase_non_cash": 2100.0,
             "sales_cash": 1000.0,
@@ -5259,7 +5259,7 @@
           "discount": 200.0,
           "gst": 288.0,
           "profit_cash": -100.0,
-          "profit_non_cash": 1500.0,
+          "profit_non_cash": 1212.0,
           "purchase_cash": 1100.0,
           "purchase_non_cash": 2100.0,
           "sales_cash": 1000.0,
@@ -5276,7 +5276,7 @@
             "discount": 0.0,
             "gst": 189.0,
             "profit_cash": 0.0,
-            "profit_non_cash": 1050.0,
+            "profit_non_cash": 861.0,
             "purchase_cash": 0.0,
             "purchase_non_cash": 750.0,
             "sales_cash": 0.0,
@@ -5287,7 +5287,7 @@
             "discount": 0.0,
             "gst": 189.0,
             "profit_cash": 0.0,
-            "profit_non_cash": 1050.0,
+            "profit_non_cash": 861.0,
             "purchase_cash": 0.0,
             "purchase_non_cash": 750.0,
             "sales_cash": 0.0,
@@ -5300,7 +5300,7 @@
             "discount": 0.0,
             "gst": 63.0,
             "profit_cash": 0.0,
-            "profit_non_cash": 350.0,
+            "profit_non_cash": 287.0,
             "purchase_cash": 0.0,
             "purchase_non_cash": 250.0,
             "sales_cash": 0.0,
@@ -5311,7 +5311,7 @@
             "discount": 0.0,
             "gst": 63.0,
             "profit_cash": 0.0,
-            "profit_non_cash": 350.0,
+            "profit_non_cash": 287.0,
             "purchase_cash": 0.0,
             "purchase_non_cash": 250.0,
             "sales_cash": 0.0,
@@ -5322,7 +5322,7 @@
             "discount": 0.0,
             "gst": 189.0,
             "profit_cash": 0.0,
-            "profit_non_cash": 1050.0,
+            "profit_non_cash": 861.0,
             "purchase_cash": 0.0,
             "purchase_non_cash": 750.0,
             "sales_cash": 0.0,
@@ -5333,7 +5333,7 @@
             "discount": 0.0,
             "gst": 63.0,
             "profit_cash": 0.0,
-            "profit_non_cash": 350.0,
+            "profit_non_cash": 287.0,
             "purchase_cash": 0.0,
             "purchase_non_cash": 250.0,
             "sales_cash": 0.0,
@@ -5346,7 +5346,7 @@
           "discount": 0.0,
           "gst": 189.0,
           "profit_cash": 0.0,
-          "profit_non_cash": 1050.0,
+          "profit_non_cash": 861.0,
           "purchase_cash": 0.0,
           "purchase_non_cash": 750.0,
           "sales_cash": 0.0,
@@ -5363,7 +5363,7 @@
             "discount": 1550.0,
             "gst": 1323.999,
             "profit_cash": 1000.0,
-            "profit_non_cash": 5665.5502,
+            "profit_non_cash": 4341.5512,
             "purchase_cash": 6800.0,
             "purchase_non_cash": 11444.44,
             "sales_cash": 7800.0,
@@ -5374,7 +5374,7 @@
             "discount": 1550.0,
             "gst": 1287.999,
             "profit_cash": 1000.0,
-            "profit_non_cash": 5465.5502,
+            "profit_non_cash": 4177.5512,
             "purchase_cash": 6800.0,
             "purchase_non_cash": 10944.44,
             "sales_cash": 7800.0,
@@ -5385,7 +5385,7 @@
             "discount": 0.0,
             "gst": 36.0,
             "profit_cash": 0.0,
-            "profit_non_cash": 200.0,
+            "profit_non_cash": 164.0,
             "purchase_cash": 0.0,
             "purchase_non_cash": 500.0,
             "sales_cash": 0.0,
@@ -5398,7 +5398,7 @@
             "discount": 350.0,
             "gst": 306.0,
             "profit_cash": 100.0,
-            "profit_non_cash": 230.0,
+            "profit_non_cash": -76.0,
             "purchase_cash": 1700.0,
             "purchase_non_cash": 2900.0,
             "sales_cash": 1800.0,
@@ -5409,7 +5409,7 @@
             "discount": 200.0,
             "gst": 90.0,
             "profit_cash": 200.0,
-            "profit_non_cash": 500.0,
+            "profit_non_cash": 410.0,
             "purchase_cash": 800.0,
             "purchase_non_cash": 1000.0,
             "sales_cash": 1000.0,
@@ -5420,7 +5420,7 @@
             "discount": 200.0,
             "gst": 90.0,
             "profit_cash": 200.0,
-            "profit_non_cash": 500.0,
+            "profit_non_cash": 410.0,
             "purchase_cash": 800.0,
             "purchase_non_cash": 1000.0,
             "sales_cash": 1000.0,
@@ -5431,7 +5431,7 @@
             "discount": 200.0,
             "gst": 289.9998,
             "profit_cash": 200.0,
-            "profit_non_cash": 1536.6656,
+            "profit_non_cash": 1246.6658,
             "purchase_cash": 800.0,
             "purchase_non_cash": 2111.11,
             "sales_cash": 1000.0,
@@ -5442,7 +5442,7 @@
             "discount": 1550.0,
             "gst": 1323.999,
             "profit_cash": 1000.0,
-            "profit_non_cash": 5665.5502,
+            "profit_non_cash": 4341.5512,
             "purchase_cash": 6800.0,
             "purchase_non_cash": 11444.44,
             "sales_cash": 7800.0,
@@ -5453,7 +5453,7 @@
             "discount": 200.0,
             "gst": 288.0,
             "profit_cash": -100.0,
-            "profit_non_cash": 1500.0,
+            "profit_non_cash": 1212.0,
             "purchase_cash": 1100.0,
             "purchase_non_cash": 2100.0,
             "sales_cash": 1000.0,
@@ -5464,7 +5464,7 @@
             "discount": 200.0,
             "gst": 169.9992,
             "profit_cash": 200.0,
-            "profit_non_cash": 898.8846,
+            "profit_non_cash": 728.8854,
             "purchase_cash": 800.0,
             "purchase_non_cash": 1333.33,
             "sales_cash": 1000.0,
@@ -5475,7 +5475,7 @@
             "discount": 200.0,
             "gst": 90.0,
             "profit_cash": 200.0,
-            "profit_non_cash": 500.0,
+            "profit_non_cash": 410.0,
             "purchase_cash": 800.0,
             "purchase_non_cash": 1000.0,
             "sales_cash": 1000.0,
@@ -5488,159 +5488,12 @@
           "discount": 1550.0,
           "gst": 1323.999,
           "profit_cash": 1000.0,
-          "profit_non_cash": 5665.5502,
+          "profit_non_cash": 4341.5512,
           "purchase_cash": 6800.0,
           "purchase_non_cash": 11444.44,
           "sales_cash": 7800.0,
           "sales_non_cash": 17109.9902,
           "tcs": 189.9998
-        }
-      },
-      "status": 200
-    },
-    "core.employee_bookings[all]": {
-      "body": {
-        "data": []
-      },
-      "status": 200
-    },
-    "core.employee_bookings[month_bad]": {
-      "body": {
-        "data": []
-      },
-      "status": 200
-    },
-    "core.employee_bookings[month_january]": {
-      "body": {
-        "data": []
-      },
-      "status": 200
-    },
-    "core.employee_bookings[service_hotel]": {
-      "body": {
-        "data": []
-      },
-      "status": 200
-    },
-    "core.employee_bookings[service_ticket]": {
-      "body": {
-        "data": []
-      },
-      "status": 200
-    },
-    "core.employee_bookings[year_2024]": {
-      "body": {
-        "data": []
-      },
-      "status": 200
-    },
-    "core.employee_bookings[year_2025]": {
-      "body": {
-        "data": []
-      },
-      "status": 200
-    },
-    "core.employee_filtered[all]": {
-      "body": {
-        "service_summary": {},
-        "totals": {
-          "bookings": 0,
-          "profit_cash": 0.0,
-          "profit_non_cash": 0.0,
-          "purchase_cash": 0.0,
-          "purchase_non_cash": 0.0,
-          "sales_cash": 0.0,
-          "sales_non_cash": 0.0
-        }
-      },
-      "status": 200
-    },
-    "core.employee_filtered[month_bad]": {
-      "body": {
-        "service_summary": {},
-        "totals": {
-          "bookings": 0,
-          "profit_cash": 0.0,
-          "profit_non_cash": 0.0,
-          "purchase_cash": 0.0,
-          "purchase_non_cash": 0.0,
-          "sales_cash": 0.0,
-          "sales_non_cash": 0.0
-        }
-      },
-      "status": 200
-    },
-    "core.employee_filtered[month_january]": {
-      "body": {
-        "service_summary": {},
-        "totals": {
-          "bookings": 0,
-          "profit_cash": 0.0,
-          "profit_non_cash": 0.0,
-          "purchase_cash": 0.0,
-          "purchase_non_cash": 0.0,
-          "sales_cash": 0.0,
-          "sales_non_cash": 0.0
-        }
-      },
-      "status": 200
-    },
-    "core.employee_filtered[service_hotel]": {
-      "body": {
-        "service_summary": {},
-        "totals": {
-          "bookings": 0,
-          "profit_cash": 0.0,
-          "profit_non_cash": 0.0,
-          "purchase_cash": 0.0,
-          "purchase_non_cash": 0.0,
-          "sales_cash": 0.0,
-          "sales_non_cash": 0.0
-        }
-      },
-      "status": 200
-    },
-    "core.employee_filtered[service_ticket]": {
-      "body": {
-        "service_summary": {},
-        "totals": {
-          "bookings": 0,
-          "profit_cash": 0.0,
-          "profit_non_cash": 0.0,
-          "purchase_cash": 0.0,
-          "purchase_non_cash": 0.0,
-          "sales_cash": 0.0,
-          "sales_non_cash": 0.0
-        }
-      },
-      "status": 200
-    },
-    "core.employee_filtered[year_2024]": {
-      "body": {
-        "service_summary": {},
-        "totals": {
-          "bookings": 0,
-          "profit_cash": 0.0,
-          "profit_non_cash": 0.0,
-          "purchase_cash": 0.0,
-          "purchase_non_cash": 0.0,
-          "sales_cash": 0.0,
-          "sales_non_cash": 0.0
-        }
-      },
-      "status": 200
-    },
-    "core.employee_filtered[year_2025]": {
-      "body": {
-        "service_summary": {},
-        "totals": {
-          "bookings": 0,
-          "profit_cash": 0.0,
-          "profit_non_cash": 0.0,
-          "purchase_cash": 0.0,
-          "purchase_non_cash": 0.0,
-          "sales_cash": 0.0,
-          "sales_non_cash": 0.0
         }
       },
       "status": 200
@@ -6156,153 +6009,6 @@
       },
       "status": 200
     },
-    "core.staff_legacy_bookings[all]": {
-      "body": {
-        "data": []
-      },
-      "status": 200
-    },
-    "core.staff_legacy_bookings[month_bad]": {
-      "body": {
-        "data": []
-      },
-      "status": 200
-    },
-    "core.staff_legacy_bookings[month_january]": {
-      "body": {
-        "data": []
-      },
-      "status": 200
-    },
-    "core.staff_legacy_bookings[service_hotel]": {
-      "body": {
-        "data": []
-      },
-      "status": 200
-    },
-    "core.staff_legacy_bookings[service_ticket]": {
-      "body": {
-        "data": []
-      },
-      "status": 200
-    },
-    "core.staff_legacy_bookings[year_2024]": {
-      "body": {
-        "data": []
-      },
-      "status": 200
-    },
-    "core.staff_legacy_bookings[year_2025]": {
-      "body": {
-        "data": []
-      },
-      "status": 200
-    },
-    "core.staff_legacy_summary[all]": {
-      "body": {
-        "totals": {
-          "bookings": 0,
-          "discount": 0.0,
-          "profit_cash": 0.0,
-          "profit_non_cash": 0.0,
-          "purchase_cash": 0.0,
-          "purchase_non_cash": 0.0,
-          "sales_cash": 0.0,
-          "sales_non_cash": 0.0
-        }
-      },
-      "status": 200
-    },
-    "core.staff_legacy_summary[month_bad]": {
-      "body": {
-        "totals": {
-          "bookings": 0,
-          "discount": 0.0,
-          "profit_cash": 0.0,
-          "profit_non_cash": 0.0,
-          "purchase_cash": 0.0,
-          "purchase_non_cash": 0.0,
-          "sales_cash": 0.0,
-          "sales_non_cash": 0.0
-        }
-      },
-      "status": 200
-    },
-    "core.staff_legacy_summary[month_january]": {
-      "body": {
-        "totals": {
-          "bookings": 0,
-          "discount": 0.0,
-          "profit_cash": 0.0,
-          "profit_non_cash": 0.0,
-          "purchase_cash": 0.0,
-          "purchase_non_cash": 0.0,
-          "sales_cash": 0.0,
-          "sales_non_cash": 0.0
-        }
-      },
-      "status": 200
-    },
-    "core.staff_legacy_summary[service_hotel]": {
-      "body": {
-        "totals": {
-          "bookings": 0,
-          "discount": 0.0,
-          "profit_cash": 0.0,
-          "profit_non_cash": 0.0,
-          "purchase_cash": 0.0,
-          "purchase_non_cash": 0.0,
-          "sales_cash": 0.0,
-          "sales_non_cash": 0.0
-        }
-      },
-      "status": 200
-    },
-    "core.staff_legacy_summary[service_ticket]": {
-      "body": {
-        "totals": {
-          "bookings": 0,
-          "discount": 0.0,
-          "profit_cash": 0.0,
-          "profit_non_cash": 0.0,
-          "purchase_cash": 0.0,
-          "purchase_non_cash": 0.0,
-          "sales_cash": 0.0,
-          "sales_non_cash": 0.0
-        }
-      },
-      "status": 200
-    },
-    "core.staff_legacy_summary[year_2024]": {
-      "body": {
-        "totals": {
-          "bookings": 0,
-          "discount": 0.0,
-          "profit_cash": 0.0,
-          "profit_non_cash": 0.0,
-          "purchase_cash": 0.0,
-          "purchase_non_cash": 0.0,
-          "sales_cash": 0.0,
-          "sales_non_cash": 0.0
-        }
-      },
-      "status": 200
-    },
-    "core.staff_legacy_summary[year_2025]": {
-      "body": {
-        "totals": {
-          "bookings": 0,
-          "discount": 0.0,
-          "profit_cash": 0.0,
-          "profit_non_cash": 0.0,
-          "purchase_cash": 0.0,
-          "purchase_non_cash": 0.0,
-          "sales_cash": 0.0,
-          "sales_non_cash": 0.0
-        }
-      },
-      "status": 200
-    },
     "gst.data[all]": {
       "body": {
         "has_next": false,
@@ -6671,3080 +6377,6 @@
             "tax": 90.0
           }
         ]
-      },
-      "status": 200
-    },
-    "legacy.bookings[all]": {
-      "body": {
-        "data": []
-      },
-      "status": 200
-    },
-    "legacy.bookings[month_bad]": {
-      "body": {
-        "data": []
-      },
-      "status": 200
-    },
-    "legacy.bookings[month_january]": {
-      "body": {
-        "data": []
-      },
-      "status": 200
-    },
-    "legacy.bookings[service_hotel]": {
-      "body": {
-        "data": []
-      },
-      "status": 200
-    },
-    "legacy.bookings[service_ticket]": {
-      "body": {
-        "data": []
-      },
-      "status": 200
-    },
-    "legacy.bookings[year_2024]": {
-      "body": {
-        "data": []
-      },
-      "status": 200
-    },
-    "legacy.bookings[year_2025]": {
-      "body": {
-        "data": []
-      },
-      "status": 200
-    },
-    "legacy.filtered[all]": {
-      "body": {
-        "totals": {
-          "bookings": 0,
-          "discount": 0.0,
-          "profit_cash": 0.0,
-          "profit_non_cash": 0.0,
-          "purchase_cash": 0.0,
-          "purchase_non_cash": 0.0,
-          "sales_cash": 0.0,
-          "sales_non_cash": 0.0
-        }
-      },
-      "status": 200
-    },
-    "legacy.filtered[month_bad]": {
-      "body": {
-        "totals": {
-          "bookings": 0,
-          "discount": 0.0,
-          "profit_cash": 0.0,
-          "profit_non_cash": 0.0,
-          "purchase_cash": 0.0,
-          "purchase_non_cash": 0.0,
-          "sales_cash": 0.0,
-          "sales_non_cash": 0.0
-        }
-      },
-      "status": 200
-    },
-    "legacy.filtered[month_january]": {
-      "body": {
-        "totals": {
-          "bookings": 0,
-          "discount": 0.0,
-          "profit_cash": 0.0,
-          "profit_non_cash": 0.0,
-          "purchase_cash": 0.0,
-          "purchase_non_cash": 0.0,
-          "sales_cash": 0.0,
-          "sales_non_cash": 0.0
-        }
-      },
-      "status": 200
-    },
-    "legacy.filtered[service_hotel]": {
-      "body": {
-        "totals": {
-          "bookings": 0,
-          "discount": 0.0,
-          "profit_cash": 0.0,
-          "profit_non_cash": 0.0,
-          "purchase_cash": 0.0,
-          "purchase_non_cash": 0.0,
-          "sales_cash": 0.0,
-          "sales_non_cash": 0.0
-        }
-      },
-      "status": 200
-    },
-    "legacy.filtered[service_ticket]": {
-      "body": {
-        "totals": {
-          "bookings": 0,
-          "discount": 0.0,
-          "profit_cash": 0.0,
-          "profit_non_cash": 0.0,
-          "purchase_cash": 0.0,
-          "purchase_non_cash": 0.0,
-          "sales_cash": 0.0,
-          "sales_non_cash": 0.0
-        }
-      },
-      "status": 200
-    },
-    "legacy.filtered[year_2024]": {
-      "body": {
-        "totals": {
-          "bookings": 0,
-          "discount": 0.0,
-          "profit_cash": 0.0,
-          "profit_non_cash": 0.0,
-          "purchase_cash": 0.0,
-          "purchase_non_cash": 0.0,
-          "sales_cash": 0.0,
-          "sales_non_cash": 0.0
-        }
-      },
-      "status": 200
-    },
-    "legacy.filtered[year_2025]": {
-      "body": {
-        "totals": {
-          "bookings": 0,
-          "discount": 0.0,
-          "profit_cash": 0.0,
-          "profit_non_cash": 0.0,
-          "purchase_cash": 0.0,
-          "purchase_non_cash": 0.0,
-          "sales_cash": 0.0,
-          "sales_non_cash": 0.0
-        }
-      },
-      "status": 200
-    },
-    "legacy.filters[all]": {
-      "body": {
-        "clients": [],
-        "employees": [],
-        "months": [
-          "January",
-          "February",
-          "March",
-          "April",
-          "May",
-          "June",
-          "July",
-          "August",
-          "September",
-          "October",
-          "November",
-          "December"
-        ],
-        "suppliers": [
-          {
-            "id": 3,
-            "name": "Supplier Hotel"
-          },
-          {
-            "id": 8,
-            "name": "Supplier Hotel Alt"
-          },
-          {
-            "id": 4,
-            "name": "Supplier Insurance"
-          },
-          {
-            "id": 7,
-            "name": "Supplier Passport"
-          },
-          {
-            "id": 6,
-            "name": "Supplier Sightseeing"
-          },
-          {
-            "id": 1,
-            "name": "Supplier Ticket"
-          },
-          {
-            "id": 5,
-            "name": "Supplier Transfer"
-          },
-          {
-            "id": 2,
-            "name": "Supplier Visa"
-          }
-        ],
-        "years": []
-      },
-      "status": 200
-    },
-    "legacy.filters[month_bad]": {
-      "body": {
-        "clients": [],
-        "employees": [],
-        "months": [
-          "January",
-          "February",
-          "March",
-          "April",
-          "May",
-          "June",
-          "July",
-          "August",
-          "September",
-          "October",
-          "November",
-          "December"
-        ],
-        "suppliers": [
-          {
-            "id": 3,
-            "name": "Supplier Hotel"
-          },
-          {
-            "id": 8,
-            "name": "Supplier Hotel Alt"
-          },
-          {
-            "id": 4,
-            "name": "Supplier Insurance"
-          },
-          {
-            "id": 7,
-            "name": "Supplier Passport"
-          },
-          {
-            "id": 6,
-            "name": "Supplier Sightseeing"
-          },
-          {
-            "id": 1,
-            "name": "Supplier Ticket"
-          },
-          {
-            "id": 5,
-            "name": "Supplier Transfer"
-          },
-          {
-            "id": 2,
-            "name": "Supplier Visa"
-          }
-        ],
-        "years": []
-      },
-      "status": 200
-    },
-    "legacy.filters[month_january]": {
-      "body": {
-        "clients": [],
-        "employees": [],
-        "months": [
-          "January",
-          "February",
-          "March",
-          "April",
-          "May",
-          "June",
-          "July",
-          "August",
-          "September",
-          "October",
-          "November",
-          "December"
-        ],
-        "suppliers": [
-          {
-            "id": 3,
-            "name": "Supplier Hotel"
-          },
-          {
-            "id": 8,
-            "name": "Supplier Hotel Alt"
-          },
-          {
-            "id": 4,
-            "name": "Supplier Insurance"
-          },
-          {
-            "id": 7,
-            "name": "Supplier Passport"
-          },
-          {
-            "id": 6,
-            "name": "Supplier Sightseeing"
-          },
-          {
-            "id": 1,
-            "name": "Supplier Ticket"
-          },
-          {
-            "id": 5,
-            "name": "Supplier Transfer"
-          },
-          {
-            "id": 2,
-            "name": "Supplier Visa"
-          }
-        ],
-        "years": []
-      },
-      "status": 200
-    },
-    "legacy.filters[service_hotel]": {
-      "body": {
-        "clients": [],
-        "employees": [],
-        "months": [
-          "January",
-          "February",
-          "March",
-          "April",
-          "May",
-          "June",
-          "July",
-          "August",
-          "September",
-          "October",
-          "November",
-          "December"
-        ],
-        "suppliers": [
-          {
-            "id": 3,
-            "name": "Supplier Hotel"
-          },
-          {
-            "id": 8,
-            "name": "Supplier Hotel Alt"
-          },
-          {
-            "id": 4,
-            "name": "Supplier Insurance"
-          },
-          {
-            "id": 7,
-            "name": "Supplier Passport"
-          },
-          {
-            "id": 6,
-            "name": "Supplier Sightseeing"
-          },
-          {
-            "id": 1,
-            "name": "Supplier Ticket"
-          },
-          {
-            "id": 5,
-            "name": "Supplier Transfer"
-          },
-          {
-            "id": 2,
-            "name": "Supplier Visa"
-          }
-        ],
-        "years": []
-      },
-      "status": 200
-    },
-    "legacy.filters[service_ticket]": {
-      "body": {
-        "clients": [],
-        "employees": [],
-        "months": [
-          "January",
-          "February",
-          "March",
-          "April",
-          "May",
-          "June",
-          "July",
-          "August",
-          "September",
-          "October",
-          "November",
-          "December"
-        ],
-        "suppliers": [
-          {
-            "id": 3,
-            "name": "Supplier Hotel"
-          },
-          {
-            "id": 8,
-            "name": "Supplier Hotel Alt"
-          },
-          {
-            "id": 4,
-            "name": "Supplier Insurance"
-          },
-          {
-            "id": 7,
-            "name": "Supplier Passport"
-          },
-          {
-            "id": 6,
-            "name": "Supplier Sightseeing"
-          },
-          {
-            "id": 1,
-            "name": "Supplier Ticket"
-          },
-          {
-            "id": 5,
-            "name": "Supplier Transfer"
-          },
-          {
-            "id": 2,
-            "name": "Supplier Visa"
-          }
-        ],
-        "years": []
-      },
-      "status": 200
-    },
-    "legacy.filters[year_2024]": {
-      "body": {
-        "clients": [],
-        "employees": [],
-        "months": [
-          "January",
-          "February",
-          "March",
-          "April",
-          "May",
-          "June",
-          "July",
-          "August",
-          "September",
-          "October",
-          "November",
-          "December"
-        ],
-        "suppliers": [
-          {
-            "id": 3,
-            "name": "Supplier Hotel"
-          },
-          {
-            "id": 8,
-            "name": "Supplier Hotel Alt"
-          },
-          {
-            "id": 4,
-            "name": "Supplier Insurance"
-          },
-          {
-            "id": 7,
-            "name": "Supplier Passport"
-          },
-          {
-            "id": 6,
-            "name": "Supplier Sightseeing"
-          },
-          {
-            "id": 1,
-            "name": "Supplier Ticket"
-          },
-          {
-            "id": 5,
-            "name": "Supplier Transfer"
-          },
-          {
-            "id": 2,
-            "name": "Supplier Visa"
-          }
-        ],
-        "years": []
-      },
-      "status": 200
-    },
-    "legacy.filters[year_2025]": {
-      "body": {
-        "clients": [],
-        "employees": [],
-        "months": [
-          "January",
-          "February",
-          "March",
-          "April",
-          "May",
-          "June",
-          "July",
-          "August",
-          "September",
-          "October",
-          "November",
-          "December"
-        ],
-        "suppliers": [
-          {
-            "id": 3,
-            "name": "Supplier Hotel"
-          },
-          {
-            "id": 8,
-            "name": "Supplier Hotel Alt"
-          },
-          {
-            "id": 4,
-            "name": "Supplier Insurance"
-          },
-          {
-            "id": 7,
-            "name": "Supplier Passport"
-          },
-          {
-            "id": 6,
-            "name": "Supplier Sightseeing"
-          },
-          {
-            "id": 1,
-            "name": "Supplier Ticket"
-          },
-          {
-            "id": 5,
-            "name": "Supplier Transfer"
-          },
-          {
-            "id": 2,
-            "name": "Supplier Visa"
-          }
-        ],
-        "years": []
-      },
-      "status": 200
-    },
-    "reports.bookings_report[all]": {
-      "body": {
-        "data": [
-          {
-            "booking_date": "10-Jan-2025",
-            "booking_id": "B-0001",
-            "client_name": "First0 Last0",
-            "created_by": "",
-            "services": [
-              {
-                "entered_by": "",
-                "mode": "Card",
-                "profit": 500.0,
-                "purchase": 1000.0,
-                "sales": 1500.0,
-                "service": "Hotel"
-              },
-              {
-                "entered_by": "",
-                "mode": "Card",
-                "profit": 500.0,
-                "purchase": 1000.0,
-                "sales": 1500.0,
-                "service": "Insurance"
-              },
-              {
-                "entered_by": "",
-                "mode": "Card",
-                "profit": 500.0,
-                "purchase": 1000.0,
-                "sales": 1500.0,
-                "service": "Passport"
-              },
-              {
-                "entered_by": "",
-                "mode": "Card",
-                "profit": 500.0,
-                "purchase": 1000.0,
-                "sales": 1500.0,
-                "service": "Sightseeing"
-              },
-              {
-                "entered_by": "",
-                "mode": "Card",
-                "profit": 500.0,
-                "purchase": 1000.0,
-                "sales": 1500.0,
-                "service": "Ticket"
-              },
-              {
-                "entered_by": "",
-                "mode": "Card",
-                "profit": 500.0,
-                "purchase": 1000.0,
-                "sales": 1500.0,
-                "service": "Transfer"
-              },
-              {
-                "entered_by": "",
-                "mode": "Card",
-                "profit": 500.0,
-                "purchase": 1000.0,
-                "sales": 1500.0,
-                "service": "Visa"
-              }
-            ],
-            "totals": {
-              "profit_cash": 0.0,
-              "profit_non_cash": 3500.0,
-              "purchase_cash": 0.0,
-              "purchase_non_cash": 7000.0,
-              "sales_cash": 0.0,
-              "sales_non_cash": 10500.0
-            }
-          },
-          {
-            "booking_date": "20-Jan-2025",
-            "booking_id": "B-0002",
-            "client_name": "First1 Last1",
-            "created_by": "",
-            "services": [
-              {
-                "entered_by": "",
-                "mode": "Cash",
-                "profit": 400.0,
-                "purchase": 800.0,
-                "sales": 1200.0,
-                "service": "Hotel"
-              },
-              {
-                "entered_by": "",
-                "mode": "Cash",
-                "profit": 400.0,
-                "purchase": 800.0,
-                "sales": 1200.0,
-                "service": "Insurance"
-              },
-              {
-                "entered_by": "",
-                "mode": "Cash",
-                "profit": 400.0,
-                "purchase": 800.0,
-                "sales": 1200.0,
-                "service": "Passport"
-              },
-              {
-                "entered_by": "",
-                "mode": "Cash",
-                "profit": 400.0,
-                "purchase": 800.0,
-                "sales": 1200.0,
-                "service": "Sightseeing"
-              },
-              {
-                "entered_by": "",
-                "mode": "Cash",
-                "profit": 400.0,
-                "purchase": 800.0,
-                "sales": 1200.0,
-                "service": "Ticket"
-              },
-              {
-                "entered_by": "",
-                "mode": "Cash",
-                "profit": 400.0,
-                "purchase": 800.0,
-                "sales": 1200.0,
-                "service": "Transfer"
-              },
-              {
-                "entered_by": "",
-                "mode": "Cash",
-                "profit": 400.0,
-                "purchase": 800.0,
-                "sales": 1200.0,
-                "service": "Visa"
-              }
-            ],
-            "totals": {
-              "profit_cash": 2800.0,
-              "profit_non_cash": 0.0,
-              "purchase_cash": 5600.0,
-              "purchase_non_cash": 0.0,
-              "sales_cash": 8400.0,
-              "sales_non_cash": 0.0
-            }
-          },
-          {
-            "booking_date": "05-Feb-2025",
-            "booking_id": "B-0003",
-            "client_name": "First2 Last2",
-            "created_by": "",
-            "services": [
-              {
-                "entered_by": "",
-                "mode": "Bank Transfer",
-                "profit": 300.0,
-                "purchase": 700.0,
-                "sales": 1000.0,
-                "service": "Hotel"
-              },
-              {
-                "entered_by": "",
-                "mode": "Cash",
-                "profit": 350.0,
-                "purchase": 800.0,
-                "sales": 1150.0,
-                "service": "Insurance"
-              },
-              {
-                "entered_by": "",
-                "mode": "Bank Transfer",
-                "profit": 500.0,
-                "purchase": 1100.0,
-                "sales": 1600.0,
-                "service": "Passport"
-              },
-              {
-                "entered_by": "",
-                "mode": "Cash",
-                "profit": 450.0,
-                "purchase": 1000.0,
-                "sales": 1450.0,
-                "service": "Sightseeing"
-              },
-              {
-                "entered_by": "",
-                "mode": "Bank Transfer",
-                "profit": 200.0,
-                "purchase": 500.0,
-                "sales": 700.0,
-                "service": "Ticket"
-              },
-              {
-                "entered_by": "",
-                "mode": "Bank Transfer",
-                "profit": 400.0,
-                "purchase": 900.0,
-                "sales": 1300.0,
-                "service": "Transfer"
-              },
-              {
-                "entered_by": "",
-                "mode": "Cash",
-                "profit": 250.0,
-                "purchase": 600.0,
-                "sales": 850.0,
-                "service": "Visa"
-              }
-            ],
-            "totals": {
-              "profit_cash": 1050.0,
-              "profit_non_cash": 1400.0,
-              "purchase_cash": 2400.0,
-              "purchase_non_cash": 3200.0,
-              "sales_cash": 3450.0,
-              "sales_non_cash": 4600.0
-            }
-          },
-          {
-            "booking_date": "18-Feb-2025",
-            "booking_id": "B-0004",
-            "client_name": "First3 Last3",
-            "created_by": "",
-            "services": [
-              {
-                "entered_by": "",
-                "mode": "Card",
-                "profit": -2000.0,
-                "purchase": 9000.0,
-                "sales": 7000.0,
-                "service": "Hotel"
-              },
-              {
-                "entered_by": "",
-                "mode": "Card",
-                "profit": -1800.0,
-                "purchase": 5000.0,
-                "sales": 3200.0,
-                "service": "Ticket"
-              }
-            ],
-            "totals": {
-              "profit_cash": 0.0,
-              "profit_non_cash": -3800.0,
-              "purchase_cash": 0.0,
-              "purchase_non_cash": 14000.0,
-              "sales_cash": 0.0,
-              "sales_non_cash": 10200.0
-            }
-          },
-          {
-            "booking_date": "01-Mar-2025",
-            "booking_id": "B-0005",
-            "client_name": "First4 Last4",
-            "created_by": "",
-            "services": [
-              {
-                "entered_by": "",
-                "mode": "Card",
-                "profit": 0.0,
-                "purchase": 0.0,
-                "sales": 0.0,
-                "service": "Visa"
-              }
-            ],
-            "totals": {
-              "profit_cash": 0.0,
-              "profit_non_cash": 0.0,
-              "purchase_cash": 0.0,
-              "purchase_non_cash": 0.0,
-              "sales_cash": 0.0,
-              "sales_non_cash": 0.0
-            }
-          },
-          {
-            "booking_date": "08-Mar-2025",
-            "booking_id": "B-0006",
-            "client_name": "First5 Last5",
-            "created_by": "",
-            "services": [],
-            "totals": {
-              "profit_cash": 0.0,
-              "profit_non_cash": 0.0,
-              "purchase_cash": 0.0,
-              "purchase_non_cash": 0.0,
-              "sales_cash": 0.0,
-              "sales_non_cash": 0.0
-            }
-          },
-          {
-            "booking_date": "12-Mar-2025",
-            "booking_id": "B-0007",
-            "client_name": "First0 Last0",
-            "created_by": "",
-            "services": [],
-            "totals": {
-              "profit_cash": 0.0,
-              "profit_non_cash": 0.0,
-              "purchase_cash": 0.0,
-              "purchase_non_cash": 0.0,
-              "sales_cash": 0.0,
-              "sales_non_cash": 0.0
-            }
-          },
-          {
-            "booking_date": "02-Apr-2025",
-            "booking_id": "B-0008",
-            "client_name": "First1 Last1",
-            "created_by": "",
-            "services": [
-              {
-                "entered_by": "",
-                "mode": "Card",
-                "profit": 800.0,
-                "purchase": 1200.0,
-                "sales": 2000.0,
-                "service": "Hotel"
-              },
-              {
-                "entered_by": "",
-                "mode": "Cash",
-                "profit": 500.0,
-                "purchase": 900.0,
-                "sales": 1400.0,
-                "service": "Hotel"
-              },
-              {
-                "entered_by": "",
-                "mode": "Bank Transfer",
-                "profit": 400.0,
-                "purchase": 700.0,
-                "sales": 1100.0,
-                "service": "Hotel"
-              },
-              {
-                "entered_by": "",
-                "mode": "Cash",
-                "profit": 150.0,
-                "purchase": 300.0,
-                "sales": 450.0,
-                "service": "Ticket"
-              },
-              {
-                "entered_by": "",
-                "mode": "Card",
-                "profit": 350.0,
-                "purchase": 600.0,
-                "sales": 950.0,
-                "service": "Ticket"
-              }
-            ],
-            "totals": {
-              "profit_cash": 650.0,
-              "profit_non_cash": 1550.0,
-              "purchase_cash": 1200.0,
-              "purchase_non_cash": 2500.0,
-              "sales_cash": 1850.0,
-              "sales_non_cash": 4050.0
-            }
-          },
-          {
-            "booking_date": "22-Nov-2024",
-            "booking_id": "B-0009",
-            "client_name": "First2 Last2",
-            "created_by": "",
-            "services": [
-              {
-                "entered_by": "",
-                "mode": "Bank Transfer",
-                "profit": 350.0,
-                "purchase": 250.0,
-                "sales": 600.0,
-                "service": "Insurance"
-              },
-              {
-                "entered_by": "",
-                "mode": "Bank Transfer",
-                "profit": 350.0,
-                "purchase": 250.0,
-                "sales": 600.0,
-                "service": "Passport"
-              },
-              {
-                "entered_by": "",
-                "mode": "Bank Transfer",
-                "profit": 350.0,
-                "purchase": 250.0,
-                "sales": 600.0,
-                "service": "Visa"
-              }
-            ],
-            "totals": {
-              "profit_cash": 0.0,
-              "profit_non_cash": 1050.0,
-              "purchase_cash": 0.0,
-              "purchase_non_cash": 750.0,
-              "sales_cash": 0.0,
-              "sales_non_cash": 1800.0
-            }
-          },
-          {
-            "booking_date": "15-Apr-2025",
-            "booking_id": "B-0010",
-            "client_name": "First3 Last3",
-            "created_by": "",
-            "services": [
-              {
-                "entered_by": "",
-                "mode": "Card",
-                "profit": 1111.11,
-                "purchase": 1111.11,
-                "sales": 2222.22,
-                "service": "Sightseeing"
-              },
-              {
-                "entered_by": "",
-                "mode": "Card",
-                "profit": 444.44,
-                "purchase": 333.33,
-                "sales": 777.77,
-                "service": "Transfer"
-              }
-            ],
-            "totals": {
-              "profit_cash": 0.0,
-              "profit_non_cash": 1555.55,
-              "purchase_cash": 0.0,
-              "purchase_non_cash": 1444.44,
-              "sales_cash": 0.0,
-              "sales_non_cash": 2999.99
-            }
-          }
-        ]
-      },
-      "status": 200
-    },
-    "reports.bookings_report[month_bad]": {
-      "body": {
-        "data": [
-          {
-            "booking_date": "10-Jan-2025",
-            "booking_id": "B-0001",
-            "client_name": "First0 Last0",
-            "created_by": "",
-            "services": [
-              {
-                "entered_by": "",
-                "mode": "Card",
-                "profit": 500.0,
-                "purchase": 1000.0,
-                "sales": 1500.0,
-                "service": "Hotel"
-              },
-              {
-                "entered_by": "",
-                "mode": "Card",
-                "profit": 500.0,
-                "purchase": 1000.0,
-                "sales": 1500.0,
-                "service": "Insurance"
-              },
-              {
-                "entered_by": "",
-                "mode": "Card",
-                "profit": 500.0,
-                "purchase": 1000.0,
-                "sales": 1500.0,
-                "service": "Passport"
-              },
-              {
-                "entered_by": "",
-                "mode": "Card",
-                "profit": 500.0,
-                "purchase": 1000.0,
-                "sales": 1500.0,
-                "service": "Sightseeing"
-              },
-              {
-                "entered_by": "",
-                "mode": "Card",
-                "profit": 500.0,
-                "purchase": 1000.0,
-                "sales": 1500.0,
-                "service": "Ticket"
-              },
-              {
-                "entered_by": "",
-                "mode": "Card",
-                "profit": 500.0,
-                "purchase": 1000.0,
-                "sales": 1500.0,
-                "service": "Transfer"
-              },
-              {
-                "entered_by": "",
-                "mode": "Card",
-                "profit": 500.0,
-                "purchase": 1000.0,
-                "sales": 1500.0,
-                "service": "Visa"
-              }
-            ],
-            "totals": {
-              "profit_cash": 0.0,
-              "profit_non_cash": 3500.0,
-              "purchase_cash": 0.0,
-              "purchase_non_cash": 7000.0,
-              "sales_cash": 0.0,
-              "sales_non_cash": 10500.0
-            }
-          },
-          {
-            "booking_date": "20-Jan-2025",
-            "booking_id": "B-0002",
-            "client_name": "First1 Last1",
-            "created_by": "",
-            "services": [
-              {
-                "entered_by": "",
-                "mode": "Cash",
-                "profit": 400.0,
-                "purchase": 800.0,
-                "sales": 1200.0,
-                "service": "Hotel"
-              },
-              {
-                "entered_by": "",
-                "mode": "Cash",
-                "profit": 400.0,
-                "purchase": 800.0,
-                "sales": 1200.0,
-                "service": "Insurance"
-              },
-              {
-                "entered_by": "",
-                "mode": "Cash",
-                "profit": 400.0,
-                "purchase": 800.0,
-                "sales": 1200.0,
-                "service": "Passport"
-              },
-              {
-                "entered_by": "",
-                "mode": "Cash",
-                "profit": 400.0,
-                "purchase": 800.0,
-                "sales": 1200.0,
-                "service": "Sightseeing"
-              },
-              {
-                "entered_by": "",
-                "mode": "Cash",
-                "profit": 400.0,
-                "purchase": 800.0,
-                "sales": 1200.0,
-                "service": "Ticket"
-              },
-              {
-                "entered_by": "",
-                "mode": "Cash",
-                "profit": 400.0,
-                "purchase": 800.0,
-                "sales": 1200.0,
-                "service": "Transfer"
-              },
-              {
-                "entered_by": "",
-                "mode": "Cash",
-                "profit": 400.0,
-                "purchase": 800.0,
-                "sales": 1200.0,
-                "service": "Visa"
-              }
-            ],
-            "totals": {
-              "profit_cash": 2800.0,
-              "profit_non_cash": 0.0,
-              "purchase_cash": 5600.0,
-              "purchase_non_cash": 0.0,
-              "sales_cash": 8400.0,
-              "sales_non_cash": 0.0
-            }
-          },
-          {
-            "booking_date": "05-Feb-2025",
-            "booking_id": "B-0003",
-            "client_name": "First2 Last2",
-            "created_by": "",
-            "services": [
-              {
-                "entered_by": "",
-                "mode": "Bank Transfer",
-                "profit": 300.0,
-                "purchase": 700.0,
-                "sales": 1000.0,
-                "service": "Hotel"
-              },
-              {
-                "entered_by": "",
-                "mode": "Cash",
-                "profit": 350.0,
-                "purchase": 800.0,
-                "sales": 1150.0,
-                "service": "Insurance"
-              },
-              {
-                "entered_by": "",
-                "mode": "Bank Transfer",
-                "profit": 500.0,
-                "purchase": 1100.0,
-                "sales": 1600.0,
-                "service": "Passport"
-              },
-              {
-                "entered_by": "",
-                "mode": "Cash",
-                "profit": 450.0,
-                "purchase": 1000.0,
-                "sales": 1450.0,
-                "service": "Sightseeing"
-              },
-              {
-                "entered_by": "",
-                "mode": "Bank Transfer",
-                "profit": 200.0,
-                "purchase": 500.0,
-                "sales": 700.0,
-                "service": "Ticket"
-              },
-              {
-                "entered_by": "",
-                "mode": "Bank Transfer",
-                "profit": 400.0,
-                "purchase": 900.0,
-                "sales": 1300.0,
-                "service": "Transfer"
-              },
-              {
-                "entered_by": "",
-                "mode": "Cash",
-                "profit": 250.0,
-                "purchase": 600.0,
-                "sales": 850.0,
-                "service": "Visa"
-              }
-            ],
-            "totals": {
-              "profit_cash": 1050.0,
-              "profit_non_cash": 1400.0,
-              "purchase_cash": 2400.0,
-              "purchase_non_cash": 3200.0,
-              "sales_cash": 3450.0,
-              "sales_non_cash": 4600.0
-            }
-          },
-          {
-            "booking_date": "18-Feb-2025",
-            "booking_id": "B-0004",
-            "client_name": "First3 Last3",
-            "created_by": "",
-            "services": [
-              {
-                "entered_by": "",
-                "mode": "Card",
-                "profit": -2000.0,
-                "purchase": 9000.0,
-                "sales": 7000.0,
-                "service": "Hotel"
-              },
-              {
-                "entered_by": "",
-                "mode": "Card",
-                "profit": -1800.0,
-                "purchase": 5000.0,
-                "sales": 3200.0,
-                "service": "Ticket"
-              }
-            ],
-            "totals": {
-              "profit_cash": 0.0,
-              "profit_non_cash": -3800.0,
-              "purchase_cash": 0.0,
-              "purchase_non_cash": 14000.0,
-              "sales_cash": 0.0,
-              "sales_non_cash": 10200.0
-            }
-          },
-          {
-            "booking_date": "01-Mar-2025",
-            "booking_id": "B-0005",
-            "client_name": "First4 Last4",
-            "created_by": "",
-            "services": [
-              {
-                "entered_by": "",
-                "mode": "Card",
-                "profit": 0.0,
-                "purchase": 0.0,
-                "sales": 0.0,
-                "service": "Visa"
-              }
-            ],
-            "totals": {
-              "profit_cash": 0.0,
-              "profit_non_cash": 0.0,
-              "purchase_cash": 0.0,
-              "purchase_non_cash": 0.0,
-              "sales_cash": 0.0,
-              "sales_non_cash": 0.0
-            }
-          },
-          {
-            "booking_date": "08-Mar-2025",
-            "booking_id": "B-0006",
-            "client_name": "First5 Last5",
-            "created_by": "",
-            "services": [],
-            "totals": {
-              "profit_cash": 0.0,
-              "profit_non_cash": 0.0,
-              "purchase_cash": 0.0,
-              "purchase_non_cash": 0.0,
-              "sales_cash": 0.0,
-              "sales_non_cash": 0.0
-            }
-          },
-          {
-            "booking_date": "12-Mar-2025",
-            "booking_id": "B-0007",
-            "client_name": "First0 Last0",
-            "created_by": "",
-            "services": [],
-            "totals": {
-              "profit_cash": 0.0,
-              "profit_non_cash": 0.0,
-              "purchase_cash": 0.0,
-              "purchase_non_cash": 0.0,
-              "sales_cash": 0.0,
-              "sales_non_cash": 0.0
-            }
-          },
-          {
-            "booking_date": "02-Apr-2025",
-            "booking_id": "B-0008",
-            "client_name": "First1 Last1",
-            "created_by": "",
-            "services": [
-              {
-                "entered_by": "",
-                "mode": "Card",
-                "profit": 800.0,
-                "purchase": 1200.0,
-                "sales": 2000.0,
-                "service": "Hotel"
-              },
-              {
-                "entered_by": "",
-                "mode": "Cash",
-                "profit": 500.0,
-                "purchase": 900.0,
-                "sales": 1400.0,
-                "service": "Hotel"
-              },
-              {
-                "entered_by": "",
-                "mode": "Bank Transfer",
-                "profit": 400.0,
-                "purchase": 700.0,
-                "sales": 1100.0,
-                "service": "Hotel"
-              },
-              {
-                "entered_by": "",
-                "mode": "Cash",
-                "profit": 150.0,
-                "purchase": 300.0,
-                "sales": 450.0,
-                "service": "Ticket"
-              },
-              {
-                "entered_by": "",
-                "mode": "Card",
-                "profit": 350.0,
-                "purchase": 600.0,
-                "sales": 950.0,
-                "service": "Ticket"
-              }
-            ],
-            "totals": {
-              "profit_cash": 650.0,
-              "profit_non_cash": 1550.0,
-              "purchase_cash": 1200.0,
-              "purchase_non_cash": 2500.0,
-              "sales_cash": 1850.0,
-              "sales_non_cash": 4050.0
-            }
-          },
-          {
-            "booking_date": "22-Nov-2024",
-            "booking_id": "B-0009",
-            "client_name": "First2 Last2",
-            "created_by": "",
-            "services": [
-              {
-                "entered_by": "",
-                "mode": "Bank Transfer",
-                "profit": 350.0,
-                "purchase": 250.0,
-                "sales": 600.0,
-                "service": "Insurance"
-              },
-              {
-                "entered_by": "",
-                "mode": "Bank Transfer",
-                "profit": 350.0,
-                "purchase": 250.0,
-                "sales": 600.0,
-                "service": "Passport"
-              },
-              {
-                "entered_by": "",
-                "mode": "Bank Transfer",
-                "profit": 350.0,
-                "purchase": 250.0,
-                "sales": 600.0,
-                "service": "Visa"
-              }
-            ],
-            "totals": {
-              "profit_cash": 0.0,
-              "profit_non_cash": 1050.0,
-              "purchase_cash": 0.0,
-              "purchase_non_cash": 750.0,
-              "sales_cash": 0.0,
-              "sales_non_cash": 1800.0
-            }
-          },
-          {
-            "booking_date": "15-Apr-2025",
-            "booking_id": "B-0010",
-            "client_name": "First3 Last3",
-            "created_by": "",
-            "services": [
-              {
-                "entered_by": "",
-                "mode": "Card",
-                "profit": 1111.11,
-                "purchase": 1111.11,
-                "sales": 2222.22,
-                "service": "Sightseeing"
-              },
-              {
-                "entered_by": "",
-                "mode": "Card",
-                "profit": 444.44,
-                "purchase": 333.33,
-                "sales": 777.77,
-                "service": "Transfer"
-              }
-            ],
-            "totals": {
-              "profit_cash": 0.0,
-              "profit_non_cash": 1555.55,
-              "purchase_cash": 0.0,
-              "purchase_non_cash": 1444.44,
-              "sales_cash": 0.0,
-              "sales_non_cash": 2999.99
-            }
-          }
-        ]
-      },
-      "status": 200
-    },
-    "reports.bookings_report[month_january]": {
-      "body": {
-        "data": [
-          {
-            "booking_date": "10-Jan-2025",
-            "booking_id": "B-0001",
-            "client_name": "First0 Last0",
-            "created_by": "",
-            "services": [
-              {
-                "entered_by": "",
-                "mode": "Card",
-                "profit": 500.0,
-                "purchase": 1000.0,
-                "sales": 1500.0,
-                "service": "Hotel"
-              },
-              {
-                "entered_by": "",
-                "mode": "Card",
-                "profit": 500.0,
-                "purchase": 1000.0,
-                "sales": 1500.0,
-                "service": "Insurance"
-              },
-              {
-                "entered_by": "",
-                "mode": "Card",
-                "profit": 500.0,
-                "purchase": 1000.0,
-                "sales": 1500.0,
-                "service": "Passport"
-              },
-              {
-                "entered_by": "",
-                "mode": "Card",
-                "profit": 500.0,
-                "purchase": 1000.0,
-                "sales": 1500.0,
-                "service": "Sightseeing"
-              },
-              {
-                "entered_by": "",
-                "mode": "Card",
-                "profit": 500.0,
-                "purchase": 1000.0,
-                "sales": 1500.0,
-                "service": "Ticket"
-              },
-              {
-                "entered_by": "",
-                "mode": "Card",
-                "profit": 500.0,
-                "purchase": 1000.0,
-                "sales": 1500.0,
-                "service": "Transfer"
-              },
-              {
-                "entered_by": "",
-                "mode": "Card",
-                "profit": 500.0,
-                "purchase": 1000.0,
-                "sales": 1500.0,
-                "service": "Visa"
-              }
-            ],
-            "totals": {
-              "profit_cash": 0.0,
-              "profit_non_cash": 3500.0,
-              "purchase_cash": 0.0,
-              "purchase_non_cash": 7000.0,
-              "sales_cash": 0.0,
-              "sales_non_cash": 10500.0
-            }
-          },
-          {
-            "booking_date": "20-Jan-2025",
-            "booking_id": "B-0002",
-            "client_name": "First1 Last1",
-            "created_by": "",
-            "services": [
-              {
-                "entered_by": "",
-                "mode": "Cash",
-                "profit": 400.0,
-                "purchase": 800.0,
-                "sales": 1200.0,
-                "service": "Hotel"
-              },
-              {
-                "entered_by": "",
-                "mode": "Cash",
-                "profit": 400.0,
-                "purchase": 800.0,
-                "sales": 1200.0,
-                "service": "Insurance"
-              },
-              {
-                "entered_by": "",
-                "mode": "Cash",
-                "profit": 400.0,
-                "purchase": 800.0,
-                "sales": 1200.0,
-                "service": "Passport"
-              },
-              {
-                "entered_by": "",
-                "mode": "Cash",
-                "profit": 400.0,
-                "purchase": 800.0,
-                "sales": 1200.0,
-                "service": "Sightseeing"
-              },
-              {
-                "entered_by": "",
-                "mode": "Cash",
-                "profit": 400.0,
-                "purchase": 800.0,
-                "sales": 1200.0,
-                "service": "Ticket"
-              },
-              {
-                "entered_by": "",
-                "mode": "Cash",
-                "profit": 400.0,
-                "purchase": 800.0,
-                "sales": 1200.0,
-                "service": "Transfer"
-              },
-              {
-                "entered_by": "",
-                "mode": "Cash",
-                "profit": 400.0,
-                "purchase": 800.0,
-                "sales": 1200.0,
-                "service": "Visa"
-              }
-            ],
-            "totals": {
-              "profit_cash": 2800.0,
-              "profit_non_cash": 0.0,
-              "purchase_cash": 5600.0,
-              "purchase_non_cash": 0.0,
-              "sales_cash": 8400.0,
-              "sales_non_cash": 0.0
-            }
-          }
-        ]
-      },
-      "status": 200
-    },
-    "reports.bookings_report[service_hotel]": {
-      "body": {
-        "data": [
-          {
-            "booking_date": "10-Jan-2025",
-            "booking_id": "B-0001",
-            "client_name": "First0 Last0",
-            "created_by": "",
-            "services": [
-              {
-                "entered_by": "",
-                "mode": "Card",
-                "profit": 500.0,
-                "purchase": 1000.0,
-                "sales": 1500.0,
-                "service": "Hotel"
-              }
-            ],
-            "totals": {
-              "profit_cash": 0.0,
-              "profit_non_cash": 500.0,
-              "purchase_cash": 0.0,
-              "purchase_non_cash": 1000.0,
-              "sales_cash": 0.0,
-              "sales_non_cash": 1500.0
-            }
-          },
-          {
-            "booking_date": "20-Jan-2025",
-            "booking_id": "B-0002",
-            "client_name": "First1 Last1",
-            "created_by": "",
-            "services": [
-              {
-                "entered_by": "",
-                "mode": "Cash",
-                "profit": 400.0,
-                "purchase": 800.0,
-                "sales": 1200.0,
-                "service": "Hotel"
-              }
-            ],
-            "totals": {
-              "profit_cash": 400.0,
-              "profit_non_cash": 0.0,
-              "purchase_cash": 800.0,
-              "purchase_non_cash": 0.0,
-              "sales_cash": 1200.0,
-              "sales_non_cash": 0.0
-            }
-          },
-          {
-            "booking_date": "05-Feb-2025",
-            "booking_id": "B-0003",
-            "client_name": "First2 Last2",
-            "created_by": "",
-            "services": [
-              {
-                "entered_by": "",
-                "mode": "Bank Transfer",
-                "profit": 300.0,
-                "purchase": 700.0,
-                "sales": 1000.0,
-                "service": "Hotel"
-              }
-            ],
-            "totals": {
-              "profit_cash": 0.0,
-              "profit_non_cash": 300.0,
-              "purchase_cash": 0.0,
-              "purchase_non_cash": 700.0,
-              "sales_cash": 0.0,
-              "sales_non_cash": 1000.0
-            }
-          },
-          {
-            "booking_date": "18-Feb-2025",
-            "booking_id": "B-0004",
-            "client_name": "First3 Last3",
-            "created_by": "",
-            "services": [
-              {
-                "entered_by": "",
-                "mode": "Card",
-                "profit": -2000.0,
-                "purchase": 9000.0,
-                "sales": 7000.0,
-                "service": "Hotel"
-              }
-            ],
-            "totals": {
-              "profit_cash": 0.0,
-              "profit_non_cash": -2000.0,
-              "purchase_cash": 0.0,
-              "purchase_non_cash": 9000.0,
-              "sales_cash": 0.0,
-              "sales_non_cash": 7000.0
-            }
-          },
-          {
-            "booking_date": "01-Mar-2025",
-            "booking_id": "B-0005",
-            "client_name": "First4 Last4",
-            "created_by": "",
-            "services": [],
-            "totals": {
-              "profit_cash": 0.0,
-              "profit_non_cash": 0.0,
-              "purchase_cash": 0.0,
-              "purchase_non_cash": 0.0,
-              "sales_cash": 0.0,
-              "sales_non_cash": 0.0
-            }
-          },
-          {
-            "booking_date": "08-Mar-2025",
-            "booking_id": "B-0006",
-            "client_name": "First5 Last5",
-            "created_by": "",
-            "services": [],
-            "totals": {
-              "profit_cash": 0.0,
-              "profit_non_cash": 0.0,
-              "purchase_cash": 0.0,
-              "purchase_non_cash": 0.0,
-              "sales_cash": 0.0,
-              "sales_non_cash": 0.0
-            }
-          },
-          {
-            "booking_date": "12-Mar-2025",
-            "booking_id": "B-0007",
-            "client_name": "First0 Last0",
-            "created_by": "",
-            "services": [],
-            "totals": {
-              "profit_cash": 0.0,
-              "profit_non_cash": 0.0,
-              "purchase_cash": 0.0,
-              "purchase_non_cash": 0.0,
-              "sales_cash": 0.0,
-              "sales_non_cash": 0.0
-            }
-          },
-          {
-            "booking_date": "02-Apr-2025",
-            "booking_id": "B-0008",
-            "client_name": "First1 Last1",
-            "created_by": "",
-            "services": [
-              {
-                "entered_by": "",
-                "mode": "Card",
-                "profit": 800.0,
-                "purchase": 1200.0,
-                "sales": 2000.0,
-                "service": "Hotel"
-              },
-              {
-                "entered_by": "",
-                "mode": "Cash",
-                "profit": 500.0,
-                "purchase": 900.0,
-                "sales": 1400.0,
-                "service": "Hotel"
-              },
-              {
-                "entered_by": "",
-                "mode": "Bank Transfer",
-                "profit": 400.0,
-                "purchase": 700.0,
-                "sales": 1100.0,
-                "service": "Hotel"
-              }
-            ],
-            "totals": {
-              "profit_cash": 500.0,
-              "profit_non_cash": 1200.0,
-              "purchase_cash": 900.0,
-              "purchase_non_cash": 1900.0,
-              "sales_cash": 1400.0,
-              "sales_non_cash": 3100.0
-            }
-          },
-          {
-            "booking_date": "22-Nov-2024",
-            "booking_id": "B-0009",
-            "client_name": "First2 Last2",
-            "created_by": "",
-            "services": [],
-            "totals": {
-              "profit_cash": 0.0,
-              "profit_non_cash": 0.0,
-              "purchase_cash": 0.0,
-              "purchase_non_cash": 0.0,
-              "sales_cash": 0.0,
-              "sales_non_cash": 0.0
-            }
-          },
-          {
-            "booking_date": "15-Apr-2025",
-            "booking_id": "B-0010",
-            "client_name": "First3 Last3",
-            "created_by": "",
-            "services": [],
-            "totals": {
-              "profit_cash": 0.0,
-              "profit_non_cash": 0.0,
-              "purchase_cash": 0.0,
-              "purchase_non_cash": 0.0,
-              "sales_cash": 0.0,
-              "sales_non_cash": 0.0
-            }
-          }
-        ]
-      },
-      "status": 200
-    },
-    "reports.bookings_report[service_ticket]": {
-      "body": {
-        "data": [
-          {
-            "booking_date": "10-Jan-2025",
-            "booking_id": "B-0001",
-            "client_name": "First0 Last0",
-            "created_by": "",
-            "services": [
-              {
-                "entered_by": "",
-                "mode": "Card",
-                "profit": 500.0,
-                "purchase": 1000.0,
-                "sales": 1500.0,
-                "service": "Ticket"
-              }
-            ],
-            "totals": {
-              "profit_cash": 0.0,
-              "profit_non_cash": 500.0,
-              "purchase_cash": 0.0,
-              "purchase_non_cash": 1000.0,
-              "sales_cash": 0.0,
-              "sales_non_cash": 1500.0
-            }
-          },
-          {
-            "booking_date": "20-Jan-2025",
-            "booking_id": "B-0002",
-            "client_name": "First1 Last1",
-            "created_by": "",
-            "services": [
-              {
-                "entered_by": "",
-                "mode": "Cash",
-                "profit": 400.0,
-                "purchase": 800.0,
-                "sales": 1200.0,
-                "service": "Ticket"
-              }
-            ],
-            "totals": {
-              "profit_cash": 400.0,
-              "profit_non_cash": 0.0,
-              "purchase_cash": 800.0,
-              "purchase_non_cash": 0.0,
-              "sales_cash": 1200.0,
-              "sales_non_cash": 0.0
-            }
-          },
-          {
-            "booking_date": "05-Feb-2025",
-            "booking_id": "B-0003",
-            "client_name": "First2 Last2",
-            "created_by": "",
-            "services": [
-              {
-                "entered_by": "",
-                "mode": "Bank Transfer",
-                "profit": 200.0,
-                "purchase": 500.0,
-                "sales": 700.0,
-                "service": "Ticket"
-              }
-            ],
-            "totals": {
-              "profit_cash": 0.0,
-              "profit_non_cash": 200.0,
-              "purchase_cash": 0.0,
-              "purchase_non_cash": 500.0,
-              "sales_cash": 0.0,
-              "sales_non_cash": 700.0
-            }
-          },
-          {
-            "booking_date": "18-Feb-2025",
-            "booking_id": "B-0004",
-            "client_name": "First3 Last3",
-            "created_by": "",
-            "services": [
-              {
-                "entered_by": "",
-                "mode": "Card",
-                "profit": -1800.0,
-                "purchase": 5000.0,
-                "sales": 3200.0,
-                "service": "Ticket"
-              }
-            ],
-            "totals": {
-              "profit_cash": 0.0,
-              "profit_non_cash": -1800.0,
-              "purchase_cash": 0.0,
-              "purchase_non_cash": 5000.0,
-              "sales_cash": 0.0,
-              "sales_non_cash": 3200.0
-            }
-          },
-          {
-            "booking_date": "01-Mar-2025",
-            "booking_id": "B-0005",
-            "client_name": "First4 Last4",
-            "created_by": "",
-            "services": [],
-            "totals": {
-              "profit_cash": 0.0,
-              "profit_non_cash": 0.0,
-              "purchase_cash": 0.0,
-              "purchase_non_cash": 0.0,
-              "sales_cash": 0.0,
-              "sales_non_cash": 0.0
-            }
-          },
-          {
-            "booking_date": "08-Mar-2025",
-            "booking_id": "B-0006",
-            "client_name": "First5 Last5",
-            "created_by": "",
-            "services": [],
-            "totals": {
-              "profit_cash": 0.0,
-              "profit_non_cash": 0.0,
-              "purchase_cash": 0.0,
-              "purchase_non_cash": 0.0,
-              "sales_cash": 0.0,
-              "sales_non_cash": 0.0
-            }
-          },
-          {
-            "booking_date": "12-Mar-2025",
-            "booking_id": "B-0007",
-            "client_name": "First0 Last0",
-            "created_by": "",
-            "services": [],
-            "totals": {
-              "profit_cash": 0.0,
-              "profit_non_cash": 0.0,
-              "purchase_cash": 0.0,
-              "purchase_non_cash": 0.0,
-              "sales_cash": 0.0,
-              "sales_non_cash": 0.0
-            }
-          },
-          {
-            "booking_date": "02-Apr-2025",
-            "booking_id": "B-0008",
-            "client_name": "First1 Last1",
-            "created_by": "",
-            "services": [
-              {
-                "entered_by": "",
-                "mode": "Cash",
-                "profit": 150.0,
-                "purchase": 300.0,
-                "sales": 450.0,
-                "service": "Ticket"
-              },
-              {
-                "entered_by": "",
-                "mode": "Card",
-                "profit": 350.0,
-                "purchase": 600.0,
-                "sales": 950.0,
-                "service": "Ticket"
-              }
-            ],
-            "totals": {
-              "profit_cash": 150.0,
-              "profit_non_cash": 350.0,
-              "purchase_cash": 300.0,
-              "purchase_non_cash": 600.0,
-              "sales_cash": 450.0,
-              "sales_non_cash": 950.0
-            }
-          },
-          {
-            "booking_date": "22-Nov-2024",
-            "booking_id": "B-0009",
-            "client_name": "First2 Last2",
-            "created_by": "",
-            "services": [],
-            "totals": {
-              "profit_cash": 0.0,
-              "profit_non_cash": 0.0,
-              "purchase_cash": 0.0,
-              "purchase_non_cash": 0.0,
-              "sales_cash": 0.0,
-              "sales_non_cash": 0.0
-            }
-          },
-          {
-            "booking_date": "15-Apr-2025",
-            "booking_id": "B-0010",
-            "client_name": "First3 Last3",
-            "created_by": "",
-            "services": [],
-            "totals": {
-              "profit_cash": 0.0,
-              "profit_non_cash": 0.0,
-              "purchase_cash": 0.0,
-              "purchase_non_cash": 0.0,
-              "sales_cash": 0.0,
-              "sales_non_cash": 0.0
-            }
-          }
-        ]
-      },
-      "status": 200
-    },
-    "reports.bookings_report[year_2024]": {
-      "body": {
-        "data": [
-          {
-            "booking_date": "22-Nov-2024",
-            "booking_id": "B-0009",
-            "client_name": "First2 Last2",
-            "created_by": "",
-            "services": [
-              {
-                "entered_by": "",
-                "mode": "Bank Transfer",
-                "profit": 350.0,
-                "purchase": 250.0,
-                "sales": 600.0,
-                "service": "Insurance"
-              },
-              {
-                "entered_by": "",
-                "mode": "Bank Transfer",
-                "profit": 350.0,
-                "purchase": 250.0,
-                "sales": 600.0,
-                "service": "Passport"
-              },
-              {
-                "entered_by": "",
-                "mode": "Bank Transfer",
-                "profit": 350.0,
-                "purchase": 250.0,
-                "sales": 600.0,
-                "service": "Visa"
-              }
-            ],
-            "totals": {
-              "profit_cash": 0.0,
-              "profit_non_cash": 1050.0,
-              "purchase_cash": 0.0,
-              "purchase_non_cash": 750.0,
-              "sales_cash": 0.0,
-              "sales_non_cash": 1800.0
-            }
-          }
-        ]
-      },
-      "status": 200
-    },
-    "reports.bookings_report[year_2025]": {
-      "body": {
-        "data": [
-          {
-            "booking_date": "10-Jan-2025",
-            "booking_id": "B-0001",
-            "client_name": "First0 Last0",
-            "created_by": "",
-            "services": [
-              {
-                "entered_by": "",
-                "mode": "Card",
-                "profit": 500.0,
-                "purchase": 1000.0,
-                "sales": 1500.0,
-                "service": "Hotel"
-              },
-              {
-                "entered_by": "",
-                "mode": "Card",
-                "profit": 500.0,
-                "purchase": 1000.0,
-                "sales": 1500.0,
-                "service": "Insurance"
-              },
-              {
-                "entered_by": "",
-                "mode": "Card",
-                "profit": 500.0,
-                "purchase": 1000.0,
-                "sales": 1500.0,
-                "service": "Passport"
-              },
-              {
-                "entered_by": "",
-                "mode": "Card",
-                "profit": 500.0,
-                "purchase": 1000.0,
-                "sales": 1500.0,
-                "service": "Sightseeing"
-              },
-              {
-                "entered_by": "",
-                "mode": "Card",
-                "profit": 500.0,
-                "purchase": 1000.0,
-                "sales": 1500.0,
-                "service": "Ticket"
-              },
-              {
-                "entered_by": "",
-                "mode": "Card",
-                "profit": 500.0,
-                "purchase": 1000.0,
-                "sales": 1500.0,
-                "service": "Transfer"
-              },
-              {
-                "entered_by": "",
-                "mode": "Card",
-                "profit": 500.0,
-                "purchase": 1000.0,
-                "sales": 1500.0,
-                "service": "Visa"
-              }
-            ],
-            "totals": {
-              "profit_cash": 0.0,
-              "profit_non_cash": 3500.0,
-              "purchase_cash": 0.0,
-              "purchase_non_cash": 7000.0,
-              "sales_cash": 0.0,
-              "sales_non_cash": 10500.0
-            }
-          },
-          {
-            "booking_date": "20-Jan-2025",
-            "booking_id": "B-0002",
-            "client_name": "First1 Last1",
-            "created_by": "",
-            "services": [
-              {
-                "entered_by": "",
-                "mode": "Cash",
-                "profit": 400.0,
-                "purchase": 800.0,
-                "sales": 1200.0,
-                "service": "Hotel"
-              },
-              {
-                "entered_by": "",
-                "mode": "Cash",
-                "profit": 400.0,
-                "purchase": 800.0,
-                "sales": 1200.0,
-                "service": "Insurance"
-              },
-              {
-                "entered_by": "",
-                "mode": "Cash",
-                "profit": 400.0,
-                "purchase": 800.0,
-                "sales": 1200.0,
-                "service": "Passport"
-              },
-              {
-                "entered_by": "",
-                "mode": "Cash",
-                "profit": 400.0,
-                "purchase": 800.0,
-                "sales": 1200.0,
-                "service": "Sightseeing"
-              },
-              {
-                "entered_by": "",
-                "mode": "Cash",
-                "profit": 400.0,
-                "purchase": 800.0,
-                "sales": 1200.0,
-                "service": "Ticket"
-              },
-              {
-                "entered_by": "",
-                "mode": "Cash",
-                "profit": 400.0,
-                "purchase": 800.0,
-                "sales": 1200.0,
-                "service": "Transfer"
-              },
-              {
-                "entered_by": "",
-                "mode": "Cash",
-                "profit": 400.0,
-                "purchase": 800.0,
-                "sales": 1200.0,
-                "service": "Visa"
-              }
-            ],
-            "totals": {
-              "profit_cash": 2800.0,
-              "profit_non_cash": 0.0,
-              "purchase_cash": 5600.0,
-              "purchase_non_cash": 0.0,
-              "sales_cash": 8400.0,
-              "sales_non_cash": 0.0
-            }
-          },
-          {
-            "booking_date": "05-Feb-2025",
-            "booking_id": "B-0003",
-            "client_name": "First2 Last2",
-            "created_by": "",
-            "services": [
-              {
-                "entered_by": "",
-                "mode": "Bank Transfer",
-                "profit": 300.0,
-                "purchase": 700.0,
-                "sales": 1000.0,
-                "service": "Hotel"
-              },
-              {
-                "entered_by": "",
-                "mode": "Cash",
-                "profit": 350.0,
-                "purchase": 800.0,
-                "sales": 1150.0,
-                "service": "Insurance"
-              },
-              {
-                "entered_by": "",
-                "mode": "Bank Transfer",
-                "profit": 500.0,
-                "purchase": 1100.0,
-                "sales": 1600.0,
-                "service": "Passport"
-              },
-              {
-                "entered_by": "",
-                "mode": "Cash",
-                "profit": 450.0,
-                "purchase": 1000.0,
-                "sales": 1450.0,
-                "service": "Sightseeing"
-              },
-              {
-                "entered_by": "",
-                "mode": "Bank Transfer",
-                "profit": 200.0,
-                "purchase": 500.0,
-                "sales": 700.0,
-                "service": "Ticket"
-              },
-              {
-                "entered_by": "",
-                "mode": "Bank Transfer",
-                "profit": 400.0,
-                "purchase": 900.0,
-                "sales": 1300.0,
-                "service": "Transfer"
-              },
-              {
-                "entered_by": "",
-                "mode": "Cash",
-                "profit": 250.0,
-                "purchase": 600.0,
-                "sales": 850.0,
-                "service": "Visa"
-              }
-            ],
-            "totals": {
-              "profit_cash": 1050.0,
-              "profit_non_cash": 1400.0,
-              "purchase_cash": 2400.0,
-              "purchase_non_cash": 3200.0,
-              "sales_cash": 3450.0,
-              "sales_non_cash": 4600.0
-            }
-          },
-          {
-            "booking_date": "18-Feb-2025",
-            "booking_id": "B-0004",
-            "client_name": "First3 Last3",
-            "created_by": "",
-            "services": [
-              {
-                "entered_by": "",
-                "mode": "Card",
-                "profit": -2000.0,
-                "purchase": 9000.0,
-                "sales": 7000.0,
-                "service": "Hotel"
-              },
-              {
-                "entered_by": "",
-                "mode": "Card",
-                "profit": -1800.0,
-                "purchase": 5000.0,
-                "sales": 3200.0,
-                "service": "Ticket"
-              }
-            ],
-            "totals": {
-              "profit_cash": 0.0,
-              "profit_non_cash": -3800.0,
-              "purchase_cash": 0.0,
-              "purchase_non_cash": 14000.0,
-              "sales_cash": 0.0,
-              "sales_non_cash": 10200.0
-            }
-          },
-          {
-            "booking_date": "01-Mar-2025",
-            "booking_id": "B-0005",
-            "client_name": "First4 Last4",
-            "created_by": "",
-            "services": [
-              {
-                "entered_by": "",
-                "mode": "Card",
-                "profit": 0.0,
-                "purchase": 0.0,
-                "sales": 0.0,
-                "service": "Visa"
-              }
-            ],
-            "totals": {
-              "profit_cash": 0.0,
-              "profit_non_cash": 0.0,
-              "purchase_cash": 0.0,
-              "purchase_non_cash": 0.0,
-              "sales_cash": 0.0,
-              "sales_non_cash": 0.0
-            }
-          },
-          {
-            "booking_date": "08-Mar-2025",
-            "booking_id": "B-0006",
-            "client_name": "First5 Last5",
-            "created_by": "",
-            "services": [],
-            "totals": {
-              "profit_cash": 0.0,
-              "profit_non_cash": 0.0,
-              "purchase_cash": 0.0,
-              "purchase_non_cash": 0.0,
-              "sales_cash": 0.0,
-              "sales_non_cash": 0.0
-            }
-          },
-          {
-            "booking_date": "12-Mar-2025",
-            "booking_id": "B-0007",
-            "client_name": "First0 Last0",
-            "created_by": "",
-            "services": [],
-            "totals": {
-              "profit_cash": 0.0,
-              "profit_non_cash": 0.0,
-              "purchase_cash": 0.0,
-              "purchase_non_cash": 0.0,
-              "sales_cash": 0.0,
-              "sales_non_cash": 0.0
-            }
-          },
-          {
-            "booking_date": "02-Apr-2025",
-            "booking_id": "B-0008",
-            "client_name": "First1 Last1",
-            "created_by": "",
-            "services": [
-              {
-                "entered_by": "",
-                "mode": "Card",
-                "profit": 800.0,
-                "purchase": 1200.0,
-                "sales": 2000.0,
-                "service": "Hotel"
-              },
-              {
-                "entered_by": "",
-                "mode": "Cash",
-                "profit": 500.0,
-                "purchase": 900.0,
-                "sales": 1400.0,
-                "service": "Hotel"
-              },
-              {
-                "entered_by": "",
-                "mode": "Bank Transfer",
-                "profit": 400.0,
-                "purchase": 700.0,
-                "sales": 1100.0,
-                "service": "Hotel"
-              },
-              {
-                "entered_by": "",
-                "mode": "Cash",
-                "profit": 150.0,
-                "purchase": 300.0,
-                "sales": 450.0,
-                "service": "Ticket"
-              },
-              {
-                "entered_by": "",
-                "mode": "Card",
-                "profit": 350.0,
-                "purchase": 600.0,
-                "sales": 950.0,
-                "service": "Ticket"
-              }
-            ],
-            "totals": {
-              "profit_cash": 650.0,
-              "profit_non_cash": 1550.0,
-              "purchase_cash": 1200.0,
-              "purchase_non_cash": 2500.0,
-              "sales_cash": 1850.0,
-              "sales_non_cash": 4050.0
-            }
-          },
-          {
-            "booking_date": "15-Apr-2025",
-            "booking_id": "B-0010",
-            "client_name": "First3 Last3",
-            "created_by": "",
-            "services": [
-              {
-                "entered_by": "",
-                "mode": "Card",
-                "profit": 1111.11,
-                "purchase": 1111.11,
-                "sales": 2222.22,
-                "service": "Sightseeing"
-              },
-              {
-                "entered_by": "",
-                "mode": "Card",
-                "profit": 444.44,
-                "purchase": 333.33,
-                "sales": 777.77,
-                "service": "Transfer"
-              }
-            ],
-            "totals": {
-              "profit_cash": 0.0,
-              "profit_non_cash": 1555.55,
-              "purchase_cash": 0.0,
-              "purchase_non_cash": 1444.44,
-              "sales_cash": 0.0,
-              "sales_non_cash": 2999.99
-            }
-          }
-        ]
-      },
-      "status": 200
-    },
-    "reports.filtered_report[all]": {
-      "body": {
-        "employee_summary": {
-          "TOTAL": {
-            "profit_cash": 4500.0,
-            "profit_non_cash": 5255.55,
-            "purchase_cash": 9200.0,
-            "purchase_non_cash": 28894.44,
-            "sales_cash": 13700.0,
-            "sales_non_cash": 34149.99
-          },
-          "staff1": {
-            "profit_cash": 3450.0,
-            "profit_non_cash": 6605.55,
-            "purchase_cash": 6800.0,
-            "purchase_non_cash": 10944.44,
-            "sales_cash": 10250.0,
-            "sales_non_cash": 17549.99
-          },
-          "staff2": {
-            "profit_cash": 1050.0,
-            "profit_non_cash": -1350.0,
-            "purchase_cash": 2400.0,
-            "purchase_non_cash": 17950.0,
-            "sales_cash": 3450.0,
-            "sales_non_cash": 16600.0
-          }
-        },
-        "service_summary": {
-          "Hotel": {
-            "bookings": 5,
-            "profit_cash": 900.0,
-            "profit_non_cash": 0.0,
-            "purchase_cash": 1700.0,
-            "purchase_non_cash": 12600.0,
-            "sales_cash": 2600.0,
-            "sales_non_cash": 12600.0
-          },
-          "Insurance": {
-            "bookings": 4,
-            "profit_cash": 750.0,
-            "profit_non_cash": 850.0,
-            "purchase_cash": 1600.0,
-            "purchase_non_cash": 1250.0,
-            "sales_cash": 2350.0,
-            "sales_non_cash": 2100.0
-          },
-          "Passport": {
-            "bookings": 4,
-            "profit_cash": 400.0,
-            "profit_non_cash": 1350.0,
-            "purchase_cash": 800.0,
-            "purchase_non_cash": 2350.0,
-            "sales_cash": 1200.0,
-            "sales_non_cash": 3700.0
-          },
-          "Sightseeing": {
-            "bookings": 4,
-            "profit_cash": 850.0,
-            "profit_non_cash": 1611.11,
-            "purchase_cash": 1800.0,
-            "purchase_non_cash": 2111.11,
-            "sales_cash": 2650.0,
-            "sales_non_cash": 3722.22
-          },
-          "TOTAL": {
-            "bookings": 31,
-            "profit_cash": 4500.0,
-            "profit_non_cash": 5255.55,
-            "purchase_cash": 9200.0,
-            "purchase_non_cash": 28894.44,
-            "sales_cash": 13700.0,
-            "sales_non_cash": 34149.99
-          },
-          "Ticket": {
-            "bookings": 5,
-            "profit_cash": 550.0,
-            "profit_non_cash": -750.0,
-            "purchase_cash": 1100.0,
-            "purchase_non_cash": 7100.0,
-            "sales_cash": 1650.0,
-            "sales_non_cash": 6350.0
-          },
-          "Transfer": {
-            "bookings": 4,
-            "profit_cash": 400.0,
-            "profit_non_cash": 1344.44,
-            "purchase_cash": 800.0,
-            "purchase_non_cash": 2233.33,
-            "sales_cash": 1200.0,
-            "sales_non_cash": 3577.77
-          },
-          "Visa": {
-            "bookings": 5,
-            "profit_cash": 650.0,
-            "profit_non_cash": 850.0,
-            "purchase_cash": 1400.0,
-            "purchase_non_cash": 1250.0,
-            "sales_cash": 2050.0,
-            "sales_non_cash": 2100.0
-          }
-        },
-        "totals": {
-          "bookings": 10,
-          "profit_cash": 4500.0,
-          "profit_non_cash": 5255.55,
-          "purchase_cash": 9200.0,
-          "purchase_non_cash": 28894.44,
-          "sales_cash": 13700.0,
-          "sales_non_cash": 34149.99
-        }
-      },
-      "status": 200
-    },
-    "reports.filtered_report[month_bad]": {
-      "body": {
-        "employee_summary": {
-          "TOTAL": {
-            "profit_cash": 4500.0,
-            "profit_non_cash": 5255.55,
-            "purchase_cash": 9200.0,
-            "purchase_non_cash": 28894.44,
-            "sales_cash": 13700.0,
-            "sales_non_cash": 34149.99
-          },
-          "staff1": {
-            "profit_cash": 3450.0,
-            "profit_non_cash": 6605.55,
-            "purchase_cash": 6800.0,
-            "purchase_non_cash": 10944.44,
-            "sales_cash": 10250.0,
-            "sales_non_cash": 17549.99
-          },
-          "staff2": {
-            "profit_cash": 1050.0,
-            "profit_non_cash": -1350.0,
-            "purchase_cash": 2400.0,
-            "purchase_non_cash": 17950.0,
-            "sales_cash": 3450.0,
-            "sales_non_cash": 16600.0
-          }
-        },
-        "service_summary": {
-          "Hotel": {
-            "bookings": 5,
-            "profit_cash": 900.0,
-            "profit_non_cash": 0.0,
-            "purchase_cash": 1700.0,
-            "purchase_non_cash": 12600.0,
-            "sales_cash": 2600.0,
-            "sales_non_cash": 12600.0
-          },
-          "Insurance": {
-            "bookings": 4,
-            "profit_cash": 750.0,
-            "profit_non_cash": 850.0,
-            "purchase_cash": 1600.0,
-            "purchase_non_cash": 1250.0,
-            "sales_cash": 2350.0,
-            "sales_non_cash": 2100.0
-          },
-          "Passport": {
-            "bookings": 4,
-            "profit_cash": 400.0,
-            "profit_non_cash": 1350.0,
-            "purchase_cash": 800.0,
-            "purchase_non_cash": 2350.0,
-            "sales_cash": 1200.0,
-            "sales_non_cash": 3700.0
-          },
-          "Sightseeing": {
-            "bookings": 4,
-            "profit_cash": 850.0,
-            "profit_non_cash": 1611.11,
-            "purchase_cash": 1800.0,
-            "purchase_non_cash": 2111.11,
-            "sales_cash": 2650.0,
-            "sales_non_cash": 3722.22
-          },
-          "TOTAL": {
-            "bookings": 31,
-            "profit_cash": 4500.0,
-            "profit_non_cash": 5255.55,
-            "purchase_cash": 9200.0,
-            "purchase_non_cash": 28894.44,
-            "sales_cash": 13700.0,
-            "sales_non_cash": 34149.99
-          },
-          "Ticket": {
-            "bookings": 5,
-            "profit_cash": 550.0,
-            "profit_non_cash": -750.0,
-            "purchase_cash": 1100.0,
-            "purchase_non_cash": 7100.0,
-            "sales_cash": 1650.0,
-            "sales_non_cash": 6350.0
-          },
-          "Transfer": {
-            "bookings": 4,
-            "profit_cash": 400.0,
-            "profit_non_cash": 1344.44,
-            "purchase_cash": 800.0,
-            "purchase_non_cash": 2233.33,
-            "sales_cash": 1200.0,
-            "sales_non_cash": 3577.77
-          },
-          "Visa": {
-            "bookings": 5,
-            "profit_cash": 650.0,
-            "profit_non_cash": 850.0,
-            "purchase_cash": 1400.0,
-            "purchase_non_cash": 1250.0,
-            "sales_cash": 2050.0,
-            "sales_non_cash": 2100.0
-          }
-        },
-        "totals": {
-          "bookings": 10,
-          "profit_cash": 4500.0,
-          "profit_non_cash": 5255.55,
-          "purchase_cash": 9200.0,
-          "purchase_non_cash": 28894.44,
-          "sales_cash": 13700.0,
-          "sales_non_cash": 34149.99
-        }
-      },
-      "status": 200
-    },
-    "reports.filtered_report[month_january]": {
-      "body": {
-        "employee_summary": {
-          "TOTAL": {
-            "profit_cash": 2800.0,
-            "profit_non_cash": 3500.0,
-            "purchase_cash": 5600.0,
-            "purchase_non_cash": 7000.0,
-            "sales_cash": 8400.0,
-            "sales_non_cash": 10500.0
-          },
-          "staff1": {
-            "profit_cash": 2800.0,
-            "profit_non_cash": 3500.0,
-            "purchase_cash": 5600.0,
-            "purchase_non_cash": 7000.0,
-            "sales_cash": 8400.0,
-            "sales_non_cash": 10500.0
-          }
-        },
-        "service_summary": {
-          "Hotel": {
-            "bookings": 2,
-            "profit_cash": 400.0,
-            "profit_non_cash": 500.0,
-            "purchase_cash": 800.0,
-            "purchase_non_cash": 1000.0,
-            "sales_cash": 1200.0,
-            "sales_non_cash": 1500.0
-          },
-          "Insurance": {
-            "bookings": 2,
-            "profit_cash": 400.0,
-            "profit_non_cash": 500.0,
-            "purchase_cash": 800.0,
-            "purchase_non_cash": 1000.0,
-            "sales_cash": 1200.0,
-            "sales_non_cash": 1500.0
-          },
-          "Passport": {
-            "bookings": 2,
-            "profit_cash": 400.0,
-            "profit_non_cash": 500.0,
-            "purchase_cash": 800.0,
-            "purchase_non_cash": 1000.0,
-            "sales_cash": 1200.0,
-            "sales_non_cash": 1500.0
-          },
-          "Sightseeing": {
-            "bookings": 2,
-            "profit_cash": 400.0,
-            "profit_non_cash": 500.0,
-            "purchase_cash": 800.0,
-            "purchase_non_cash": 1000.0,
-            "sales_cash": 1200.0,
-            "sales_non_cash": 1500.0
-          },
-          "TOTAL": {
-            "bookings": 14,
-            "profit_cash": 2800.0,
-            "profit_non_cash": 3500.0,
-            "purchase_cash": 5600.0,
-            "purchase_non_cash": 7000.0,
-            "sales_cash": 8400.0,
-            "sales_non_cash": 10500.0
-          },
-          "Ticket": {
-            "bookings": 2,
-            "profit_cash": 400.0,
-            "profit_non_cash": 500.0,
-            "purchase_cash": 800.0,
-            "purchase_non_cash": 1000.0,
-            "sales_cash": 1200.0,
-            "sales_non_cash": 1500.0
-          },
-          "Transfer": {
-            "bookings": 2,
-            "profit_cash": 400.0,
-            "profit_non_cash": 500.0,
-            "purchase_cash": 800.0,
-            "purchase_non_cash": 1000.0,
-            "sales_cash": 1200.0,
-            "sales_non_cash": 1500.0
-          },
-          "Visa": {
-            "bookings": 2,
-            "profit_cash": 400.0,
-            "profit_non_cash": 500.0,
-            "purchase_cash": 800.0,
-            "purchase_non_cash": 1000.0,
-            "sales_cash": 1200.0,
-            "sales_non_cash": 1500.0
-          }
-        },
-        "totals": {
-          "bookings": 2,
-          "profit_cash": 2800.0,
-          "profit_non_cash": 3500.0,
-          "purchase_cash": 5600.0,
-          "purchase_non_cash": 7000.0,
-          "sales_cash": 8400.0,
-          "sales_non_cash": 10500.0
-        }
-      },
-      "status": 200
-    },
-    "reports.filtered_report[service_hotel]": {
-      "body": {
-        "employee_summary": {
-          "TOTAL": {
-            "profit_cash": 900.0,
-            "profit_non_cash": 0.0,
-            "purchase_cash": 1700.0,
-            "purchase_non_cash": 12600.0,
-            "sales_cash": 2600.0,
-            "sales_non_cash": 12600.0
-          },
-          "staff1": {
-            "profit_cash": 900.0,
-            "profit_non_cash": 1700.0,
-            "purchase_cash": 1700.0,
-            "purchase_non_cash": 2900.0,
-            "sales_cash": 2600.0,
-            "sales_non_cash": 4600.0
-          },
-          "staff2": {
-            "profit_cash": 0.0,
-            "profit_non_cash": -1700.0,
-            "purchase_cash": 0.0,
-            "purchase_non_cash": 9700.0,
-            "sales_cash": 0.0,
-            "sales_non_cash": 8000.0
-          }
-        },
-        "service_summary": {
-          "Hotel": {
-            "bookings": 5,
-            "profit_cash": 900.0,
-            "profit_non_cash": 0.0,
-            "purchase_cash": 1700.0,
-            "purchase_non_cash": 12600.0,
-            "sales_cash": 2600.0,
-            "sales_non_cash": 12600.0
-          },
-          "TOTAL": {
-            "bookings": 5,
-            "profit_cash": 900.0,
-            "profit_non_cash": 0.0,
-            "purchase_cash": 1700.0,
-            "purchase_non_cash": 12600.0,
-            "sales_cash": 2600.0,
-            "sales_non_cash": 12600.0
-          }
-        },
-        "totals": {
-          "bookings": 10,
-          "profit_cash": 900.0,
-          "profit_non_cash": 0.0,
-          "purchase_cash": 1700.0,
-          "purchase_non_cash": 12600.0,
-          "sales_cash": 2600.0,
-          "sales_non_cash": 12600.0
-        }
-      },
-      "status": 200
-    },
-    "reports.filtered_report[service_ticket]": {
-      "body": {
-        "employee_summary": {
-          "TOTAL": {
-            "profit_cash": 550.0,
-            "profit_non_cash": -750.0,
-            "purchase_cash": 1100.0,
-            "purchase_non_cash": 7100.0,
-            "sales_cash": 1650.0,
-            "sales_non_cash": 6350.0
-          },
-          "staff1": {
-            "profit_cash": 550.0,
-            "profit_non_cash": 850.0,
-            "purchase_cash": 1100.0,
-            "purchase_non_cash": 1600.0,
-            "sales_cash": 1650.0,
-            "sales_non_cash": 2450.0
-          },
-          "staff2": {
-            "profit_cash": 0.0,
-            "profit_non_cash": -1600.0,
-            "purchase_cash": 0.0,
-            "purchase_non_cash": 5500.0,
-            "sales_cash": 0.0,
-            "sales_non_cash": 3900.0
-          }
-        },
-        "service_summary": {
-          "TOTAL": {
-            "bookings": 5,
-            "profit_cash": 550.0,
-            "profit_non_cash": -750.0,
-            "purchase_cash": 1100.0,
-            "purchase_non_cash": 7100.0,
-            "sales_cash": 1650.0,
-            "sales_non_cash": 6350.0
-          },
-          "Ticket": {
-            "bookings": 5,
-            "profit_cash": 550.0,
-            "profit_non_cash": -750.0,
-            "purchase_cash": 1100.0,
-            "purchase_non_cash": 7100.0,
-            "sales_cash": 1650.0,
-            "sales_non_cash": 6350.0
-          }
-        },
-        "totals": {
-          "bookings": 10,
-          "profit_cash": 550.0,
-          "profit_non_cash": -750.0,
-          "purchase_cash": 1100.0,
-          "purchase_non_cash": 7100.0,
-          "sales_cash": 1650.0,
-          "sales_non_cash": 6350.0
-        }
-      },
-      "status": 200
-    },
-    "reports.filtered_report[year_2024]": {
-      "body": {
-        "employee_summary": {
-          "TOTAL": {
-            "profit_cash": 0.0,
-            "profit_non_cash": 1050.0,
-            "purchase_cash": 0.0,
-            "purchase_non_cash": 750.0,
-            "sales_cash": 0.0,
-            "sales_non_cash": 1800.0
-          },
-          "staff2": {
-            "profit_cash": 0.0,
-            "profit_non_cash": 1050.0,
-            "purchase_cash": 0.0,
-            "purchase_non_cash": 750.0,
-            "sales_cash": 0.0,
-            "sales_non_cash": 1800.0
-          }
-        },
-        "service_summary": {
-          "Insurance": {
-            "bookings": 1,
-            "profit_cash": 0.0,
-            "profit_non_cash": 350.0,
-            "purchase_cash": 0.0,
-            "purchase_non_cash": 250.0,
-            "sales_cash": 0.0,
-            "sales_non_cash": 600.0
-          },
-          "Passport": {
-            "bookings": 1,
-            "profit_cash": 0.0,
-            "profit_non_cash": 350.0,
-            "purchase_cash": 0.0,
-            "purchase_non_cash": 250.0,
-            "sales_cash": 0.0,
-            "sales_non_cash": 600.0
-          },
-          "TOTAL": {
-            "bookings": 3,
-            "profit_cash": 0.0,
-            "profit_non_cash": 1050.0,
-            "purchase_cash": 0.0,
-            "purchase_non_cash": 750.0,
-            "sales_cash": 0.0,
-            "sales_non_cash": 1800.0
-          },
-          "Visa": {
-            "bookings": 1,
-            "profit_cash": 0.0,
-            "profit_non_cash": 350.0,
-            "purchase_cash": 0.0,
-            "purchase_non_cash": 250.0,
-            "sales_cash": 0.0,
-            "sales_non_cash": 600.0
-          }
-        },
-        "totals": {
-          "bookings": 1,
-          "profit_cash": 0.0,
-          "profit_non_cash": 1050.0,
-          "purchase_cash": 0.0,
-          "purchase_non_cash": 750.0,
-          "sales_cash": 0.0,
-          "sales_non_cash": 1800.0
-        }
-      },
-      "status": 200
-    },
-    "reports.filtered_report[year_2025]": {
-      "body": {
-        "employee_summary": {
-          "TOTAL": {
-            "profit_cash": 4500.0,
-            "profit_non_cash": 4205.55,
-            "purchase_cash": 9200.0,
-            "purchase_non_cash": 28144.44,
-            "sales_cash": 13700.0,
-            "sales_non_cash": 32349.99
-          },
-          "staff1": {
-            "profit_cash": 3450.0,
-            "profit_non_cash": 6605.55,
-            "purchase_cash": 6800.0,
-            "purchase_non_cash": 10944.44,
-            "sales_cash": 10250.0,
-            "sales_non_cash": 17549.99
-          },
-          "staff2": {
-            "profit_cash": 1050.0,
-            "profit_non_cash": -2400.0,
-            "purchase_cash": 2400.0,
-            "purchase_non_cash": 17200.0,
-            "sales_cash": 3450.0,
-            "sales_non_cash": 14800.0
-          }
-        },
-        "service_summary": {
-          "Hotel": {
-            "bookings": 5,
-            "profit_cash": 900.0,
-            "profit_non_cash": 0.0,
-            "purchase_cash": 1700.0,
-            "purchase_non_cash": 12600.0,
-            "sales_cash": 2600.0,
-            "sales_non_cash": 12600.0
-          },
-          "Insurance": {
-            "bookings": 3,
-            "profit_cash": 750.0,
-            "profit_non_cash": 500.0,
-            "purchase_cash": 1600.0,
-            "purchase_non_cash": 1000.0,
-            "sales_cash": 2350.0,
-            "sales_non_cash": 1500.0
-          },
-          "Passport": {
-            "bookings": 3,
-            "profit_cash": 400.0,
-            "profit_non_cash": 1000.0,
-            "purchase_cash": 800.0,
-            "purchase_non_cash": 2100.0,
-            "sales_cash": 1200.0,
-            "sales_non_cash": 3100.0
-          },
-          "Sightseeing": {
-            "bookings": 4,
-            "profit_cash": 850.0,
-            "profit_non_cash": 1611.11,
-            "purchase_cash": 1800.0,
-            "purchase_non_cash": 2111.11,
-            "sales_cash": 2650.0,
-            "sales_non_cash": 3722.22
-          },
-          "TOTAL": {
-            "bookings": 28,
-            "profit_cash": 4500.0,
-            "profit_non_cash": 4205.55,
-            "purchase_cash": 9200.0,
-            "purchase_non_cash": 28144.44,
-            "sales_cash": 13700.0,
-            "sales_non_cash": 32349.99
-          },
-          "Ticket": {
-            "bookings": 5,
-            "profit_cash": 550.0,
-            "profit_non_cash": -750.0,
-            "purchase_cash": 1100.0,
-            "purchase_non_cash": 7100.0,
-            "sales_cash": 1650.0,
-            "sales_non_cash": 6350.0
-          },
-          "Transfer": {
-            "bookings": 4,
-            "profit_cash": 400.0,
-            "profit_non_cash": 1344.44,
-            "purchase_cash": 800.0,
-            "purchase_non_cash": 2233.33,
-            "sales_cash": 1200.0,
-            "sales_non_cash": 3577.77
-          },
-          "Visa": {
-            "bookings": 4,
-            "profit_cash": 650.0,
-            "profit_non_cash": 500.0,
-            "purchase_cash": 1400.0,
-            "purchase_non_cash": 1000.0,
-            "sales_cash": 2050.0,
-            "sales_non_cash": 1500.0
-          }
-        },
-        "totals": {
-          "bookings": 9,
-          "profit_cash": 4500.0,
-          "profit_non_cash": 4205.55,
-          "purchase_cash": 9200.0,
-          "purchase_non_cash": 28144.44,
-          "sales_cash": 13700.0,
-          "sales_non_cash": 32349.99
-        }
       },
       "status": 200
     },
@@ -10374,552 +7006,6 @@
         ],
         "years": [
           2025
-        ]
-      },
-      "status": 200
-    },
-    "reports.monthly_profit[all]": {
-      "body": {
-        "datasets": [
-          {
-            "backgroundColor": "#00aaff",
-            "data": [
-              4500.0
-            ],
-            "label": "Profit Cash"
-          },
-          {
-            "backgroundColor": "#55cc55",
-            "data": [
-              5255.55
-            ],
-            "label": "Profit Non-Cash"
-          }
-        ],
-        "labels": [
-          "03-2025"
-        ]
-      },
-      "status": 200
-    },
-    "reports.monthly_profit[month_bad]": {
-      "body": {
-        "datasets": [
-          {
-            "backgroundColor": "#00aaff",
-            "data": [
-              4500.0
-            ],
-            "label": "Profit Cash"
-          },
-          {
-            "backgroundColor": "#55cc55",
-            "data": [
-              5255.55
-            ],
-            "label": "Profit Non-Cash"
-          }
-        ],
-        "labels": [
-          "03-2025"
-        ]
-      },
-      "status": 200
-    },
-    "reports.monthly_profit[month_january]": {
-      "body": {
-        "datasets": [
-          {
-            "backgroundColor": "#00aaff",
-            "data": [
-              4500.0
-            ],
-            "label": "Profit Cash"
-          },
-          {
-            "backgroundColor": "#55cc55",
-            "data": [
-              5255.55
-            ],
-            "label": "Profit Non-Cash"
-          }
-        ],
-        "labels": [
-          "03-2025"
-        ]
-      },
-      "status": 200
-    },
-    "reports.monthly_profit[service_hotel]": {
-      "body": {
-        "datasets": [
-          {
-            "backgroundColor": "#00aaff",
-            "data": [
-              4500.0
-            ],
-            "label": "Profit Cash"
-          },
-          {
-            "backgroundColor": "#55cc55",
-            "data": [
-              5255.55
-            ],
-            "label": "Profit Non-Cash"
-          }
-        ],
-        "labels": [
-          "03-2025"
-        ]
-      },
-      "status": 200
-    },
-    "reports.monthly_profit[service_ticket]": {
-      "body": {
-        "datasets": [
-          {
-            "backgroundColor": "#00aaff",
-            "data": [
-              4500.0
-            ],
-            "label": "Profit Cash"
-          },
-          {
-            "backgroundColor": "#55cc55",
-            "data": [
-              5255.55
-            ],
-            "label": "Profit Non-Cash"
-          }
-        ],
-        "labels": [
-          "03-2025"
-        ]
-      },
-      "status": 200
-    },
-    "reports.monthly_profit[year_2024]": {
-      "body": {
-        "datasets": [
-          {
-            "backgroundColor": "#00aaff",
-            "data": [
-              4500.0
-            ],
-            "label": "Profit Cash"
-          },
-          {
-            "backgroundColor": "#55cc55",
-            "data": [
-              5255.55
-            ],
-            "label": "Profit Non-Cash"
-          }
-        ],
-        "labels": [
-          "03-2025"
-        ]
-      },
-      "status": 200
-    },
-    "reports.monthly_profit[year_2025]": {
-      "body": {
-        "datasets": [
-          {
-            "backgroundColor": "#00aaff",
-            "data": [
-              4500.0
-            ],
-            "label": "Profit Cash"
-          },
-          {
-            "backgroundColor": "#55cc55",
-            "data": [
-              5255.55
-            ],
-            "label": "Profit Non-Cash"
-          }
-        ],
-        "labels": [
-          "03-2025"
-        ]
-      },
-      "status": 200
-    },
-    "reports.staff_profit[all]": {
-      "body": {
-        "datasets": {
-          "cash": [
-            {
-              "data": [
-                3450.0
-              ],
-              "label": ""
-            },
-            {
-              "data": [
-                1050.0
-              ],
-              "label": ""
-            }
-          ],
-          "non_cash": [
-            {
-              "data": [
-                6605.55
-              ],
-              "label": ""
-            },
-            {
-              "data": [
-                -1350.0
-              ],
-              "label": ""
-            }
-          ]
-        },
-        "labels": [
-          "Mar-25"
-        ],
-        "table": [
-          {
-            "cash": 3450.0,
-            "contribution": 103.08,
-            "non_cash": 6605.55,
-            "staff": "",
-            "total": 10055.55
-          },
-          {
-            "cash": 1050.0,
-            "contribution": -3.08,
-            "non_cash": -1350.0,
-            "staff": "",
-            "total": -300.0
-          }
-        ]
-      },
-      "status": 200
-    },
-    "reports.staff_profit[month_bad]": {
-      "body": {
-        "datasets": {
-          "cash": [
-            {
-              "data": [
-                3450.0
-              ],
-              "label": ""
-            },
-            {
-              "data": [
-                1050.0
-              ],
-              "label": ""
-            }
-          ],
-          "non_cash": [
-            {
-              "data": [
-                6605.55
-              ],
-              "label": ""
-            },
-            {
-              "data": [
-                -1350.0
-              ],
-              "label": ""
-            }
-          ]
-        },
-        "labels": [
-          "Mar-25"
-        ],
-        "table": [
-          {
-            "cash": 3450.0,
-            "contribution": 103.08,
-            "non_cash": 6605.55,
-            "staff": "",
-            "total": 10055.55
-          },
-          {
-            "cash": 1050.0,
-            "contribution": -3.08,
-            "non_cash": -1350.0,
-            "staff": "",
-            "total": -300.0
-          }
-        ]
-      },
-      "status": 200
-    },
-    "reports.staff_profit[month_january]": {
-      "body": {
-        "datasets": {
-          "cash": [
-            {
-              "data": [
-                3450.0
-              ],
-              "label": ""
-            },
-            {
-              "data": [
-                1050.0
-              ],
-              "label": ""
-            }
-          ],
-          "non_cash": [
-            {
-              "data": [
-                6605.55
-              ],
-              "label": ""
-            },
-            {
-              "data": [
-                -1350.0
-              ],
-              "label": ""
-            }
-          ]
-        },
-        "labels": [
-          "Mar-25"
-        ],
-        "table": [
-          {
-            "cash": 3450.0,
-            "contribution": 103.08,
-            "non_cash": 6605.55,
-            "staff": "",
-            "total": 10055.55
-          },
-          {
-            "cash": 1050.0,
-            "contribution": -3.08,
-            "non_cash": -1350.0,
-            "staff": "",
-            "total": -300.0
-          }
-        ]
-      },
-      "status": 200
-    },
-    "reports.staff_profit[service_hotel]": {
-      "body": {
-        "datasets": {
-          "cash": [
-            {
-              "data": [
-                3450.0
-              ],
-              "label": ""
-            },
-            {
-              "data": [
-                1050.0
-              ],
-              "label": ""
-            }
-          ],
-          "non_cash": [
-            {
-              "data": [
-                6605.55
-              ],
-              "label": ""
-            },
-            {
-              "data": [
-                -1350.0
-              ],
-              "label": ""
-            }
-          ]
-        },
-        "labels": [
-          "Mar-25"
-        ],
-        "table": [
-          {
-            "cash": 3450.0,
-            "contribution": 103.08,
-            "non_cash": 6605.55,
-            "staff": "",
-            "total": 10055.55
-          },
-          {
-            "cash": 1050.0,
-            "contribution": -3.08,
-            "non_cash": -1350.0,
-            "staff": "",
-            "total": -300.0
-          }
-        ]
-      },
-      "status": 200
-    },
-    "reports.staff_profit[service_ticket]": {
-      "body": {
-        "datasets": {
-          "cash": [
-            {
-              "data": [
-                3450.0
-              ],
-              "label": ""
-            },
-            {
-              "data": [
-                1050.0
-              ],
-              "label": ""
-            }
-          ],
-          "non_cash": [
-            {
-              "data": [
-                6605.55
-              ],
-              "label": ""
-            },
-            {
-              "data": [
-                -1350.0
-              ],
-              "label": ""
-            }
-          ]
-        },
-        "labels": [
-          "Mar-25"
-        ],
-        "table": [
-          {
-            "cash": 3450.0,
-            "contribution": 103.08,
-            "non_cash": 6605.55,
-            "staff": "",
-            "total": 10055.55
-          },
-          {
-            "cash": 1050.0,
-            "contribution": -3.08,
-            "non_cash": -1350.0,
-            "staff": "",
-            "total": -300.0
-          }
-        ]
-      },
-      "status": 200
-    },
-    "reports.staff_profit[year_2024]": {
-      "body": {
-        "datasets": {
-          "cash": [
-            {
-              "data": [
-                3450.0
-              ],
-              "label": ""
-            },
-            {
-              "data": [
-                1050.0
-              ],
-              "label": ""
-            }
-          ],
-          "non_cash": [
-            {
-              "data": [
-                6605.55
-              ],
-              "label": ""
-            },
-            {
-              "data": [
-                -1350.0
-              ],
-              "label": ""
-            }
-          ]
-        },
-        "labels": [
-          "Mar-25"
-        ],
-        "table": [
-          {
-            "cash": 3450.0,
-            "contribution": 103.08,
-            "non_cash": 6605.55,
-            "staff": "",
-            "total": 10055.55
-          },
-          {
-            "cash": 1050.0,
-            "contribution": -3.08,
-            "non_cash": -1350.0,
-            "staff": "",
-            "total": -300.0
-          }
-        ]
-      },
-      "status": 200
-    },
-    "reports.staff_profit[year_2025]": {
-      "body": {
-        "datasets": {
-          "cash": [
-            {
-              "data": [
-                3450.0
-              ],
-              "label": ""
-            },
-            {
-              "data": [
-                1050.0
-              ],
-              "label": ""
-            }
-          ],
-          "non_cash": [
-            {
-              "data": [
-                6605.55
-              ],
-              "label": ""
-            },
-            {
-              "data": [
-                -1350.0
-              ],
-              "label": ""
-            }
-          ]
-        },
-        "labels": [
-          "Mar-25"
-        ],
-        "table": [
-          {
-            "cash": 3450.0,
-            "contribution": 103.08,
-            "non_cash": 6605.55,
-            "staff": "",
-            "total": 10055.55
-          },
-          {
-            "cash": 1050.0,
-            "contribution": -3.08,
-            "non_cash": -1350.0,
-            "staff": "",
-            "total": -300.0
-          }
         ]
       },
       "status": 200

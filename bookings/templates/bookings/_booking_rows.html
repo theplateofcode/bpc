@@ -38,11 +38,36 @@
   </td>
 </tr>
 {% if forloop.last and page_obj.has_next %}
+{% comment %}
+Sentinel row that pulls the next page.
+
+`revealed` was the wrong trigger here. It watches the element against the
+VIEWPORT, but the table scrolls inside .table-container-wrapper, which is capped
+at 70vh with overflow-y:auto. A row can be scrolled into view inside that box
+without ever entering the viewport, so the trigger fired unreliably or not at
+all -- which is why loading more felt broken.
+
+`intersect root:<selector>` points the IntersectionObserver at the scrolling
+container instead. rootMargin pre-loads slightly before the row appears so the
+next page is usually there by the time it is scrolled to.
+
+The button is a deliberate fallback: if the observer misses for any reason, the
+user still has a way forward instead of a table that silently stops.
+{% endcomment %}
 <tr class="lazy-loader-row"
     hx-get="{% url 'booking_rows' %}?{{ next_querystring }}"
-    hx-trigger="revealed"
+    hx-trigger="intersect once root:.table-container-wrapper rootMargin:200px"
     hx-swap="outerHTML">
-  <td colspan="11" class="text-center py-3 text-muted">Loading more bookings...</td>
+  <td colspan="11" class="text-center py-3">
+    <span class="htmx-indicator text-muted">Loading more bookings…</span>
+    <button type="button"
+            class="btn btn-sm btn-outline-secondary"
+            hx-get="{% url 'booking_rows' %}?{{ next_querystring }}"
+            hx-target="closest tr"
+            hx-swap="outerHTML">
+      Load more
+    </button>
+  </td>
 </tr>
 {% endif %}
 {% empty %}

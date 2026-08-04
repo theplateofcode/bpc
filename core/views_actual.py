@@ -34,9 +34,18 @@ def to_decimal(val) -> Decimal:
 
 
 def is_cash_mode(mode) -> bool:
+    """A payment mode counts as cash only when it is named exactly "cash".
+
+    This module used to test `"cash" in name.lower()`, a substring match, while
+    reports/views_actual.py and Booking.tcs_amount both test for equality. On the
+    current data every test agrees -- of the ten payment modes only "Cash"
+    matches any of them -- but a mode named "Cash on arrival" would have counted
+    as cash in the staff report and as non-cash everywhere else. Unified on
+    equality, which is what the booking-level TCS rule already used.
+    """
     if not mode or not getattr(mode, "name", None):
         return False
-    return "cash" in mode.name.lower()
+    return mode.name.strip().lower() == "cash"
 
 
 SERVICE_MODEL_MAP = {
@@ -91,9 +100,8 @@ def _svc_purchase_totals(rows: ReportRows, booking_id: int, service_code: str) -
     Purchase from service tables, split by service.mode cash/non-cash.
     NOTE: This sums purchase_amount for the booking in that service table.
 
-    The cash test is a substring match, matching the icontains query it
-    replaces. reports/views_actual.py uses an exact match for the same split --
-    the difference is pre-existing and preserved here rather than unified.
+    The cash test is equality, matching reports/views_actual.py and
+    Booking.tcs_amount. It was a substring match here; see is_cash_mode above.
     """
     if service_code not in SERVICE_MODEL_MAP:
         return ZERO, ZERO, ZERO
@@ -104,7 +112,7 @@ def _svc_purchase_totals(rows: ReportRows, booking_id: int, service_code: str) -
         amount = to_decimal(row.purchase_amount)
         total += amount
         mode_name = getattr(row.mode, "name", "") or ""
-        if "cash" in mode_name.lower():
+        if mode_name.strip().lower() == "cash":
             cash += amount
     non_cash = total - cash
     return total, cash, non_cash

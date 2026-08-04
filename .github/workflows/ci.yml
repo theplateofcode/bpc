@@ -1,0 +1,65 @@
+name: Tests
+
+# Runs on every push and pull request. The deploy workflow will not run unless
+# this one has passed, so a red build cannot reach the server.
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+  workflow_call:      # lets deploy.yml reuse this job
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        # Match production: MySQL 8, and the default collation is what makes
+        # the cash comparisons case-insensitive. SQLite does not reproduce that,
+        # which is why the suite runs against a real MySQL here.
+        image: mysql:8.0
+        env:
+          MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+          MYSQL_DATABASE: bpc_test
+        ports: ["3306:3306"]
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          # django-bootstrap5 requires >=3.10; the server runs 3.12.
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Django checks
+        run: python manage.py check
+
+      - name: No missing migrations
+        # Catches a model change committed without its migration, which would
+        # otherwise only surface at deploy time.
+        run: python manage.py makemigrations --check --dry-run --settings=main.settings_test
+
+      - name: Test suite against MySQL
+        env:
+          BPC_TEST_DB_HOST: 127.0.0.1
+          BPC_TEST_DB_PORT: "3306"
+          BPC_TEST_DB_USER: root
+          BPC_TEST_DB_PASSWORD: ""
+        run: python manage.py test tests --settings=main.settings_test_mysql -v 2
+
+      - name: Test suite against SQLite
+        # The snapshots are generated on MySQL. They must also pass on SQLite --
+        # if they stop doing so, something backend-dependent has crept in.
+        run: python manage.py test tests --settings=main.settings_test -v 2

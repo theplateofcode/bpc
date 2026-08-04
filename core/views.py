@@ -39,11 +39,32 @@ def manage_groups(request):
 
 
 @login_required
-def employee_dashboard(request):
-    """Main dashboard for logged-in employees (non-superusers)."""
-    if request.user.is_superuser:
+def home(request):
+    """Land each role on the report it actually works from.
+
+        OWNER / ADMIN / superuser -> owner actuals
+        ACCOUNTANT                -> the accounts to-do queue
+        everyone else (STAFF)     -> staff actuals
+
+    Accountants are sent to their work queue rather than a report: they have no
+    assigned services, so a staff report would render empty for them.
+
+    The old dashboard at templates/home.html is no longer routed. It is left in
+    the repository in case any of it is wanted later.
+    """
+    role = getattr(request.user, "role", "")
+
+    if request.user.is_superuser or role in ("OWNER", "ADMIN"):
         return render(request, "owner_reports_actual.html")
-    return render(request, "home.html")
+
+    if role == "ACCOUNTANT":
+        return redirect("accounts_todo")
+
+    return render(request, "staff_actual_profit.html")
+
+
+# Kept so anything still importing the old name does not break.
+employee_dashboard = home
 
 
 # ---------------------------

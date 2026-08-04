@@ -177,24 +177,17 @@ class GoldenMasterTests(TestCase):
 
     def _snapshot_endpoints(self):
         """Every read-only JSON report endpoint, across filter permutations."""
+        # Only the routed surface. The before-payments and legacy reports were
+        # retired -- their views still exist but nothing routes to them, so
+        # requesting these paths would just record a wall of 404s and prove
+        # nothing. See reports/urls.py for what was retired and why.
         endpoints = [
-            ("reports.filtered_report", "/reports/owner-reports/filtered/"),
-            ("reports.bookings_report", "/reports/owner-reports/bookings-report/"),
-            ("reports.monthly_profit", "/reports/owner-reports/monthly/"),
-            ("reports.staff_profit", "/reports/owner-reports/staff/"),
-            ("reports.filters", "/reports/owner-reports/filter-data/"),
             ("actual.filtered", "/reports/owner/actual/data/"),
             ("actual.bookings", "/reports/owner/actual/bookings/"),
-            ("legacy.filters", "/reports/api/report-filters-legacy/"),
-            ("legacy.filtered", "/reports/api/filtered-legacy-report/"),
-            ("legacy.bookings", "/reports/api/bookings-report-legacy/"),
-            ("core.employee_filtered", "/employee/filtered/"),
-            ("core.employee_bookings", "/employee/bookings/"),
-            ("core.employee_filters", "/employee/filters/"),
+            ("reports.filters", "/reports/owner-reports/filter-data/"),
             ("core.staff_actual_filtered", "/staff-reports-actual/filtered/"),
             ("core.staff_actual_bookings", "/staff-reports-actual/bookings/"),
-            ("core.staff_legacy_summary", "/staff/legacy/summary/"),
-            ("core.staff_legacy_bookings", "/staff/legacy/bookings/"),
+            ("core.employee_filters", "/employee/filters/"),
             ("gst.data", "/etc/gst/data/"),
             ("tcs.data", "/etc/tcs/data/"),
         ]

@@ -1,0 +1,134 @@
+name: Deploy to production
+
+# Deploys to srv882070 on every push to main, but only after the test suite has
+# passed. Also runnable by hand from the Actions tab.
+#
+# ---------------------------------------------------------------------------
+# ONE-TIME SETUP -- do this yourself, none of it should go through anyone else
+#
+# 1. On your own machine, make a key that is used ONLY for deploys:
+#
+#      ssh-keygen -t ed25519 -f ~/.ssh/bpc_deploy -N "" -C "github-deploy"
+#
+# 2. Authorise the public half on the server:
+#
+#      ssh-copy-id -i ~/.ssh/bpc_deploy.pub hetpatel@31.97.60.40
+#
+# 3. Add the PRIVATE half to GitHub as a secret. Repository -> Settings ->
+#    Secrets and variables -> Actions -> New repository secret:
+#
+#      SSH_PRIVATE_KEY   contents of ~/.ssh/bpc_deploy   (the whole file)
+#      SSH_HOST          31.97.60.40
+#      SSH_USER          hetpatel
+#      SSH_PORT          22
+#
+#    Never commit the private key. GitHub masks secrets in logs.
+#
+# 4. Restarting gunicorn needs sudo. Give the deploy user exactly that one
+#    command without a password, and nothing else -- run `sudo visudo` and add:
+#
+#      hetpatel ALL=(ALL) NOPASSWD: /bin/systemctl restart gunicorn
+#
+#    Without this the deploy reaches the restart step and hangs on a prompt.
+#
+# 5. Protect main so nothing lands without review:
+#    Settings -> Branches -> add a rule requiring the Tests workflow to pass.
+# ---------------------------------------------------------------------------
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:      # manual run from the Actions tab
+
+concurrency:
+  # Never let two deploys touch the server at once.
+  group: production-deploy
+  cancel-in-progress: false
+
+jobs:
+  test:
+    uses: ./.github/workflows/ci.yml
+
+  deploy:
+    needs: test           # a red build never reaches the server
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Deploy over SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          command_timeout: 15m
+          script: |
+            set -euo pipefail
+
+            APP=~/webapps/bpc
+            VENV=~/webapps/venv_latest
+            STAMP=$(date +%F-%H%M%S)
+
+            echo "::group::Backup"
+            mkdir -p ~/db-backups
+            # --single-transaction so the client's tables are never locked.
+            mysqldump --single-transaction --quick --no-tablespaces booking_db \
+              | gzip > ~/db-backups/bpc-$STAMP.sql.gz
+            ls -lh ~/db-backups/bpc-$STAMP.sql.gz
+            # Keep the last 10 backups, drop older ones.
+            ls -1t ~/db-backups/bpc-*.sql.gz | tail -n +11 | xargs -r rm --
+            echo "::endgroup::"
+
+            cd "$APP"
+            echo "Rolling back to $(git rev-parse --short HEAD) if this fails"
+            git rev-parse HEAD > ~/bpc-rollback-sha.txt
+
+            echo "::group::Fetch"
+            # Tracked .pyc files pick up local modifications; discard them so the
+            # checkout is clean. Nothing else in the tree is tracked-and-edited.
+            git checkout -- .
+            git fetch --prune origin
+            git checkout main
+            git reset --hard origin/main
+            git log --oneline -1
+            echo "::endgroup::"
+
+            echo "::group::Dependencies"
+            source "$VENV/bin/activate"
+            pip install --quiet --upgrade pip
+            pip install --quiet -r requirements.txt
+            echo "::endgroup::"
+
+            echo "::group::Migrate"
+            python manage.py migrate --noinput
+            echo "::endgroup::"
+
+            echo "::group::Static"
+            # The service forms style themselves from static/styles.css; skipping
+            # this deploys them unstyled.
+            python manage.py collectstatic --noinput
+            echo "::endgroup::"
+
+            echo "::group::Restart"
+            sudo /bin/systemctl restart gunicorn
+            sleep 3
+            systemctl is-active gunicorn
+            echo "::endgroup::"
+
+            echo "::group::Smoke test"
+            # localhost is in ALLOWED_HOSTS; 127.0.0.1 is not, and would 400.
+            code=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8000/)
+            echo "GET / -> $code"
+            case "$code" in
+              200|302) echo "OK" ;;
+              *) echo "Unexpected status, rolling back"
+                 git reset --hard "$(cat ~/bpc-rollback-sha.txt)"
+                 pip install --quiet -r requirements.txt
+                 python manage.py collectstatic --noinput
+                 sudo /bin/systemctl restart gunicorn
+                 exit 1 ;;
+            esac
+            echo "::endgroup::"
+
+            echo "Deployed $(git rev-parse --short HEAD)"
