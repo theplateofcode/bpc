@@ -407,6 +407,16 @@ def bookings_report(request):
     data = []
     bookings = list(bookings)
     service_rows = _service_value_rows_by_booking(booking.id for booking in bookings)
+
+    # "entered by" used to be looked up one query at a time, inside the loop over
+    # service rows -- on real data that was 1,215 queries for a single request.
+    # One query for the whole page instead. get_full_name() is evaluated here so
+    # the loop only does a dict lookup.
+    staff_names = {
+        user.id: user.get_full_name()
+        for user in User.objects.only("id", "first_name", "last_name")
+    }
+
     for booking in bookings:
         booking_info = {
             "booking_id": booking.booking_id,
@@ -439,8 +449,7 @@ def bookings_report(request):
                 purchase_non += purchase
                 profit_non += profit
 
-            staff = User.objects.filter(id=s["created_by_id"]).first()
-            staff_name = staff.get_full_name() if staff else "Unknown"
+            staff_name = staff_names.get(s["created_by_id"], "Unknown")
 
             booking_info["services"].append({
                 "service": s["service_name"],
