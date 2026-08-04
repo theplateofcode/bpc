@@ -1,7 +1,12 @@
 name: Deploy to production
 
-# Deploys to srv882070 on every push to main, but only after the test suite has
-# passed. Also runnable by hand from the Actions tab.
+# Deploys to srv882070 on every push to the branch named in DEPLOY_BRANCH below,
+# but only after the test suite has passed. Also runnable by hand from the
+# Actions tab.
+#
+# Production tracks a BRANCH, not main. main is deliberately left where it was.
+# To point production somewhere else later, change DEPLOY_BRANCH here and the
+# branch listed under `on: push:` -- they must match.
 #
 # ---------------------------------------------------------------------------
 # ONE-TIME SETUP -- do this yourself, none of it should go through anyone else
@@ -31,14 +36,27 @@ name: Deploy to production
 #
 #    Without this the deploy reaches the restart step and hangs on a prompt.
 #
-# 5. Protect main so nothing lands without review:
-#    Settings -> Branches -> add a rule requiring the Tests workflow to pass.
+# 5. Protect the deploy branch so nothing lands on the server without review:
+#    Settings -> Branches -> add a rule for perf/booking-list-n-plus-1
+#    requiring the Tests workflow to pass.
+#
+# NOTE ON BRANCHES
+#    Production tracks perf/booking-list-n-plus-1. main is intentionally left at
+#    the pre-optimisation commit, so a fresh clone of main is NOT what is
+#    running. Anyone joining this project should be told that. If you later want
+#    a clearer name, rename once and update DEPLOY_BRANCH and the push trigger:
+#
+#      git branch -m perf/booking-list-n-plus-1 production
+#      git push origin production && git push origin --delete perf/booking-list-n-plus-1
 # ---------------------------------------------------------------------------
 
 on:
   push:
-    branches: [main]
+    branches: [perf/booking-list-n-plus-1]   # keep in step with DEPLOY_BRANCH
   workflow_dispatch:      # manual run from the Actions tab
+
+env:
+  DEPLOY_BRANCH: perf/booking-list-n-plus-1
 
 concurrency:
   # Never let two deploys touch the server at once.
@@ -63,12 +81,15 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
           command_timeout: 15m
+          envs: DEPLOY_BRANCH
           script: |
             set -euo pipefail
 
             APP=~/webapps/bpc
             VENV=~/webapps/venv_latest
             STAMP=$(date +%F-%H%M%S)
+            BRANCH="${DEPLOY_BRANCH:?DEPLOY_BRANCH not set}"
+            echo "Deploying branch: $BRANCH"
 
             echo "::group::Backup"
             mkdir -p ~/db-backups
@@ -89,9 +110,9 @@ jobs:
             # checkout is clean. Nothing else in the tree is tracked-and-edited.
             git checkout -- .
             git fetch --prune origin
-            git checkout main
-            git reset --hard origin/main
-            git log --oneline -1
+            git checkout -B "$BRANCH" "origin/$BRANCH"
+            git reset --hard "origin/$BRANCH"
+            echo "now on: $(git branch --show-current) @ $(git rev-parse --short HEAD)"
             echo "::endgroup::"
 
             echo "::group::Dependencies"
