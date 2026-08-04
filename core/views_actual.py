@@ -209,6 +209,9 @@ def staff_filtered_actual_report(request):
 
     assignments = (
         BookingService.objects
+        # See the note in reports/views_actual.py: float totals accumulate in
+        # row order, so the order must not be left to the query planner.
+        .order_by("id")
         .select_related("booking", "booking__client", "service")
         .filter(assigned_to=user)
         # must have at least one approved service-linked payment somewhere in the booking
@@ -332,6 +335,7 @@ def staff_bookings_report(request):
                 .values_list("booking_id", flat=True).distinct())
         .select_related("client", "created_by")
         .distinct()
+        .order_by("id")  # rows go straight into the response; pin the order
     )
 
     if year:

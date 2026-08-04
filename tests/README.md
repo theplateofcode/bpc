@@ -6,12 +6,38 @@ report endpoints, and fails if any of it moves.
 
 ## Running
 
+Against MySQL, which is what production uses. **Run this one before deploying.**
+
+```bash
+python manage.py test tests --settings=main.settings_test_mysql
+```
+
+Against SQLite, for fast iteration with no server:
+
 ```bash
 python manage.py test tests --settings=main.settings_test
 ```
 
-`main.settings_test` swaps MySQL for in-memory SQLite so the suite runs anywhere,
-including CI, with no database server. Nothing in it affects production.
+Both settings modules are committed. The snapshots are generated on MySQL and
+pass unchanged on SQLite — if that ever stops being true, something backend-
+dependent has crept in and is worth understanding before it ships.
+
+### Why MySQL matters, concretely
+
+SQLite is not a substitute here. A real bug survived four commits of
+SQLite-green testing:
+
+> `purchase_total` excluded cash rows with `.exclude(mode__name='Cash')`. When
+> that was rewritten to sum prefetched rows in Python it became
+> `row.mode.name == 'Cash'`. MySQL's default collation
+> (`utf8mb4_0900_ai_ci`) compares case-insensitively, so the original query
+> also excluded a mode named `CASH` — the Python version did not, and every
+> total on such a booking came out wrong. SQLite compares case-sensitively and
+> happily agreed with the broken version.
+
+`test_cash_rule.py` now runs the original query chain beside the property and
+asserts they still agree. Its case-variant tests skip on SQLite, because there
+the comparison cannot fail.
 
 To regenerate the snapshot after an **intentional** behaviour change:
 
@@ -47,6 +73,22 @@ The snapshot has three sections:
 | `test_golden_master.py` | Money properties, bookings list, 19 report endpoints |
 | `test_service_forms.py` | Rendered HTML of the 14 service create/edit forms |
 | `test_legacy_filters.py` | Regression tests for the two legacy filter endpoints |
+| `test_cash_rule.py` | The rewritten totals still match the ORM query they replaced |
+
+## Two things the fixture pins deliberately
+
+**Primary keys.** `seed.py` assigns explicit ids. Two of them reach rendered
+output — `Client.client_id` formats its pk as `C-0004`, and `Booking.save()`
+derives `B-0004` from the last row's pk — so letting the database allocate them
+made the snapshots backend-dependent. InnoDB in particular does not roll its
+`AUTO_INCREMENT` counter back between test classes, so ids drifted as the suite
+ran.
+
+**Row order.** Several report querysets had no `ORDER BY`, so their row order
+was whatever index the planner chose. That is not merely a test problem: adding
+the performance indexes changed which index MySQL picked, which would have
+quietly reshuffled the rows in the owner's booking report. Those querysets now
+order by `id` explicitly.
 
 ## Fixed since the baseline was first taken
 

@@ -42,14 +42,22 @@ def _sum_amount(rows, field, keep=None):
     return total
 
 
-def _not_cash_exact(row):
-    """Mirrors .exclude(mode__name='Cash') -- note the exact, cased match."""
-    mode = row.mode
-    return not (mode is not None and mode.name == 'Cash')
+def _not_cash(row):
+    """Mirrors .exclude(mode__name='Cash') as the database actually evaluates it.
 
+    The properties here replaced two spellings of the same test:
+    `.exclude(mode__name='Cash')` in the totals and
+    `.exclude(mode__name__iexact='cash')` in tcs_amount. On MySQL those are the
+    same query -- the default collation, utf8mb4_0900_ai_ci, compares
+    case-insensitively -- so the distinction only ever existed on paper.
 
-def _not_cash_iexact(row):
-    """Mirrors .exclude(mode__name__iexact='cash')."""
+    Reimplementing the first one as `name == 'Cash'` was therefore wrong: a
+    payment mode recorded as 'CASH' or 'cash' was excluded by the old query and
+    would have been counted by the new code, silently changing every total on
+    that booking. Only visible on MySQL; SQLite compares case-sensitively and
+    agrees with the buggy version. Caught by tests/test_cash_rule.py, which is
+    why that test is worth running against MySQL.
+    """
     mode = row.mode
     return not (mode is not None and (mode.name or '').lower() == 'cash')
 
@@ -147,8 +155,12 @@ class BookingQuerySet(models.QuerySet):
             Hotel, Insurance, Passport, SightSeeing, Ticket, Transfer, Visa,
         )
 
-        not_cash = Q(mode__name='Cash')                       # matches the properties
-        not_cash_i = Q(mode__name__iexact='cash')             # tcs uses the looser test
+        # `__iexact` everywhere, matching _not_cash() above. The original code
+        # wrote this test two ways, but MySQL's collation made both
+        # case-insensitive, so the looser form is the one that describes what
+        # production has always done -- and it behaves the same on SQLite,
+        # which the plain equality form does not.
+        not_cash = Q(mode__name__iexact='cash')
         international = Q(travel_type__iexact='international')
 
         def totals(field):
@@ -163,9 +175,9 @@ class BookingQuerySet(models.QuerySet):
             )
 
         tcs_base = (
-            _relation_sum(Hotel, 'sales_amount', exclude=not_cash_i, keep=international) +
-            _relation_sum(Transfer, 'sales_amount', exclude=not_cash_i, keep=international) +
-            _relation_sum(SightSeeing, 'sales_amount', exclude=not_cash_i, keep=international)
+            _relation_sum(Hotel, 'sales_amount', exclude=not_cash, keep=international) +
+            _relation_sum(Transfer, 'sales_amount', exclude=not_cash, keep=international) +
+            _relation_sum(SightSeeing, 'sales_amount', exclude=not_cash, keep=international)
         )
 
         qs = self.annotate(
@@ -410,9 +422,9 @@ class Booking(models.Model):
         total += _sum_amount(self._service_rows('tickets'), field)
 
         # Visa/Passport/Insurance (exclude cash)
-        total += _sum_amount(self._service_rows('visas'), field, _not_cash_exact)
-        total += _sum_amount(self._service_rows('passports'), field, _not_cash_exact)
-        total += _sum_amount(self._service_rows('insurances'), field, _not_cash_exact)
+        total += _sum_amount(self._service_rows('visas'), field, _not_cash)
+        total += _sum_amount(self._service_rows('passports'), field, _not_cash)
+        total += _sum_amount(self._service_rows('insurances'), field, _not_cash)
 
         # Package services (exclude cash)
         total += self._package_total(field)
@@ -420,9 +432,9 @@ class Booking(models.Model):
 
     def _package_total(self, field):
         return (
-            _sum_amount(self._service_rows('hotels'), field, _not_cash_exact) +
-            _sum_amount(self._service_rows('sightseeings'), field, _not_cash_exact) +
-            _sum_amount(self._service_rows('transfers'), field, _not_cash_exact)
+            _sum_amount(self._service_rows('hotels'), field, _not_cash) +
+            _sum_amount(self._service_rows('sightseeings'), field, _not_cash) +
+            _sum_amount(self._service_rows('transfers'), field, _not_cash)
         )
 
     @property
@@ -456,7 +468,7 @@ class Booking(models.Model):
         def qualifying(rows):
             return _sum_amount(
                 rows, 'sales_amount',
-                lambda row: _not_cash_iexact(row) and _is_international(row),
+                lambda row: _not_cash(row) and _is_international(row),
             )
 
         total = (

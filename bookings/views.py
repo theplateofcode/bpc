@@ -397,6 +397,11 @@ def _build_rows_context(request):
     fallback_qs = (
         _booking_base_queryset(request, for_display=False)
         .prefetch_related("services")
+        # list.sort() below is stable, so equal sort keys keep this order.
+        # Without an ORDER BY that order is whatever index the planner chose,
+        # which differs between MySQL and SQLite and can shift when indexes
+        # change. Pin it so tied rows land the same way every time.
+        .order_by("id")
     )
     if columns_used & set(BOOKING_MONEY_ANNOTATION):
         # A request can sort by `services` while also filtering on a money

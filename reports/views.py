@@ -248,7 +248,10 @@ def filtered_report(request):
     }
 
     # --- Step 1: Get the bookings (same filters as bookings_report) ---
-    bookings = Booking.objects.all().select_related("client", "created_by")
+    # Ordered explicitly: this queryset is iterated straight into the response,
+    # and without ORDER BY the row order is whatever index the planner picks --
+    # which the indexes added for performance can silently change.
+    bookings = Booking.objects.all().select_related("client", "created_by").order_by("id")
 
     if client:
         bookings = bookings.filter(client_id=client)
@@ -374,7 +377,10 @@ def bookings_report(request):
     supplier = request.GET.get("supplier")
     service_filter = request.GET.get("service")
 
-    bookings = Booking.objects.all().select_related("client", "created_by")
+    # Ordered explicitly: this queryset is iterated straight into the response,
+    # and without ORDER BY the row order is whatever index the planner picks --
+    # which the indexes added for performance can silently change.
+    bookings = Booking.objects.all().select_related("client", "created_by").order_by("id")
 
     if client_id:
         bookings = bookings.filter(client_id=client_id)

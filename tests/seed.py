@@ -85,44 +85,56 @@ def build():
     f = Fixture()
 
     # --- reference data -------------------------------------------------
-    for name in ("Cash", "Card", "Bank Transfer"):
-        f.modes[name] = Mode.objects.create(name=name)
+    # Primary keys are assigned explicitly throughout. Two of them leak into
+    # rendered output -- Client.client_id formats its pk as "C-0004", and
+    # Booking.save() derives "B-0004" from the last row's pk -- so letting the
+    # database allocate them makes the snapshots depend on the backend. InnoDB
+    # in particular does not roll its AUTO_INCREMENT counter back between test
+    # classes, so ids drift as the suite runs and the same fixture produces
+    # different output on MySQL than on SQLite. Pinning them makes the
+    # snapshots identical on both.
+    for i, name in enumerate(("Cash", "Card", "Bank Transfer"), start=1):
+        f.modes[name] = Mode.objects.create(id=i, name=name)
 
-    for name in ("open", "in process", "closed"):
-        f.statuses[name] = Status.objects.create(name=name)
+    for i, name in enumerate(("open", "in process", "closed"), start=1):
+        f.statuses[name] = Status.objects.create(id=i, name=name)
 
-    for code in SERVICE_CODES:
-        f.services[code] = ServiceList.objects.create(code=code, name=code.title())
+    for i, code in enumerate(SERVICE_CODES, start=1):
+        f.services[code] = ServiceList.objects.create(id=i, code=code, name=code.title())
 
-    Carrier.objects.create(name="TestAir")
+    Carrier.objects.create(id=1, name="TestAir")
 
-    for code in SERVICE_CODES:
+    for i, code in enumerate(SERVICE_CODES, start=1):
         f.suppliers[code] = Supplier.objects.create(
-            name=f"Supplier {code.title()}", category=f.services[code]
+            id=i, name=f"Supplier {code.title()}", category=f.services[code]
         )
     # A second supplier on hotels, so the supplier filter has something to bite on.
     f.suppliers["hotel_alt"] = Supplier.objects.create(
+        id=len(SERVICE_CODES) + 1,
         name="Supplier Hotel Alt", category=f.services["hotel"]
     )
 
     # --- users ----------------------------------------------------------
     owner = User.objects.create_superuser(
-        username="owner", password="x", email="owner@example.com"
+        id=1, username="owner", password="x", email="owner@example.com"
     )
     owner.role = "OWNER"
     owner.save()
     f.users["owner"] = owner
 
-    for uname, role in (("staff1", "STAFF"), ("staff2", "STAFF"),
-                        ("acct", "ACCOUNTANT"), ("admin1", "ADMIN")):
-        u = User.objects.create_user(username=uname, password="x")
+    for i, (uname, role) in enumerate((("staff1", "STAFF"), ("staff2", "STAFF"),
+                                       ("acct", "ACCOUNTANT"), ("admin1", "ADMIN")),
+                                      start=2):
+        u = User.objects.create_user(id=i, username=uname, password="x")
         u.role = role
         u.save()
         f.users[uname] = u
 
     # --- clients --------------------------------------------------------
+    # Client.client_id renders as "C-0001", straight from the pk.
     for i in range(6):
         f.clients.append(Client.objects.create(
+            id=i + 1,
             first_name=f"First{i}",
             last_name=f"Last{i}",
             contact_number=f"90000000{i:02d}",
@@ -134,7 +146,10 @@ def build():
     staff1, staff2 = f.users["staff1"], f.users["staff2"]
 
     def new_booking(client, creator, booking_date, status, adults=2, children=0):
+        # Booking.save() builds booking_id as "B-{last pk + 1:04d}", so pinning
+        # the pk pins the visible reference too.
         b = Booking.objects.create(
+            id=len(f.bookings) + 1,
             created_by=creator,
             client=client,
             booking_date=booking_date,

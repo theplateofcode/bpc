@@ -235,6 +235,10 @@ def filtered_actual_report(request):
 
     assignments = (
         BookingService.objects
+        # Ordered explicitly: the loop below accumulates float totals, and float
+        # addition is not associative, so an undefined row order makes the
+        # result depend on which index the planner happened to use.
+        .order_by("id")
         .select_related("booking", "booking__client", "booking__created_by", "service", "assigned_to")
         .filter(
             booking_id__in=PaymentReceived.objects.filter(approved=True)
@@ -409,6 +413,7 @@ def bookings_report(request):
             .distinct()
         )
         .select_related("client", "created_by")
+        .order_by("id")  # rows go straight into the response; pin the order
     )
 
     # Booking-level filters (same style as your existing)
