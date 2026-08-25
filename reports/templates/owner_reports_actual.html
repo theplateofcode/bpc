@@ -1,4 +1,4 @@
-{% extends "base.html" %} {% block content %}
+{% extends "base.html" %} {% load static %} {% block content %}
 
 <h3 class="mt-4 text-danger fw-bold">Actual Profit Reports</h3>
 
@@ -160,8 +160,14 @@
 </table>
 
 <!-- Client Summary -->
-<h4 class="mt-4 text-danger">Client Bookings Summary (Actual)</h4>
-<table class="table table-bordered" id="clientSummary">
+<div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mt-4">
+  <h4 class="mb-0 text-danger">Client Bookings Summary (Actual)</h4>
+  <input type="search" id="clientSummarySearch" class="form-control form-control-sm"
+         style="max-width: 20rem" autocomplete="off"
+         placeholder="Search booking, client, staff or service…"
+         aria-label="Search bookings">
+</div>
+<table class="table table-bordered mt-2" id="clientSummary">
   <thead class="table-light text-center">
     <tr>
       <th>Booking ID</th>
@@ -180,6 +186,7 @@
   </thead>
   <tbody></tbody>
 </table>
+<div id="clientSummaryPager"></div>
 
 <!-- Modal -->
 <div class="modal fade" id="serviceModal" tabindex="-1" aria-hidden="true">
@@ -203,6 +210,7 @@
 </div>
 
 <!-- JS -->
+<script src="{% static 'js/booking-summary-table.js' %}"></script>
 <script>
   document.addEventListener("DOMContentLoaded", async () => {
     const clean = (n) =>
@@ -301,9 +309,15 @@
       );
       if (!resp.ok) return;
       const bookings = await resp.json();
-      const tbody = document.querySelector("#clientSummary tbody");
-      tbody.innerHTML = "";
-      bookings.data.forEach((b) => {
+      // Paging and search are presentation only -- every row below is drawn
+      // from the response exactly as it arrived.
+      initBookingSummary({
+        rows: bookings.data || [],
+        tbody: document.querySelector("#clientSummary tbody"),
+        searchInput: document.getElementById("clientSummarySearch"),
+        pager: document.getElementById("clientSummaryPager"),
+        pageSize: 25,
+        renderRow(b) {
         const svc = b.services.map((s) => s.service).join(", ");
         const mod = b.services
           .map(
@@ -315,9 +329,7 @@
         </div>`
           )
           .join("");
-        tbody.insertAdjacentHTML(
-          "beforeend",
-          `
+        return `
         <tr>
           <td>${b.booking_id}</td><td>${b.booking_date}</td>
           <td>${b.created_by}</td><td>${b.client_name}</td>
@@ -335,8 +347,8 @@
             b.totals.profit_non_cash
           )}</td>
           <td>${clean(b.totals.discount || 0)}</td>
-        </tr>`
-        );
+        </tr>`;
+        },
       });
     }
 

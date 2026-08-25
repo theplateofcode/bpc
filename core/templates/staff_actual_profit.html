@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load static %}
 {% block content %}
 <div style="display: flex;">
   <h3 class="mt-4 text-primary fw-bold">Staff Actual Profit Dashboard</h3>
@@ -106,8 +107,14 @@
 </table>
 
 <!-- CLIENT BOOKINGS -->
-<h4 class="mt-4 text-primary">My Bookings Summary (Actual)</h4>
-<table class="table table-bordered text-center" id="clientSummary">
+<div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mt-4">
+  <h4 class="mb-0 text-primary">My Bookings Summary (Actual)</h4>
+  <input type="search" id="clientSummarySearch" class="form-control form-control-sm"
+         style="max-width: 20rem" autocomplete="off"
+         placeholder="Search booking, client or service…"
+         aria-label="Search bookings">
+</div>
+<table class="table table-bordered text-center mt-2" id="clientSummary">
   <thead class="table-light">
     <tr>
       <th>Booking ID</th>
@@ -125,6 +132,7 @@
   </thead>
   <tbody></tbody>
 </table>
+<div id="clientSummaryPager"></div>
 
 <!-- MODAL -->
 <div class="modal fade" id="serviceModal" tabindex="-1">
@@ -139,6 +147,7 @@
   </div>
 </div>
 
+<script src="{% static 'js/booking-summary-table.js' %}"></script>
 <script>
 document.addEventListener("DOMContentLoaded", async () => {
   let servicesStore = {};
@@ -214,12 +223,23 @@ document.addEventListener("DOMContentLoaded", async () => {
     tbody.innerHTML = "";
 
     servicesStore = {};
-
+    // Populate the modal store for EVERY booking, not only the visible page,
+    // so "Show" still works after paging or searching.
     (bd.data || []).forEach((b) => {
-      const svcNames = (b.services || []).map((s) => s.service).join(", ");
       servicesStore[b.booking_id] = b.services || [];
+    });
 
-      tbody.insertAdjacentHTML("beforeend", `<tr>
+    // Paging and search are presentation only -- rows are drawn from the
+    // response exactly as it arrived.
+    initBookingSummary({
+      rows: bd.data || [],
+      tbody: tbody,
+      searchInput: document.getElementById("clientSummarySearch"),
+      pager: document.getElementById("clientSummaryPager"),
+      pageSize: 25,
+      renderRow(b) {
+      const svcNames = (b.services || []).map((s) => s.service).join(", ");
+      return `<tr>
         <td>${b.booking_id}</td>
         <td>${b.booking_date}</td>
         <td>${b.client_name}</td>
@@ -239,7 +259,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         <td>${fmt(b.totals?.profit_cash)}</td>
         <td>${fmt(b.totals?.profit_non_cash)}</td>
         <td>${fmt(b.totals?.discount)}</td>
-      </tr>`);
+      </tr>`;
+      },
     });
   }
 
