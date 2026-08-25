@@ -193,6 +193,7 @@ def booking_all_services_fully_approved(rows: ReportRows, booking_id: int) -> bo
     - booking has services assigned in BookingService
     - AND there are NO pending (approved=False) payments for that booking+assigned services
     - AND each assigned service has at least 1 approved payment row
+    - AND each assigned service has an APPROVED settlement row (marked as full)
     """
     service_ids = rows.assigned_service_ids(booking_id)
     if not service_ids:
@@ -202,9 +203,14 @@ def booking_all_services_fully_approved(rows: ReportRows, booking_id: int) -> bo
     if rows.has_pending_payment(booking_id, service_ids):
         return False
 
-    # Ensure every assigned service has at least 1 approved row
+    # Ensure every assigned service has at least 1 approved row, AND that the
+    # service has been settled -- "mark as full", once the accountant approved
+    # it. Approved payments alone are not enough: a service can be part-paid and
+    # still have an approved payment against it.
     for sid in service_ids:
         if not rows.has_approved_payment(booking_id, sid):
+            return False
+        if not rows.has_settled_payment(booking_id, sid):
             return False
 
     return True
@@ -287,6 +293,14 @@ def filtered_actual_report(request):
 
     for a in assignments:
         booking = a.booking
+
+        # Same gate the bookings table below already applies, and the one the
+        # staff summary has always applied. Without it these cards totalled
+        # bookings that the Client Bookings Summary underneath them did not
+        # show, so the two never reconciled.
+        if not booking_all_services_fully_approved(rows, a.booking_id):
+            continue
+
         svc = a.service
         service_code = _svc_code(svc)
 

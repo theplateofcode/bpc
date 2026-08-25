@@ -142,6 +142,22 @@ Any change in **value** is still caught. Only trailing-zero scale is ignored.
 Everything in this section has been reviewed against production data and signed
 off. Changing any of it is a regression, however reasonable the change looks.
 
+### A booking appears in the actuals reports only once it is SETTLED
+
+Every assigned service must have an **approved settlement row** -- the zero-amount
+`is_full=True` row that "mark as full" writes, after an accountant approves it.
+Approved payments alone are not enough: a service can be part-paid and still
+have an approved payment against it.
+
+Added deliberately at the owner's request. It was never in the original code --
+`is_full` had zero references in any reports module. On production it moves the
+count from 734 bookings to 731, so the settlement step is part of the daily
+routine rather than an exception.
+
+The same gate now runs on all four report views. It previously skipped the
+owner's summary cards, so those cards totalled bookings the table beneath them
+did not list.
+
 ### A payment mode is cash only when it is named exactly "cash"
 
 Case-insensitive equality, never a substring match. A mode called "Cash on

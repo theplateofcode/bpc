@@ -80,6 +80,7 @@ def booking_all_services_fully_approved(rows: ReportRows, booking_id: int) -> bo
     - booking must have BookingService rows
     - no pending PaymentReceived (approved=False) for those service_ids
     - at least 1 approved payment per service_id
+    - AND an approved settlement row (marked as full) per service_id
     """
     service_ids = rows.assigned_service_ids(booking_id)
     if not service_ids:
@@ -88,8 +89,13 @@ def booking_all_services_fully_approved(rows: ReportRows, booking_id: int) -> bo
     if rows.has_pending_payment(booking_id, service_ids):
         return False
 
+    # Approved payments alone are not enough: a service can be part-paid and
+    # still have an approved payment against it. It must also be settled --
+    # "mark as full", once the accountant approved it.
     for sid in service_ids:
         if not rows.has_approved_payment(booking_id, sid):
+            return False
+        if not rows.has_settled_payment(booking_id, sid):
             return False
 
     return True

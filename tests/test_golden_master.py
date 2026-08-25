@@ -200,6 +200,27 @@ class GoldenMasterTests(TestCase):
                 if resp.status_code == 200 and "json" in resp.get("Content-Type", ""):
                     record["body"] = canon(json.loads(resp.content))
                 out[key] = record
+
+        # The staff reports only ever show services the logged-in user is
+        # assigned to. Requested as the owner -- who has no assignments -- they
+        # come back empty, so every entry above proves nothing about them.
+        # Request them again as staff who DO have assignments.
+        staff_endpoints = [
+            ("staff.filtered", "/staff-reports-actual/filtered/"),
+            ("staff.bookings", "/staff-reports-actual/bookings/"),
+        ]
+        for username in ("staff1", "staff2"):
+            staff_client = HttpClient(raise_request_exception=False)
+            staff_client.force_login(self.fixture.users[username])
+            for name, path in staff_endpoints:
+                for label, params in REPORT_PARAM_SETS:
+                    key = f"{name}@{username}[{label}]"
+                    resp = staff_client.get(path, params)
+                    record = {"status": resp.status_code}
+                    if resp.status_code == 200 and "json" in resp.get("Content-Type", ""):
+                        record["body"] = canon(json.loads(resp.content))
+                    out[key] = record
+
         return out
 
     def build_snapshot(self):

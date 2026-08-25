@@ -146,6 +146,21 @@ class ReportRows:
     def has_approved_payment(self, booking_id, service_id):
         return bool(self._approved_payments.get((booking_id, service_id)))
 
+    def has_settled_payment(self, booking_id, service_id):
+        """True when this service has an APPROVED settlement row.
+
+        "Mark as full" writes a zero-amount row with is_full=True carrying any
+        shortfall as a discount, created unapproved. It only counts once an
+        accountant has approved it -- the same event that auto-closes the
+        booking. So this is strictly narrower than has_approved_payment().
+
+        No extra query: _approved_payments already holds the full rows.
+        """
+        return any(
+            payment.is_full
+            for payment in self._approved_payments.get((booking_id, service_id), ())
+        )
+
     def has_pending_payment(self, booking_id, service_ids):
         """True when any of these services has an unapproved payment."""
         pending = self._pending_service_ids.get(booking_id)
