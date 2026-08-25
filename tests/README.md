@@ -1,5 +1,19 @@
 # Golden master test suite
 
+> ## The calculations are frozen
+>
+> The owner has reviewed every figure against production data and signed them
+> off. From here on the rule is: **optimise, refactor and restructure freely —
+> but never change what the software computes.**
+>
+> A changed number is a bug in the change, not an improvement. That holds even
+> when the current behaviour looks wrong; several things that read like defects
+> are deliberate business rules and are listed further down.
+>
+> These snapshots are the contract. They are regenerable, which is exactly why
+> regenerating one is not a routine step: do it only on an explicit decision
+> from the owner, and always diff first and report precisely what moved.
+
 This suite exists for one reason: to let the app be optimised **without changing
 what it computes**. It records the current output of the financial logic and the
 report endpoints, and fails if any of it moves.
@@ -64,15 +78,16 @@ The snapshot has three sections:
 |---|---|
 | `model_properties` | All seven `Booking` money properties per booking, plus `all_services_finished()` and `get_service_statuses()` |
 | `booking_list` | Row ordering and the four rendered money cells across 24 sort/filter permutations of the bookings list |
-| `endpoints` | 19 read-only report endpoints × 7 filter permutations = 133 responses |
+| `endpoints` | 8 routed read-only report endpoints × 7 filter permutations = 56 responses |
 
 ## Test files
 
 | File | Covers |
 |---|---|
-| `test_golden_master.py` | Money properties, bookings list, 19 report endpoints |
+| `test_golden_master.py` | Money properties, bookings list, 8 routed report endpoints |
 | `test_service_forms.py` | Rendered HTML of the 14 service create/edit forms |
-| `test_legacy_filters.py` | Regression tests for the two legacy filter endpoints |
+| `test_home_routing.py` | Each role lands on the right report; retired routes 404; base.html still reverses |
+| `test_legacy_filters.py` | The legacy filter fix, called directly (those routes are retired) |
 | `test_cash_rule.py` | The rewritten totals still match the ORM query they replaced |
 
 ## Two things the fixture pins deliberately
@@ -122,7 +137,31 @@ suite here on a difference production does not have.
 
 Any change in **value** is still caught. Only trailing-zero scale is ignored.
 
-## Negative GST on loss-making bookings is INTENDED — do not "fix" it
+## Frozen rules — these look like defects and are not
+
+Everything in this section has been reviewed against production data and signed
+off. Changing any of it is a regression, however reasonable the change looks.
+
+### A payment mode is cash only when it is named exactly "cash"
+
+Case-insensitive equality, never a substring match. A mode called "Cash on
+arrival" is **not** cash. `core/views_actual.py` used to test
+`"cash" in name.lower()`, which disagreed with every other module; that was
+unified onto equality, matching `Booking.tcs_amount`.
+
+### GST comes off non-cash profit only
+
+`profit_non_cash = (sales_non_cash_net − purchase_non_cash) − gst`, with cash
+profit left whole. Both actuals reports use this, verified identical across all
+1,145 booking+service pairs in production.
+
+### The bookings list and the reports report GST differently
+
+The list caps GST at 5% of invoice; the reports charge a flat 18% of margin, so
+the two disagree on higher-margin bookings. Known and accepted — the
+client-facing sheet tells users to trust the reports for accounting.
+
+### Negative GST on loss-making bookings is INTENDED — do not "fix" it
 
 `Booking.sales_gst` is `min(invoice_amount * 0.05, gross_profit * 0.18)`. When a
 booking makes a loss, `gross_profit` is negative, so the `min()` selects the
